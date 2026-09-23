@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DATIHAN.PH — an online thrift shop featuring curated pre-loved pieces and pop-up events.">
+  <title>DATIHAN.PH — Curated Thrift</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="pages/shop.html">Shop</a>
+      <a href="pages/categories.html">Categories</a>
+      <a href="pages/pop-ups.html">Pop-ups</a>
+      <a href="pages/about.html">About</a>
+    </nav>
+    <div class="header-actions">
+      <a href="auth/login.html">Account</a>
+      <a href="pages/cart.html" aria-label="Shopping cart">Cart <span class="cart-count">0</span></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">ONLINE THRIFT SHOP</p>
+        <h1>Curated pieces.<br>Found differently.</h1>
+        <p class="hero-text">Pre-loved finds selected with intention, available online and at our pop-up events.</p>
+        <a class="button button-primary" href="pages/shop.html">Shop the collection</a>
+      </div>
+      <div class="hero-media" aria-label="Featured thrift collection image placeholder">
+        <div class="image-placeholder">DATIHAN.PH</div>
+      </div>
+    </section>
+
+    <section class="intro section-shell">
+      <p class="eyebrow">THE DATIHAN.PH EDIT</p>
+      <h2>Unique pieces, one find at a time.</h2>
+      <p>Discover a changing selection of pre-loved clothing and pieces. Since thrift finds are often limited, every drop is meant to be discovered.</p>
+    </section>
+
+    <section class="featured section-shell">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">JUST IN</p>
+          <h2>New arrivals</h2>
+        </div>
+        <a class="text-link" href="pages/shop.html">View all <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-grid" id="featured-products">
+        <article class="product-card product-card-placeholder">
+          <div class="product-image">PRODUCT IMAGE</div>
+          <div class="product-info">
+            <p class="product-name">Featured piece</p>
+            <p class="product-meta">Coming soon</p>
+          </div>
+        </article>
+        <article class="product-card product-card-placeholder">
+          <div class="product-image">PRODUCT IMAGE</div>
+          <div class="product-info">
+            <p class="product-name">Featured piece</p>
+            <p class="product-meta">Coming soon</p>
+          </div>
+        </article>
+        <article class="product-card product-card-placeholder">
+          <div class="product-image">PRODUCT IMAGE</div>
+          <div class="product-info">
+            <p class="product-name">Featured piece</p>
+            <p class="product-meta">Coming soon</p>
+          </div>
+        </article>
+        <article class="product-card product-card-placeholder">
+          <div class="product-image">PRODUCT IMAGE</div>
+          <div class="product-info">
+            <p class="product-name">Featured piece</p>
+            <p class="product-meta">Coming soon</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="pop-up-banner section-shell">
+      <div>
+        <p class="eyebrow">SEE US IRL</p>
+        <h2>Online first.<br>Pop-up sometimes.</h2>
+        <p>DATIHAN.PH has no permanent physical store, but we meet our community through selected pop-up events.</p>
+      </div>
+      <a class="button button-secondary" href="pages/pop-ups.html">See pop-ups</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">DATIHAN.PH</div>
+    <div class="footer-links">
+      <a href="pages/about.html">About</a>
+      <a href="pages/contact.html">Contact</a>
+      <a href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer">TikTok</a>
+    </div>
+    <p>© <span id="current-year">2026</span> DATIHAN.PH</p>
+  </footer>
+
+  <script src="js/global.js" defer></script>
+  <script src="js/home.js" defer></script>
+</body>
+</html>
