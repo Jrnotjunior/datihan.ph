@@ -63,7 +63,6 @@
         supabase
           .from('orders')
           .select('id, order_number, total, status, created_at')
-          .eq('user_id', ownerId)
           .order('created_at', { ascending: false })
           .limit(5),
         supabase
