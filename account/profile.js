@@ -46,6 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (!/^09\d{9}$/.test(contact)) {
+      showStatus(profileStatus, 'Contact number must be exactly 11 digits and start with 09 (example: 09123456789).', true);
+      phone.focus();
+      return;
+    }
+
     button.disabled = true;
     button.textContent = 'Saving…';
     showStatus(profileStatus, 'Saving your profile…');
@@ -107,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     showStatus(profileStatus, 'Logging out…');
 
     try {
-      // Use the normal local sign-out and redirect immediately after Supabase clears the session.
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       window.location.replace('../auth/login.html?logged_out=1');
