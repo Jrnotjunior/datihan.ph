@@ -2,6 +2,7 @@ const supabase = window.datihanSupabase;
 let modal, form, editingId = null, addresses = [], initialized = false;
 
 const statusEl = () => document.getElementById('address-status');
+const formStatusEl = () => document.getElementById('address-form-status');
 
 const showStatus = (message, type = 'success') => {
     const el = statusEl();
@@ -11,11 +12,20 @@ const showStatus = (message, type = 'success') => {
     }
 };
 
+const showFormStatus = (message, type = 'success') => {
+    const el = formStatusEl();
+    if (el) {
+        el.textContent = message;
+        el.className = `address-form-status ${type}`;
+    }
+};
+
 const closeModal = () => {
     const m = document.getElementById('address-modal');
     if (m) m.hidden = true;
     form?.reset();
     editingId = null;
+    showFormStatus('');
     const t = document.getElementById('address-modal-title');
     if (t) t.textContent = 'Add address';
 };
@@ -30,6 +40,7 @@ const openModal = (address = null) => {
     if (t) t.textContent = address ? 'Edit address' : 'Add address';
 
     form?.reset();
+    showFormStatus('');
 
     if (address) {
         document.getElementById('address-label-input').value = address.label || '';
@@ -46,7 +57,6 @@ const openModal = (address = null) => {
     m.hidden = false;
 };
 
-// Keep the modal opener available to the page even if another script initializes first.
 window.openAddressModal = openModal;
 
 const render = () => {
@@ -132,12 +142,12 @@ const validate = () => {
     const z = document.getElementById('address-postal').value.trim();
 
     if (!/^09\d{9}$/.test(p)) {
-        showStatus('Contact number must be exactly 11 digits and start with 09.', 'error');
+        showFormStatus('Contact number must be exactly 11 digits and start with 09.', 'error');
         return false;
     }
 
     if (!/^\d{4}$/.test(z)) {
-        showStatus('Postal code must be exactly 4 digits.', 'error');
+        showFormStatus('Postal code must be exactly 4 digits.', 'error');
         return false;
     }
 
@@ -147,11 +157,17 @@ const validate = () => {
 async function saveAddress(e) {
     e?.preventDefault();
 
-    if (!validate()) return;
+    const saveButton = document.getElementById('save-address-button');
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = 'Saving...';
+    }
 
-    showStatus('Saving address...', 'success');
+    showFormStatus('Saving address...', 'success');
 
     try {
+        if (!validate()) return;
+
         const session = await getSession();
 
         const payload = {
@@ -206,7 +222,13 @@ async function saveAddress(e) {
         showStatus(wasEditing ? 'Address updated successfully.' : 'Address saved successfully.', 'success');
     } catch (e) {
         console.error('Saved address error:', e);
+        showFormStatus(`Save failed: ${e.message || e}`, 'error');
         showStatus(`Save failed: ${e.message || e}`, 'error');
+    } finally {
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.textContent = 'Save address';
+        }
     }
 }
 
@@ -302,8 +324,6 @@ function initAddressPage() {
     loadAddresses();
 }
 
-// Initialize after the DOM exists. Also listen for the auth guard event so the
-// page works whether auth-guard.js fires before or after this script.
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAddressPage, { once: true });
 } else {
