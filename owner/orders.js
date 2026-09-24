@@ -126,10 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const previous = order.status || 'pending';
     select.disabled = true;
     try {
-      const { error } = await supabase.from('orders').update({ status: nextStatus, updated_at: new Date().toISOString() }).eq('id', orderId);
+      const { data, error } = await supabase.from('orders').update({ status: nextStatus, updated_at: new Date().toISOString() }).eq('id', orderId).select('id, status').maybeSingle();
       if (error) throw error;
-      order.status = nextStatus;
-      showToast(`Order ${order.order_number || ''} updated to ${statusLabel(nextStatus)}.`);
+      if (!data) throw new Error('The order status could not be saved. Your owner account may not have permission to update orders yet.');
+      order.status = data.status || nextStatus;
+      showToast(`Order ${order.order_number || ''} updated to ${statusLabel(order.status)}.`);
       if (fromModal) openOrder(order); else render();
     } catch (error) {
       console.error('Update order status error:', error);
