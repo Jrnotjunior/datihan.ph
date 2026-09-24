@@ -1,6 +1,6 @@
 (() => {
   const supabaseClient = window.datihanSupabase;
-  const state = { editingId: null, events: [] };
+  const state = { editingId: null, pendingDeleteId: null, events: [] };
 
   const list = document.getElementById('events-list');
   const modal = document.getElementById('event-modal');
@@ -8,6 +8,9 @@
   const modalTitle = document.getElementById('event-modal-title');
   const toast = document.getElementById('toast');
   const saveButton = document.getElementById('save-event');
+  const deleteConfirmModal = document.getElementById('event-delete-confirm-modal');
+  const deleteConfirmMessage = document.getElementById('event-delete-confirm-message');
+  const deleteConfirmButton = document.getElementById('event-delete-confirm-button');
 
   const fields = {
     id: document.getElementById('event-id'),
@@ -139,6 +142,47 @@
     fields.status.value = 'upcoming';
   }
 
+  function openDeleteConfirm(id) {
+    const event = state.events.find(item => item.id === id);
+    if (!event) return;
+    state.pendingDeleteId = id;
+    deleteConfirmMessage.textContent = `“${event.title}” will be permanently removed from your pop-up events.`;
+    deleteConfirmModal.hidden = false;
+    deleteConfirmButton.focus();
+  }
+
+  function closeDeleteConfirm() {
+    deleteConfirmModal.hidden = true;
+    state.pendingDeleteId = null;
+  }
+
+  async function confirmDeleteEvent() {
+    const id = state.pendingDeleteId;
+    if (!id) return;
+
+    deleteConfirmButton.disabled = true;
+    deleteConfirmButton.textContent = 'Deleting...';
+
+    try {
+      const session = await getSession();
+      const { error } = await supabaseClient
+        .from('pop_up_events')
+        .delete()
+        .eq('id', id)
+        .eq('owner_id', session.user.id);
+      if (error) throw error;
+      closeDeleteConfirm();
+      showToast('Pop-up event deleted successfully.');
+      await loadEvents();
+    } catch (error) {
+      console.error('Delete pop-up event error:', error);
+      showToast(error.message || 'Unable to delete the pop-up event.', true);
+    } finally {
+      deleteConfirmButton.disabled = false;
+      deleteConfirmButton.textContent = 'Delete event';
+    }
+  }
+
   async function saveEvent(event) {
     event.preventDefault();
     saveButton.disabled = true;
@@ -185,31 +229,12 @@
     }
   }
 
-  async function deleteEvent(id) {
-    const event = state.events.find(item => item.id === id);
-    if (!event) return;
-
-    if (!window.confirm(`Delete “${event.title}”? This action cannot be undone.`)) return;
-
-    try {
-      const session = await getSession();
-      const { error } = await supabaseClient
-        .from('pop_up_events')
-        .delete()
-        .eq('id', id)
-        .eq('owner_id', session.user.id);
-      if (error) throw error;
-      showToast('Pop-up event deleted successfully.');
-      await loadEvents();
-    } catch (error) {
-      console.error('Delete pop-up event error:', error);
-      showToast(error.message || 'Unable to delete the pop-up event.', true);
-    }
-  }
-
   document.getElementById('add-event-button').addEventListener('click', () => openModal());
   document.getElementById('close-event-modal').addEventListener('click', closeModal);
   document.getElementById('cancel-event').addEventListener('click', closeModal);
+  document.getElementById('event-delete-cancel-button').addEventListener('click', closeDeleteConfirm);
+  document.getElementById('event-delete-confirm-backdrop').addEventListener('click', closeDeleteConfirm);
+  deleteConfirmButton.addEventListener('click', confirmDeleteEvent);
   form.addEventListener('submit', saveEvent);
 
   modal.addEventListener('click', event => {
@@ -217,7 +242,9 @@
   });
 
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    if (event.key !== 'Escape') return;
+    if (!deleteConfirmModal.hidden) closeDeleteConfirm();
+    else if (modal.classList.contains('is-open')) closeModal();
   });
 
   list.addEventListener('click', event => {
@@ -226,7 +253,7 @@
     const item = state.events.find(entry => entry.id === button.dataset.id);
     if (!item) return;
     if (button.dataset.action === 'edit') openModal(item);
-    if (button.dataset.action === 'delete') deleteEvent(item.id);
+    if (button.dataset.action === 'delete') openDeleteConfirm(item.id);
   });
 
   window.addEventListener('datihan-auth-ready', loadEvents);
