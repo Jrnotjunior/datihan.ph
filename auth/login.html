@@ -1,1 +1,128 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Login — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">DATIHAN.PH</p><h1>Welcome back.</h1><p>Authentication will be connected to Supabase.</p></header><form class="form-grid"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password"></div><button class="button button-primary" type="button">Log in</button><a class="text-link" href="register.html">Create an account →</a></form></main><script src="../js/global.js" defer></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../pages/shop.html">Shop</a>
+      <a href="../pages/categories.html">Categories</a>
+      <a href="../pages/pop-ups.html">Pop-ups</a>
+      <a href="../pages/about.html">About</a>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="icon-link" aria-label="Account" aria-current="page">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg>
+        <span>Account</span>
+      </a>
+      <a href="../pages/cart.html" class="icon-link" aria-label="Shopping cart">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg>
+        <span>Cart <span class="cart-count">0</span></span>
+      </a>
+    </div>
+  </header>
+
+  <main class="auth-main">
+    <section class="auth-card" aria-labelledby="login-title">
+      <div class="auth-heading">
+        <p class="eyebrow">ACCOUNT</p>
+        <h1 id="login-title">Welcome back.</h1>
+        <p class="auth-intro">Sign in to view your orders and manage your account.</p>
+      </div>
+
+      <form class="auth-form" id="login-form" novalidate>
+        <div class="field-group">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <p class="field-error" id="email-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="password">Password</label>
+            <a href="forgot-password.html">Forgot password?</a>
+          </div>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required minlength="6">
+            <button type="button" class="password-toggle" id="password-toggle" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+          <p class="field-error" id="password-error" aria-live="polite"></p>
+        </div>
+
+        <button class="button button-primary auth-submit" type="submit">Sign in <span class="button-icon" aria-hidden="true">→</span></button>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="auth-divider" aria-hidden="true"><span>OR</span></div>
+      <p class="auth-switch">Don't have an account? <a href="register.html">Create one</a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">DATIHAN.PH</div>
+    <div class="footer-links">
+      <a href="../pages/about.html">About</a>
+      <a href="../pages/contact.html">Contact</a>
+      <a href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer">TikTok</a>
+    </div>
+    <p>© <span id="current-year">2026</span> DATIHAN.PH</p>
+  </footer>
+
+  <script src="../js/global.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('#login-form');
+      const email = document.querySelector('#email');
+      const password = document.querySelector('#password');
+      const emailError = document.querySelector('#email-error');
+      const passwordError = document.querySelector('#password-error');
+      const status = document.querySelector('#form-status');
+      const toggle = document.querySelector('#password-toggle');
+
+      toggle.addEventListener('click', () => {
+        const showing = password.type === 'text';
+        password.type = showing ? 'password' : 'text';
+        toggle.textContent = showing ? 'Show' : 'Hide';
+        toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        toggle.setAttribute('aria-pressed', String(!showing));
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        emailError.textContent = '';
+        passwordError.textContent = '';
+        status.textContent = '';
+        let valid = true;
+
+        if (!email.value.trim()) {
+          emailError.textContent = 'Please enter your email address.';
+          valid = false;
+        } else if (!email.validity.valid) {
+          emailError.textContent = 'Please enter a valid email address.';
+          valid = false;
+        }
+
+        if (!password.value) {
+          passwordError.textContent = 'Please enter your password.';
+          valid = false;
+        } else if (password.value.length < 6) {
+          passwordError.textContent = 'Password must be at least 6 characters.';
+          valid = false;
+        }
+
+        if (valid) status.textContent = 'Sign-in is ready for Supabase authentication.';
+      });
+    });
+  </script>
+</body>
+</html>
