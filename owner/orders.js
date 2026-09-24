@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!select) return;
     updateStatus(select.dataset.id, select.value, select);
   });
-  closeModal.addEventListener('click', closeOrder);
+  closeModal?.addEventListener('click', closeOrder);
   detailModal.addEventListener('click', event => { if (event.target === detailModal) closeOrder(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeOrder(); });
 
