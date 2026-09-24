@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pop-up Events — Shop Owner — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <style>
+    .owner-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
+    .event-list{display:grid;gap:1rem}
+    .event-card{padding:1.35rem;border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white)}
+    .event-card-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+    .event-card h2{font-size:1.25rem}
+    .event-meta{display:grid;gap:.3rem;margin-top:.85rem;color:var(--brown);font-size:14px}
+    .event-description{margin-top:.85rem;color:var(--brown)}
+    .event-actions{display:flex;gap:.65rem;margin-top:1.15rem;flex-wrap:wrap}
+    .status-badge{display:inline-flex;align-items:center;border:1px solid var(--light-beige);border-radius:999px;padding:.3rem .65rem;font-size:12px;font-weight:700;text-transform:capitalize;white-space:nowrap}
+    .button-small{min-height:40px;padding:.65rem 1rem}
+    .empty-state{text-align:center;padding:2.5rem 1.25rem;border:1px dashed var(--light-beige);border-radius:var(--radius);color:var(--brown)}
+    .modal-backdrop{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(40,31,23,.55)}
+    .modal-backdrop.is-open{display:flex}
+    .modal{width:min(100%,680px);max-height:90vh;overflow:auto;padding:1.5rem;border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white);box-shadow:0 24px 80px rgba(40,31,23,.22)}
+    .modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
+    .modal-header h2{font-size:1.5rem}
+    .modal-close{border:0;background:transparent;color:var(--brown);font-size:1.5rem;line-height:1;cursor:pointer;padding:.25rem}
+    .modal-form{display:grid;gap:1rem}
+    .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .modal-actions{display:flex;justify-content:flex-end;gap:.65rem;margin-top:.5rem}
+    .toast{position:fixed;right:1.25rem;bottom:1.25rem;z-index:1100;display:none;max-width:360px;padding:.9rem 1rem;border:1px solid var(--light-beige);border-radius:12px;background:var(--off-white);box-shadow:0 12px 35px rgba(40,31,23,.16);font-size:14px}
+    .toast.is-visible{display:block}
+    .toast.error{border-color:#b66a5c}
+    .loading{color:var(--brown);font-size:14px}
+    @media(max-width:650px){.owner-toolbar,.event-card-header{align-items:flex-start;flex-direction:column}.modal-grid{grid-template-columns:1fr}.modal-actions{flex-direction:column}.modal-actions .button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">SHOP OWNER</p>
+      <h1>Pop-up events.</h1>
+      <p>Create and manage the pop-up events where customers can meet DATIHAN.PH offline.</p>
+    </header>
+
+    <section class="content-card">
+      <div class="owner-toolbar">
+        <div>
+          <p class="eyebrow">YOUR EVENTS</p>
+          <h2>Manage pop-ups</h2>
+        </div>
+        <button class="button button-primary" id="add-event-button" type="button">+ Add event</button>
+      </div>
+      <div id="events-list" class="event-list">
+        <p class="loading">Loading events...</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="event-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">POP-UP EVENT</p>
+          <h2 id="event-modal-title">Add event</h2>
+        </div>
+        <button class="modal-close" id="close-event-modal" type="button" aria-label="Close">×</button>
+      </div>
+      <form class="modal-form" id="event-form">
+        <input id="event-id" type="hidden">
+        <div class="field"><label for="event-title">Event name</label><input id="event-title" type="text" required maxlength="120" placeholder="DATIHAN.PH Weekend Pop-up"></div>
+        <div class="modal-grid">
+          <div class="field"><label for="event-date">Date</label><input id="event-date" type="date" required></div>
+          <div class="field"><label for="event-status">Status</label><select id="event-status"><option value="upcoming">Upcoming</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+        </div>
+        <div class="modal-grid">
+          <div class="field"><label for="event-start">Start time</label><input id="event-start" type="time"></div>
+          <div class="field"><label for="event-end">End time</label><input id="event-end" type="time"></div>
+        </div>
+        <div class="field"><label for="event-location">Location</label><input id="event-location" type="text" required maxlength="180" placeholder="Location, city"></div>
+        <div class="field"><label for="event-description">Description</label><textarea id="event-description" rows="5" maxlength="1000" placeholder="Tell customers what to expect."></textarea></div>
+        <div class="modal-actions">
+          <button class="button button-secondary" id="cancel-event" type="button">Cancel</button>
+          <button class="button button-primary" id="save-event" type="submit">Save event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/owner-popups.js"></script>
+</body>
+</html>
