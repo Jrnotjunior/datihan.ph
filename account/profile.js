@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     logoutButton.disabled = true;
     logoutButton.textContent = 'Logging out…';
-    showStatus(profileStatus, 'Logging out…');
+    showStatus(profileStatus, '');
 
     try {
       const { error } = await supabase.auth.signOut();
