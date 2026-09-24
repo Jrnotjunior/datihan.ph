@@ -1,6 +1,6 @@
 (() => {
   const supabaseClient = window.datihanSupabase;
-  const state = { editingId: null, products: [] };
+  const state = { editingId: null, products: [], pendingDeleteId: null };
 
   const list = document.getElementById('products-list');
   const modal = document.getElementById('product-modal');
@@ -10,6 +10,9 @@
   const toast = document.getElementById('toast');
   const searchInput = document.getElementById('product-search');
   const categoryFilter = document.getElementById('category-filter');
+  const deleteModal = document.getElementById('product-delete-confirm-modal');
+  const deleteConfirmButton = document.getElementById('product-delete-confirm-button');
+  const deleteCancelButton = document.getElementById('product-delete-cancel-button');
 
   const fields = {
     name: document.getElementById('product-name'),
@@ -153,6 +156,45 @@
     fields.active.checked = true;
   }
 
+  function openDeleteConfirmation(id) {
+    const product = state.products.find(item => item.id === id);
+    if (!product || !deleteModal) return;
+
+    state.pendingDeleteId = id;
+    const message = document.getElementById('product-delete-confirm-message');
+    if (message) {
+      message.textContent = `“${product.name}” will be permanently removed from your shop.`;
+    }
+
+    deleteModal.hidden = false;
+    deleteConfirmButton?.focus();
+  }
+
+  function closeDeleteConfirmation() {
+    if (deleteModal) deleteModal.hidden = true;
+    state.pendingDeleteId = null;
+  }
+
+  async function confirmDeleteProduct() {
+    const id = state.pendingDeleteId;
+    if (!id) return;
+
+    if (deleteConfirmButton) {
+      deleteConfirmButton.disabled = true;
+      deleteConfirmButton.textContent = 'Deleting...';
+    }
+
+    try {
+      closeDeleteConfirmation();
+      await deleteProduct(id);
+    } finally {
+      if (deleteConfirmButton) {
+        deleteConfirmButton.disabled = false;
+        deleteConfirmButton.textContent = 'Delete product';
+      }
+    }
+  }
+
   async function saveProduct(event) {
     event.preventDefault();
     if (!fields.name.value.trim()) return showToast('Product name is required.', true);
@@ -201,7 +243,6 @@
   async function deleteProduct(id) {
     const product = state.products.find(item => item.id === id);
     if (!product) return;
-    if (!window.confirm(`Delete “${product.name}”? This action cannot be undone.`)) return;
 
     try {
       const session = await getSession();
@@ -223,12 +264,18 @@
   searchInput.addEventListener('input', renderProducts);
   categoryFilter.addEventListener('change', renderProducts);
 
+  deleteCancelButton?.addEventListener('click', closeDeleteConfirmation);
+  document.getElementById('product-delete-confirm-backdrop')?.addEventListener('click', closeDeleteConfirmation);
+  deleteConfirmButton?.addEventListener('click', confirmDeleteProduct);
+
   modal.addEventListener('click', event => {
     if (event.target === modal) closeModal();
   });
 
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    if (event.key !== 'Escape') return;
+    if (deleteModal && !deleteModal.hidden) closeDeleteConfirmation();
+    else if (modal.classList.contains('is-open')) closeModal();
   });
 
   list.addEventListener('click', event => {
@@ -237,7 +284,7 @@
     const product = state.products.find(item => item.id === button.dataset.id);
     if (!product) return;
     if (button.dataset.action === 'edit') openModal(product);
-    if (button.dataset.action === 'delete') deleteProduct(product.id);
+    if (button.dataset.action === 'delete') openDeleteConfirmation(product.id);
   });
 
   window.addEventListener('datihan-auth-ready', loadProducts);
