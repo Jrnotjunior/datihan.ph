@@ -16,6 +16,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.className = `checkout-status ${type}`;
   };
 
+  const showToast = (message, title = 'Success', type = 'success') => {
+    let container = document.getElementById('toast-container');
+
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML = `
+      <div class="toast-icon" aria-hidden="true">${type === 'error' ? '!' : '✓'}</div>
+      <div class="toast-content">
+        <div class="toast-title"></div>
+        <div class="toast-message"></div>
+      </div>
+      <button class="toast-close" type="button" aria-label="Close notification">×</button>
+    `;
+
+    toast.querySelector('.toast-title').textContent = title;
+    toast.querySelector('.toast-message').textContent = message;
+
+    let removeTimer;
+    const removeToast = () => {
+      clearTimeout(removeTimer);
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 220);
+    };
+
+    toast.querySelector('.toast-close').addEventListener('click', removeToast);
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+    removeTimer = setTimeout(removeToast, 4500);
+  };
+
   const readCart = () => {
     try {
       const value = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
@@ -218,7 +259,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Order placement error:', error);
       placeOrder.disabled = false;
       placeOrder.innerHTML = placeOrder.dataset.originalText || 'Place order <span class="button-icon" aria-hidden="true">→</span>';
-      showStatus(`Unable to place your order: ${error.message || error}`, 'error');
+      showStatus('');
+
+      const message = String(error?.message || error || 'Unknown error');
+      if (message.toLowerCase().includes('row-level security') || message.toLowerCase().includes('rls')) {
+        showToast('Your order could not be saved because of a database permission setting. Please try again after the order policy is fixed.', 'Order not placed', 'error');
+      } else {
+        showToast('Something went wrong while placing your order. Please try again.', 'Order not placed', 'error');
+      }
     }
   });
 });
