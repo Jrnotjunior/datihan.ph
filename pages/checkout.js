@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const CART_KEY = 'datihan_cart';
+  const SELECTED_KEY = 'datihan_selected_cart_items';
   const supabase = window.datihanSupabase;
   const money = value => `₱${Number(value || 0).toLocaleString('en-PH')}`;
   const status = document.querySelector('#checkout-status');
@@ -22,9 +23,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (_) { return []; }
   };
 
-  const cart = readCart();
+  const readSelected = () => {
+    try {
+      const value = JSON.parse(localStorage.getItem(SELECTED_KEY) || 'null');
+      return Array.isArray(value) ? value.map(String) : null;
+    } catch (_) { return null; }
+  };
+
+  const allCart = readCart();
+  const savedSelection = readSelected();
+  const selectedIds = savedSelection === null
+    ? new Set(allCart.map(item => String(item.id)))
+    : new Set(savedSelection.map(String));
+  const cart = allCart.filter(item => selectedIds.has(String(item.id)));
+
   if (!cart.length) {
-    showStatus('Your cart is empty. Add an item before checkout.', 'error');
+    showStatus('No items are selected for checkout. Return to your cart and select at least one item.', 'error');
     if (placeOrder) placeOrder.disabled = true;
   }
 
@@ -93,6 +107,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   placeOrder?.addEventListener('click', () => {
     const selected = document.querySelector('input[name="shipping-address"]:checked');
+    if (!cart.length) {
+      showStatus('No items are selected for checkout. Return to your cart and select at least one item.', 'error');
+      return;
+    }
     if (!selected) {
       showStatus('Please select a shipping address before continuing.', 'error');
       return;
