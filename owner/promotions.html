@@ -1,1 +1,130 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Promotions — Shop Owner — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">SHOP OWNER</p><h1>Promotions.</h1><p>Manage shop-level promotional campaigns when this feature is connected.</p></header><div class="content-card"><h2>No promotions yet</h2><p style="margin-top:1rem;color:var(--brown)">Promotion tools will be added during the commerce phase.</p></div></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promotions — Shop Owner — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="promotions.css">
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">SHOP OWNER</p>
+      <h1>Promotions.</h1>
+      <p>Create discounts and promotional campaigns for your shop.</p>
+    </header>
+
+    <section class="content-card">
+      <div class="promotions-toolbar">
+        <div>
+          <p class="eyebrow">YOUR PROMOTIONS</p>
+          <h2>Promotion management</h2>
+        </div>
+        <button class="button button-primary" id="add-promotion-button" type="button">Add promotion</button>
+      </div>
+
+      <div class="promotions-filters">
+        <input id="promotion-search" type="search" placeholder="Search promotions" aria-label="Search promotions">
+        <select id="promotion-status-filter" aria-label="Filter promotions by status">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="expired">Expired</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div id="promotions-list" class="promotions-list">
+        <p class="loading">Loading promotions...</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="promotion-modal" id="promotion-modal" aria-hidden="true">
+    <div class="promotion-modal-card" role="dialog" aria-modal="true" aria-labelledby="promotion-modal-title">
+      <div class="promotion-modal-header">
+        <h2 id="promotion-modal-title">Add promotion</h2>
+        <button class="modal-close" id="close-promotion-modal" type="button" aria-label="Close">×</button>
+      </div>
+
+      <form id="promotion-form">
+        <div class="promotion-form-grid">
+          <div class="field field-full">
+            <label for="promotion-title">Promotion title</label>
+            <input id="promotion-title" type="text" maxlength="160" placeholder="e.g. Weekend Sale" required>
+          </div>
+          <div class="field">
+            <label for="promotion-discount-type">Discount type</label>
+            <select id="promotion-discount-type">
+              <option value="percentage">Percentage</option>
+              <option value="fixed">Fixed amount</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="promotion-discount-value">Discount value</label>
+            <input id="promotion-discount-value" type="number" min="0.01" step="0.01" required>
+          </div>
+          <div class="field">
+            <label for="promotion-code">Promo code <span style="font-weight:400;color:var(--brown)">(optional)</span></label>
+            <input id="promotion-code" type="text" maxlength="50" placeholder="e.g. DATIHAN10">
+          </div>
+          <div class="field">
+            <label for="promotion-start-date">Start date</label>
+            <input id="promotion-start-date" type="date">
+          </div>
+          <div class="field">
+            <label for="promotion-end-date">End date <span style="font-weight:400;color:var(--brown)">(optional)</span></label>
+            <input id="promotion-end-date" type="date">
+          </div>
+          <div class="field field-full">
+            <label for="promotion-description">Description</label>
+            <textarea id="promotion-description" rows="4" maxlength="1000" placeholder="Tell customers what this promotion offers."></textarea>
+          </div>
+          <div class="field field-full">
+            <label>Applicable products</label>
+            <div id="promotion-products" class="product-picker"></div>
+            <small style="color:var(--brown)">Leave all products unchecked to apply the promotion to the whole shop.</small>
+          </div>
+          <div class="field field-full checkbox-field">
+            <input id="promotion-active" type="checkbox" checked>
+            <label for="promotion-active">Promotion is active</label>
+          </div>
+        </div>
+
+        <div class="promotion-form-actions">
+          <button class="button button-secondary" id="cancel-promotion" type="button">Cancel</button>
+          <button class="button button-primary" id="save-promotion" type="submit">Add promotion</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="confirm-modal" id="promotion-delete-confirm-modal" hidden>
+    <div class="confirm-backdrop" id="promotion-delete-confirm-backdrop"></div>
+    <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="promotion-delete-confirm-title" aria-describedby="promotion-delete-confirm-message">
+      <div class="confirm-icon" aria-hidden="true">!</div>
+      <div class="confirm-content">
+        <p class="eyebrow">DELETE PROMOTION</p>
+        <h2 id="promotion-delete-confirm-title">Delete this promotion?</h2>
+        <p id="promotion-delete-confirm-message">This promotion will be permanently removed from your shop.</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="button button-secondary" id="promotion-delete-cancel-button" type="button">Cancel</button>
+        <button class="button button-danger" id="promotion-delete-confirm-button" type="button">Delete promotion</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/owner-promotions.js"></script>
+</body>
+</html>
