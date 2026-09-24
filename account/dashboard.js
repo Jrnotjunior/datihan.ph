@@ -1,0 +1,1 @@
+document.getElementById('logout')?.addEventListener('click',()=>{alert('Test only: logout will be connected to Supabase authentication later.');});
