@@ -77,10 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('save-password')?.addEventListener('click', async () => {
     const button = document.getElementById('save-password');
+    const currentPassword = document.getElementById('current-password').value;
     const password = document.getElementById('new-password').value;
     const confirm = document.getElementById('confirm-password').value;
 
-    if (!password && !confirm) {
+    if (!currentPassword) {
+      showStatus(passwordStatus, 'Enter your current password first.', true);
+      return;
+    }
+    if (!password) {
       showStatus(passwordStatus, 'Enter a new password first.', true);
       return;
     }
@@ -92,14 +97,30 @@ document.addEventListener('DOMContentLoaded', () => {
       showStatus(passwordStatus, 'Passwords do not match.', true);
       return;
     }
+    if (currentPassword === password) {
+      showStatus(passwordStatus, 'Your new password must be different from your current password.', true);
+      return;
+    }
 
     button.disabled = true;
     button.textContent = 'Changing…';
-    showStatus(passwordStatus, '');
+    showStatus(passwordStatus, 'Verifying your current password…');
 
     try {
+      const user = await getUser();
+      if (!user?.email) throw new Error('Unable to verify your account email. Please refresh and try again.');
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword
+      });
+      if (signInError) throw new Error('Current password is incorrect.');
+
+      showStatus(passwordStatus, 'Updating your password…');
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+
+      document.getElementById('current-password').value = '';
       document.getElementById('new-password').value = '';
       document.getElementById('confirm-password').value = '';
       showStatus(passwordStatus, 'Password changed successfully.');
