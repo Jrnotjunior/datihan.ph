@@ -7,18 +7,34 @@ const profileStatus = document.getElementById('profile-status');
 const passwordStatus = document.getElementById('password-status');
 
 async function loadProfile() {
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) {
-    window.location.replace('../auth/login.html');
-    return;
-  }
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
 
-  const user = data.user;
-  const metadata = user.user_metadata || {};
-  firstName.value = metadata.first_name || '';
-  lastName.value = metadata.last_name || '';
-  email.value = user.email || '';
-  phone.value = metadata.phone || '';
+    let user = sessionData?.session?.user || null;
+
+    if (!user) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      user = userData?.user || null;
+    }
+
+    if (!user) {
+      window.location.replace('../auth/login.html');
+      return;
+    }
+
+    const metadata = user.user_metadata || {};
+    firstName.value = metadata.first_name || '';
+    lastName.value = metadata.last_name || '';
+    email.value = user.email || '';
+    phone.value = metadata.phone || '';
+
+    showStatus(profileStatus, '');
+  } catch (error) {
+    console.error('Unable to load profile:', error);
+    showStatus(profileStatus, 'Unable to load your account information. Please refresh the page.', true);
+  }
 }
 
 function showStatus(element, message, isError = false) {
