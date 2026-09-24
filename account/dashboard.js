@@ -1,1 +1,1 @@
-document.getElementById('logout')?.addEventListener('click',()=>{alert('Test only: logout will be connected to Supabase authentication later.');});
+document.getElementById('logout')?.addEventListener('click',async()=>{const button=document.getElementById('logout');button.disabled=true;button.textContent='Logging out…';try{const{error}=await window.datihanSupabase.auth.signOut();if(error)throw error;window.location.replace('../auth/login.html');}catch(error){alert(error.message||'Unable to log out. Please try again.');button.disabled=false;button.textContent='Log out';}});
