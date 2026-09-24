@@ -1,1 +1,111 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Products — Shop Owner — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">SHOP OWNER</p><h1>Products.</h1><p>Product management will connect to the shop owner inventory.</p></header><div class="content-card"><a class="button button-primary" href="add-product.html">Add product</a></div></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products — Shop Owner — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="products.css">
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">SHOP OWNER</p>
+      <h1>Products.</h1>
+      <p>Manage the products customers can discover and purchase from your shop.</p>
+    </header>
+
+    <section class="content-card">
+      <div class="products-toolbar">
+        <div>
+          <p class="eyebrow">YOUR PRODUCTS</p>
+          <h2>Product management</h2>
+        </div>
+        <button class="button button-primary" id="add-product-button" type="button">Add product</button>
+      </div>
+
+      <div class="products-filters" style="margin-top:1rem">
+        <input id="product-search" type="search" placeholder="Search products" aria-label="Search products">
+        <select id="category-filter" aria-label="Filter products by category">
+          <option value="">All categories</option>
+        </select>
+      </div>
+
+      <div id="products-list" class="products-list">
+        <p class="loading">Loading products...</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="product-modal" id="product-modal" aria-hidden="true">
+    <div class="product-modal-card" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <div class="product-modal-header">
+        <h2 id="product-modal-title">Add product</h2>
+        <button class="modal-close" id="close-product-modal" type="button" aria-label="Close">×</button>
+      </div>
+
+      <form id="product-form">
+        <div class="product-form-grid">
+          <div class="field">
+            <label for="product-name">Product name</label>
+            <input id="product-name" type="text" required maxlength="160">
+          </div>
+          <div class="field">
+            <label for="product-price">Price</label>
+            <input id="product-price" type="number" min="0" step="0.01" required>
+          </div>
+          <div class="field">
+            <label for="product-category">Category</label>
+            <input id="product-category" type="text" placeholder="e.g. Tops, Bottoms, Accessories">
+          </div>
+          <div class="field">
+            <label for="product-size">Size</label>
+            <input id="product-size" type="text" placeholder="e.g. Small, Medium, Large">
+          </div>
+          <div class="field">
+            <label for="product-condition">Condition</label>
+            <select id="product-condition">
+              <option value="">Select condition</option>
+              <option value="Excellent">Excellent</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="product-stock">Stock</label>
+            <input id="product-stock" type="number" min="0" step="1" value="0" required>
+          </div>
+          <div class="field field-full">
+            <label for="product-image-url">Image URL</label>
+            <input id="product-image-url" type="url" placeholder="https://...">
+          </div>
+          <div class="field field-full">
+            <label for="product-description">Description</label>
+            <textarea id="product-description" rows="5" maxlength="2000"></textarea>
+          </div>
+          <div class="field field-full checkbox-field">
+            <input id="product-active" type="checkbox" checked>
+            <label for="product-active">Product is visible to buyers</label>
+          </div>
+        </div>
+
+        <div class="product-form-actions">
+          <button class="button button-secondary" id="cancel-product" type="button">Cancel</button>
+          <button class="button button-primary" id="save-product" type="submit">Add product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/owner-products.js"></script>
+</body>
+</html>
