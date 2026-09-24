@@ -30,11 +30,22 @@
     .modal-form{display:grid;gap:1rem}
     .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
     .modal-actions{display:flex;justify-content:flex-end;gap:.65rem;margin-top:.5rem}
-    .toast{position:fixed;right:1.25rem;bottom:1.25rem;z-index:1100;display:none;max-width:360px;padding:.9rem 1rem;border:1px solid var(--light-beige);border-radius:12px;background:var(--off-white);box-shadow:0 12px 35px rgba(40,31,23,.16);font-size:14px}
+    .confirm-modal[hidden]{display:none}
+    .confirm-modal{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:1rem}
+    .confirm-backdrop{position:absolute;inset:0;background:rgba(40,31,23,.55)}
+    .confirm-dialog{position:relative;width:min(100%,456px);padding:1.5rem;border:1px solid var(--light-beige);border-radius:16px;background:var(--off-white);box-shadow:0 24px 80px rgba(40,31,23,.24)}
+    .confirm-icon{width:42px;height:42px;display:grid;place-items:center;border:1px solid #b66a5c;border-radius:50%;color:#a94738;font-weight:800;font-size:20px}
+    .confirm-content{margin-top:1rem}
+    .confirm-content h2{margin-top:.35rem;font-size:1.4rem}
+    .confirm-content p:last-child{margin-top:.65rem;color:var(--brown);line-height:1.5}
+    .confirm-actions{display:flex;justify-content:flex-end;gap:.65rem;margin-top:1.35rem}
+    .button-danger{min-height:44px;padding:.75rem 1.1rem;border:1px solid #a94738;border-radius:999px;background:#b64a3a;color:#fff;font-weight:700;cursor:pointer}
+    .button-danger:hover{background:#a43f31}
+    .toast{position:fixed;right:1.25rem;bottom:1.25rem;z-index:1300;display:none;max-width:360px;padding:.9rem 1rem;border:1px solid var(--light-beige);border-radius:12px;background:var(--off-white);box-shadow:0 12px 35px rgba(40,31,23,.16);font-size:14px}
     .toast.is-visible{display:block}
     .toast.error{border-color:#b66a5c}
     .loading{color:var(--brown);font-size:14px}
-    @media(max-width:650px){.owner-toolbar,.event-card-header{align-items:flex-start;flex-direction:column}.modal-grid{grid-template-columns:1fr}.modal-actions{flex-direction:column}.modal-actions .button{width:100%}}
+    @media(max-width:650px){.owner-toolbar,.event-card-header{align-items:flex-start;flex-direction:column}.modal-grid{grid-template-columns:1fr}.modal-actions,.confirm-actions{flex-direction:column}.modal-actions .button,.confirm-actions .button{width:100%}}
   </style>
 </head>
 <body>
@@ -87,6 +98,22 @@
         </div>
       </form>
     </div>
+  </div>
+
+  <div class="confirm-modal" id="event-delete-confirm-modal" hidden>
+    <div class="confirm-backdrop" id="event-delete-confirm-backdrop"></div>
+    <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="event-delete-confirm-title" aria-describedby="event-delete-confirm-message">
+      <div class="confirm-icon" aria-hidden="true">!</div>
+      <div class="confirm-content">
+        <p class="eyebrow">DELETE POP-UP EVENT</p>
+        <h2 id="event-delete-confirm-title">Delete this event?</h2>
+        <p id="event-delete-confirm-message">This event will be permanently removed.</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="button button-secondary" id="event-delete-cancel-button" type="button">Cancel</button>
+        <button class="button button-danger" id="event-delete-confirm-button" type="button">Delete event</button>
+      </div>
+    </section>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
