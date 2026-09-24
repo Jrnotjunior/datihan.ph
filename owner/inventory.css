@@ -45,6 +45,33 @@
   width: min(100%, 430px);
 }
 
+/* Match the rounded search and filter controls used throughout the owner pages. */
+.inventory-filters input,
+.inventory-filters select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: .8rem 1rem;
+  border: 1px solid #dcc9b8;
+  border-radius: 10px;
+  background: #fffaf6;
+  color: var(--dark-brown, #281F17);
+  font: inherit;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.inventory-filters input::placeholder {
+  color: #765f4e;
+  opacity: .8;
+}
+
+.inventory-filters input:focus,
+.inventory-filters select:focus {
+  border-color: var(--brown, #6B4E3D);
+  box-shadow: 0 0 0 3px rgba(107, 78, 61, .10);
+}
+
 .inventory-list {
   display: grid;
   gap: .75rem;
