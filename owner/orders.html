@@ -1,1 +1,61 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Orders — Shop Owner — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">SHOP OWNER</p><h1>Orders.</h1><p>Orders for this shop will appear here once the commerce system is connected.</p></header><div class="content-card"><h2>No orders yet</h2><p style="margin-top:1rem;color:var(--brown)">Order records will be loaded from Supabase.</p></div></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders — Shop Owner — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="orders.css">
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">SHOP OWNER</p>
+      <h1>Orders.</h1>
+      <p>Review customer purchases and keep every order moving through your shop.</p>
+    </header>
+
+    <section class="content-card">
+      <div class="owner-toolbar">
+        <div>
+          <p class="eyebrow">YOUR ORDERS</p>
+          <h2>Order management</h2>
+        </div>
+        <div class="owner-tools">
+          <input class="owner-search" id="order-search" type="search" placeholder="Search order or customer" aria-label="Search orders">
+          <select class="owner-filter" id="order-filter" aria-label="Filter orders by status">
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="preparing">Preparing</option>
+            <option value="ready">Ready</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div id="orders-list" class="orders-list">
+        <p class="loading">Loading your orders...</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="order-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Order details">
+      <div id="order-detail"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="orders.js"></script>
+</body>
+</html>
