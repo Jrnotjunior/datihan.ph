@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const detailContent = document.getElementById('order-detail');
 
   const state = { orders: [] };
-  const statuses = ['pending', 'confirmed', 'preparing', 'ready', 'shipped', 'delivered', 'cancelled'];
+  const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned_refunded'];
   const money = value => `₱${Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
   function showToast(message, error = false) {
@@ -30,7 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function statusLabel(value) {
-    return String(value || 'pending').replaceAll('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
+    const labels = {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      returned_refunded: 'Returned / Refunded'
+    };
+    return labels[String(value || 'pending')] || String(value || 'pending').replaceAll('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
   }
 
   function getShipping(order) {
