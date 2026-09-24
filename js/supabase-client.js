@@ -1,0 +1,3 @@
+const DATIHAN_SUPABASE_URL='https://ypchtqqovhptmnclhxsu.supabase.co';
+const DATIHAN_SUPABASE_PUBLISHABLE_KEY='sb_publishable_ANt8-Ak9nJGQPFJY29NLhA_ClrnwgUL';
+window.datihanSupabase=window.supabase.createClient(DATIHAN_SUPABASE_URL,DATIHAN_SUPABASE_PUBLISHABLE_KEY);
