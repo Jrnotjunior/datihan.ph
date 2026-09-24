@@ -43,4 +43,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", cartIcon);
     link.classList.add("icon-link");
   });
+
+  const updateCartCount = () => {
+    let count = 0;
+    try {
+      const cart = JSON.parse(localStorage.getItem("datihan_cart") || "[]");
+      count = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    } catch (_) {
+      count = 0;
+    }
+    document.querySelectorAll(".cart-count").forEach((el) => {
+      el.textContent = String(count);
+      el.hidden = count === 0;
+    });
+  };
+
+  updateCartCount();
+  window.addEventListener("storage", updateCartCount);
+  window.addEventListener("datihan-cart-updated", updateCartCount);
 });
