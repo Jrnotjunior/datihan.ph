@@ -22,8 +22,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nav = document.createElement('nav');
         nav.className = 'owner-nav';
         nav.setAttribute('aria-label', 'Shop owner navigation');
+
+        const dashboardLink = currentPage !== 'dashboard.html'
+          ? '<a class="owner-nav-home" href="dashboard.html">← Dashboard</a>'
+          : '';
+
         nav.innerHTML = `
-          <a class="owner-nav-home" href="dashboard.html">← Dashboard</a>
+          ${dashboardLink}
           <div class="owner-nav-links">
             <a href="products.html" data-page="products.html">Products</a>
             <a href="inventory.html" data-page="inventory.html">Inventory</a>
