@@ -3,9 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (year) year.textContent = new Date().getFullYear();
 
   // Keep the storefront header consistent across every page.
-  // The Account icon opens the account page. If the user is not authenticated,
-  // auth-guard.js on that page redirects them to Login.
-  const accountLinks = document.querySelectorAll('.header-actions a[href*="login"], .header-actions a[href*="auth"]');
+  const accountLinks = document.querySelectorAll('.header-actions a[href*="login"], .header-actions a[href*="auth"], .header-actions a[href*="profile"]');
   const cartLinks = document.querySelectorAll('.header-actions a[href*="cart"]');
 
   const accountIcon = `
@@ -21,20 +19,27 @@ document.addEventListener("DOMContentLoaded", () => {
       <circle cx="17" cy="19" r="1"></circle>
     </svg>`;
 
+  const removeLegacyEmoji = (link, emoji) => {
+    [...link.childNodes].forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.includes(emoji)) node.remove();
+    });
+  };
+
   accountLinks.forEach((link) => {
+    removeLegacyEmoji(link, '👤');
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", accountIcon);
     link.classList.add("icon-link");
 
-    // Public pages used to point Account directly to Login. That made an
-    // authenticated user appear logged out when returning from Shop.
-    // Always open the protected account page instead.
     const accountPath = window.location.pathname.includes("/pages/")
       ? "../account/profile.html"
-      : "account/profile.html";
+      : window.location.pathname.includes("/account/")
+        ? "profile.html"
+        : "account/profile.html";
     link.setAttribute("href", accountPath);
   });
 
   cartLinks.forEach((link) => {
+    removeLegacyEmoji(link, '🛒');
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", cartIcon);
     link.classList.add("icon-link");
   });
