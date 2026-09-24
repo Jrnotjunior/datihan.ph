@@ -1,1 +1,141 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Saved Addresses — DATIHAN.PH</title><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"><link rel="stylesheet" href="addresses.css"></head><body><header class="site-header"><a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a><nav class="main-nav"><a href="../pages/shop.html">Shop</a><a href="../pages/categories.html">Categories</a><a href="../pages/pop-ups.html">Pop-ups</a><a href="../pages/about.html">About</a></nav><div class="header-actions"><a href="profile.html" class="icon-link" aria-label="Account"></a><a href="../pages/cart.html" class="icon-link" aria-label="Shopping cart"></a></div></header><main class="addresses-main"><header class="addresses-header"><p class="eyebrow">MY ACCOUNT</p><h1>Saved addresses.</h1><p>Manage the addresses you can use during checkout.</p></header><div class="addresses-layout"><section><div class="section-heading"><div><p class="eyebrow">YOUR ADDRESSES</p><h2>Shipping addresses</h2></div><button class="button button-primary" id="add-address" type="button" onclick="document.getElementById('address-modal').hidden=false">+ Add address</button></div><div id="address-status" class="address-status" aria-live="polite">Loading addresses...</div><div id="address-list" class="address-list"></div><p id="empty-addresses" class="empty-addresses" hidden>No saved addresses yet. Add one to use during checkout.</p></section><aside class="account-card"><h2>Quick access</h2><div class="account-links"><a class="account-link" href="profile.html"><span>Account overview</span><span>→</span></a><a class="account-link" href="orders.html"><span>My Orders</span><span>→</span></a><a class="account-link" href="../pages/cart.html"><span>My Cart</span><span>→</span></a></div></aside></div></main><div class="modal" id="address-modal" hidden><div class="modal-backdrop" id="address-modal-backdrop"></div><section class="address-modal" role="dialog" aria-modal="true" aria-labelledby="address-modal-title"><div class="modal-head"><div><p class="eyebrow">ADDRESS</p><h2 id="address-modal-title">Add address</h2></div><button class="modal-close" id="close-address-modal" type="button" aria-label="Close" onclick="document.getElementById('address-modal').hidden=true">×</button></div><form id="address-form" class="address-form" novalidate onsubmit="window.saveAddress(event)"><div class="field"><label for="address-label-input">Address label</label><input id="address-label-input"></div><div class="form-row"><div class="field"><label for="address-first-name">First name</label><input id="address-first-name"></div><div class="field"><label for="address-last-name">Last name</label><input id="address-last-name"></div></div><div class="field"><label for="address-line">Street / unit / building</label><input id="address-line"></div><div class="form-row"><div class="field"><label for="address-city">City / municipality</label><input id="address-city"></div><div class="field"><label for="address-province">Province</label><input id="address-province"></div></div><div class="form-row"><div class="field"><label for="address-postal">Postal code</label><input id="address-postal" inputmode="numeric" maxlength="4"></div><div class="field"><label for="address-phone">Phone number</label><input id="address-phone" type="tel" inputmode="numeric" maxlength="11" placeholder="09XXXXXXXXX"></div></div><label class="checkbox-field"><input id="address-default" type="checkbox"><span>Set as default address</span></label><p id="address-form-status" class="address-form-status" aria-live="polite"></p><div class="modal-actions"><button class="button button-secondary" id="cancel-address-modal" type="button" onclick="document.getElementById('address-modal').hidden=true">Cancel</button><button class="button button-primary" id="save-address-button" type="submit">Save address</button></div></form></section></div><footer class="site-footer"><div class="footer-brand">DATIHAN.PH</div><p>© 2026 DATIHAN.PH</p></footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js?v=2"></script><script src="../js/auth-guard.js?v=5"></script><script src="../js/global.js?v=5"></script><script src="addresses.js?v=23"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Saved Addresses — DATIHAN.PH</title>
+<link rel="stylesheet" href="../css/global.css">
+<link rel="stylesheet" href="../css/page.css">
+<link rel="stylesheet" href="addresses.css">
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
+    <nav class="main-nav">
+        <a href="../pages/shop.html">Shop</a>
+        <a href="../pages/categories.html">Categories</a>
+        <a href="../pages/pop-ups.html">Pop-ups</a>
+        <a href="../pages/about.html">About</a>
+    </nav>
+    <div class="header-actions">
+        <a href="profile.html" class="icon-link" aria-label="Account"></a>
+        <a href="../pages/cart.html" class="icon-link" aria-label="Shopping cart"></a>
+    </div>
+</header>
+
+<main class="addresses-main">
+    <header class="addresses-header">
+        <p class="eyebrow">MY ACCOUNT</p>
+        <h1>Saved addresses.</h1>
+        <p>Manage the addresses you can use during checkout.</p>
+    </header>
+
+    <div class="addresses-layout">
+        <section>
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">YOUR ADDRESSES</p>
+                    <h2>Shipping addresses</h2>
+                </div>
+                <button class="button button-primary" id="add-address" type="button">+ Add address</button>
+            </div>
+
+            <div id="address-status" class="address-status" aria-live="polite">Loading addresses...</div>
+            <div id="address-list" class="address-list"></div>
+            <p id="empty-addresses" class="empty-addresses" hidden>No saved addresses yet. Add one to use during checkout.</p>
+        </section>
+
+        <aside class="account-card">
+            <h2>Quick access</h2>
+            <div class="account-links">
+                <a class="account-link" href="profile.html"><span>Account overview</span><span>→</span></a>
+                <a class="account-link" href="orders.html"><span>My Orders</span><span>→</span></a>
+                <a class="account-link" href="../pages/cart.html"><span>My Cart</span><span>→</span></a>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<div class="modal" id="address-modal" hidden>
+    <div class="modal-backdrop" id="address-modal-backdrop"></div>
+    <section class="address-modal" role="dialog" aria-modal="true" aria-labelledby="address-modal-title">
+        <div class="modal-head">
+            <div>
+                <p class="eyebrow">ADDRESS</p>
+                <h2 id="address-modal-title">Add address</h2>
+            </div>
+            <button class="modal-close" id="close-address-modal" type="button" aria-label="Close">×</button>
+        </div>
+
+        <form id="address-form" class="address-form" novalidate>
+            <div class="field">
+                <label for="address-label-input">Address label</label>
+                <input id="address-label-input" autocomplete="address-line1">
+            </div>
+
+            <div class="form-row">
+                <div class="field">
+                    <label for="address-first-name">First name</label>
+                    <input id="address-first-name" autocomplete="given-name">
+                </div>
+                <div class="field">
+                    <label for="address-last-name">Last name</label>
+                    <input id="address-last-name" autocomplete="family-name">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="address-line">Street / unit / building</label>
+                <input id="address-line" autocomplete="street-address">
+            </div>
+
+            <div class="form-row">
+                <div class="field">
+                    <label for="address-city">City / municipality</label>
+                    <input id="address-city" autocomplete="address-level2">
+                </div>
+                <div class="field">
+                    <label for="address-province">Province</label>
+                    <input id="address-province" autocomplete="address-level1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="field">
+                    <label for="address-postal">Postal code</label>
+                    <input id="address-postal" inputmode="numeric" maxlength="4" autocomplete="postal-code">
+                </div>
+                <div class="field">
+                    <label for="address-phone">Phone number</label>
+                    <input id="address-phone" type="tel" inputmode="numeric" maxlength="11" placeholder="09XXXXXXXXX" autocomplete="tel">
+                </div>
+            </div>
+
+            <label class="checkbox-field">
+                <input id="address-default" type="checkbox">
+                <span>Set as default address</span>
+            </label>
+
+            <p id="address-form-status" class="address-form-status" aria-live="polite"></p>
+
+            <div class="modal-actions">
+                <button class="button button-secondary" id="cancel-address-modal" type="button">Cancel</button>
+                <button class="button button-primary" id="save-address-button" type="submit">Save address</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<footer class="site-footer">
+    <div class="footer-brand">DATIHAN.PH</div>
+    <p>© 2026 DATIHAN.PH</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-client.js?v=2"></script>
+<script src="../js/auth-guard.js?v=5"></script>
+<script src="../js/global.js?v=5"></script>
+<script src="../js/address-api.js?v=1"></script>
+<script src="addresses.js?v=24"></script>
+</body>
+</html>
