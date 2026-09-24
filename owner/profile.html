@@ -31,33 +31,58 @@
     </header>
 
     <section class="profile-layout">
-      <section class="content-card profile-section">
-        <p class="eyebrow">ACCOUNT INFORMATION</p>
-        <h2>Profile information</h2>
-        <div class="profile-grid">
-          <div class="profile-field">
-            <label for="first-name">First name</label>
-            <input id="first-name" type="text" autocomplete="given-name">
+      <div>
+        <section class="content-card profile-section">
+          <p class="eyebrow">ACCOUNT INFORMATION</p>
+          <h2>Profile information</h2>
+          <div class="profile-grid">
+            <div class="profile-field">
+              <label for="first-name">First name</label>
+              <input id="first-name" type="text" autocomplete="given-name">
+            </div>
+            <div class="profile-field">
+              <label for="last-name">Last name</label>
+              <input id="last-name" type="text" autocomplete="family-name">
+            </div>
+            <div class="profile-field full">
+              <label for="email">Email address</label>
+              <input id="email" type="email" readonly autocomplete="email">
+              <small>Email is managed through your DATIHAN.PH login.</small>
+            </div>
+            <div class="profile-field full">
+              <label for="phone">Contact number</label>
+              <input id="phone" type="tel" autocomplete="tel" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX">
+            </div>
           </div>
-          <div class="profile-field">
-            <label for="last-name">Last name</label>
-            <input id="last-name" type="text" autocomplete="family-name">
+          <div class="profile-actions">
+            <button class="button button-primary" type="button" id="save-profile">Save changes</button>
           </div>
-          <div class="profile-field full">
-            <label for="email">Email address</label>
-            <input id="email" type="email" readonly autocomplete="email">
-            <small>Email is managed through your DATIHAN.PH login.</small>
+          <p class="form-status" id="profile-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="content-card profile-section">
+          <p class="eyebrow">SECURITY</p>
+          <h2>Change password</h2>
+          <p class="section-note">Update the password you use to sign in to your DATIHAN.PH owner account.</p>
+
+          <div class="profile-grid">
+            <div class="profile-field full">
+              <label for="new-password">New password</label>
+              <input id="new-password" type="password" autocomplete="new-password" minlength="8" placeholder="Enter a new password">
+              <small>Use at least 8 characters.</small>
+            </div>
+            <div class="profile-field full">
+              <label for="confirm-password">Confirm new password</label>
+              <input id="confirm-password" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter your new password">
+            </div>
           </div>
-          <div class="profile-field full">
-            <label for="phone">Contact number</label>
-            <input id="phone" type="tel" autocomplete="tel" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX">
+
+          <div class="profile-actions">
+            <button class="button button-primary" type="button" id="save-password">Change password</button>
           </div>
-        </div>
-        <div class="profile-actions">
-          <button class="button button-primary" type="button" id="save-profile">Save changes</button>
-        </div>
-        <p class="form-status" id="profile-status" role="status" aria-live="polite"></p>
-      </section>
+          <p class="form-status" id="password-status" role="status" aria-live="polite"></p>
+        </section>
+      </div>
     </section>
   </main>
 
