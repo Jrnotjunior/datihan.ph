@@ -5,8 +5,10 @@ const email = document.getElementById('email');
 const phone = document.getElementById('phone');
 const profileStatus = document.getElementById('profile-status');
 const passwordStatus = document.getElementById('password-status');
+const logoutButton = document.getElementById('logout');
 
 function showStatus(element, message, isError = false) {
+  if (!element) return;
   element.textContent = message;
   element.classList.toggle('error', isError);
 }
@@ -25,7 +27,7 @@ async function loadProfile() {
     }
 
     if (!user) {
-      window.location.replace('../auth/login.html');
+      window.location.href = '../auth/login.html';
       return;
     }
 
@@ -44,9 +46,7 @@ async function loadProfile() {
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
-    window.setTimeout(() => {
-      loadProfile();
-    }, 0);
+    window.setTimeout(loadProfile, 0);
   }
 });
 
@@ -63,7 +63,7 @@ document.getElementById('save-profile')?.addEventListener('click', async () => {
 
   button.disabled = true;
   button.textContent = 'Saving…';
-  showStatus(profileStatus, '');
+  showStatus(profileStatus, 'Saving your profile…');
 
   try {
     const { error } = await supabase.auth.updateUser({
@@ -115,18 +115,26 @@ document.getElementById('save-password')?.addEventListener('click', async () => 
   }
 });
 
-document.getElementById('logout')?.addEventListener('click', async () => {
-  const button = document.getElementById('logout');
-  button.disabled = true;
-  button.textContent = 'Logging out…';
+logoutButton?.addEventListener('click', async () => {
+  if (logoutButton.disabled) return;
+
+  logoutButton.disabled = true;
+  logoutButton.textContent = 'Logging out…';
+  showStatus(profileStatus, 'Logging out…');
+
   try {
-    const { error } = await supabase.auth.signOut();
+    // Local scope clears this browser's session immediately, so navigation
+    // does not wait for a network/global sign-out request to finish.
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) throw error;
-    window.location.replace('../auth/login.html');
+
+    showStatus(profileStatus, 'Logged out successfully.');
+    window.location.href = '../auth/login.html?logged_out=1';
   } catch (error) {
-    alert(error.message || 'Unable to log out. Please try again.');
-    button.disabled = false;
-    button.textContent = 'Log out';
+    console.error('Logout error:', error);
+    showStatus(profileStatus, error.message || 'Unable to log out. Please try again.', true);
+    logoutButton.disabled = false;
+    logoutButton.textContent = 'Log out';
   }
 });
 
