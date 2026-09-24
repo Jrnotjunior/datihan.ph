@@ -6,6 +6,11 @@ const phone = document.getElementById('phone');
 const profileStatus = document.getElementById('profile-status');
 const passwordStatus = document.getElementById('password-status');
 
+function showStatus(element, message, isError = false) {
+  element.textContent = message;
+  element.classList.toggle('error', isError);
+}
+
 async function loadProfile() {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -27,9 +32,9 @@ async function loadProfile() {
     const metadata = user.user_metadata || {};
     firstName.value = metadata.first_name || '';
     lastName.value = metadata.last_name || '';
-    email.value = user.email || '';
     phone.value = metadata.phone || '';
-
+    email.value = user.email || '';
+    email.setAttribute('value', user.email || '');
     showStatus(profileStatus, '');
   } catch (error) {
     console.error('Unable to load profile:', error);
@@ -37,10 +42,13 @@ async function loadProfile() {
   }
 }
 
-function showStatus(element, message, isError = false) {
-  element.textContent = message;
-  element.classList.toggle('error', isError);
-}
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session?.user) {
+    window.setTimeout(() => {
+      loadProfile();
+    }, 0);
+  }
+});
 
 document.getElementById('save-profile')?.addEventListener('click', async () => {
   const button = document.getElementById('save-profile');
@@ -122,4 +130,4 @@ document.getElementById('logout')?.addEventListener('click', async () => {
   }
 });
 
-loadProfile();
+document.addEventListener('DOMContentLoaded', loadProfile);
