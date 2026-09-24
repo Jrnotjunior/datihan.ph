@@ -21,6 +21,47 @@ const showFormStatus = (message, type = 'success') => {
     el.className = `address-form-status ${type}`;
 };
 
+const showToast = (message, title = 'Success') => {
+    let container = document.getElementById('toast-container');
+
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        container.setAttribute('aria-live', 'polite');
+        container.setAttribute('aria-atomic', 'true');
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `
+        <div class="toast-icon" aria-hidden="true">✓</div>
+        <div class="toast-content">
+            <div class="toast-title"></div>
+            <div class="toast-message"></div>
+        </div>
+        <button class="toast-close" type="button" aria-label="Close notification">×</button>
+    `;
+
+    toast.querySelector('.toast-title').textContent = title;
+    toast.querySelector('.toast-message').textContent = message;
+
+    let removeTimer;
+    const removeToast = () => {
+        clearTimeout(removeTimer);
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 220);
+    };
+
+    toast.querySelector('.toast-close').addEventListener('click', removeToast);
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+    removeTimer = setTimeout(removeToast, 3500);
+};
+
 const setSaving = saving => {
     const button = document.getElementById('save-address-button');
     if (!button) return;
@@ -173,7 +214,10 @@ async function saveAddress(event) {
 
         closeModal();
         await loadAddresses();
-        showStatus(wasEditing ? 'Address updated successfully.' : 'Address saved successfully.', 'success');
+        showToast(
+            wasEditing ? 'Your address has been updated.' : 'Your new address has been saved.',
+            wasEditing ? 'Address updated' : 'Address saved'
+        );
     } catch (error) {
         console.error('Save address error:', error);
         showFormStatus(`Save failed: ${error.message || error}`, 'error');
@@ -188,7 +232,7 @@ async function deleteAddress(id) {
     try {
         await API.remove(id);
         await loadAddresses();
-        showStatus('Address deleted successfully.', 'success');
+        showToast('The address has been removed.', 'Address deleted');
     } catch (error) {
         console.error('Delete address error:', error);
         showStatus(`Delete failed: ${error.message || error}`, 'error');
@@ -199,7 +243,7 @@ async function setDefaultAddress(id) {
     try {
         await API.setDefault(id);
         await loadAddresses();
-        showStatus('Default address updated successfully.', 'success');
+        showToast('This address is now your default shipping address.', 'Default address updated');
     } catch (error) {
         console.error('Set default error:', error);
         showStatus(`Could not set default address: ${error.message || error}`, 'error');
