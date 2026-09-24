@@ -1,1 +1,56 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pop-ups — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><header class="site-header"><a class="brand" href="../index.html">DATIHAN.PH</a><nav class="main-nav"><a href="shop.html">Shop</a><a href="categories.html">Categories</a><a href="pop-ups.html">Pop-ups</a><a href="about.html">About</a></nav><div class="header-actions"><a href="../auth/login.html">Account</a><a href="cart.html">Cart <span class="cart-count">0</span></a></div></header><main class="page-main"><header class="page-header"><p class="eyebrow">POP-UPS</p><h1>Meet us offline.</h1><p>DATIHAN.PH is online-first with no permanent physical store. This page will show upcoming and past pop-up events.</p></header><div class="card-grid"><article class="content-card"><p class="eyebrow">UPCOMING</p><h2>Pop-up event</h2><p>Event details will be added here.</p></article><article class="content-card"><p class="eyebrow">COMMUNITY</p><h2>Find us</h2><p>Locations and schedules will be published here.</p></article></div></main><script src="../js/global.js" defer></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pop-ups — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <style>
+    .popup-list{display:grid;gap:1rem}
+    .popup-event{padding:1.5rem;border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white)}
+    .popup-event-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+    .popup-event h2{font-size:1.4rem}
+    .popup-meta{display:grid;gap:.35rem;margin-top:1rem;color:var(--brown);font-size:14px}
+    .popup-description{margin-top:1rem;color:var(--brown);max-width:720px}
+    .status-badge{display:inline-flex;border:1px solid var(--light-beige);border-radius:999px;padding:.3rem .65rem;font-size:12px;font-weight:700;text-transform:capitalize;white-space:nowrap}
+    .popup-empty{padding:2.5rem 1.25rem;text-align:center;border:1px dashed var(--light-beige);border-radius:var(--radius);color:var(--brown)}
+    @media(max-width:650px){.popup-event-header{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">DATIHAN.PH</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="shop.html">Shop</a>
+      <a href="categories.html">Categories</a>
+      <a href="pop-ups.html">Pop-ups</a>
+      <a href="about.html">About</a>
+    </nav>
+    <div class="header-actions">
+      <a href="../auth/login.html" class="icon-link" aria-label="Account"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg><span>Account</span></a>
+      <a href="cart.html" class="icon-link" aria-label="Shopping cart"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg><span>Cart <span class="cart-count">0</span></span></a>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">POP-UPS</p>
+      <h1>Meet us offline.</h1>
+      <p>Find upcoming DATIHAN.PH pop-up events, locations and schedules.</p>
+    </header>
+
+    <section class="popup-list" id="popup-events" aria-live="polite">
+      <p class="loading">Loading pop-up events...</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/global.js" defer></script>
+  <script src="../js/popups.js" defer></script>
+</body>
+</html>
