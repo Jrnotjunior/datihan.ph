@@ -1,1 +1,60 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cart — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"><link rel="stylesheet" href="cart.css"></head><body><header class="site-header"><a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a><nav class="main-nav" aria-label="Main navigation"><a href="shop.html">Shop</a><a href="categories.html">Categories</a><a href="pop-ups.html">Pop-ups</a><a href="about.html">About</a></nav><div class="header-actions"><a href="../auth/login.html" class="icon-link" aria-label="Account"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg><span>Account</span></a><a href="cart.html" class="icon-link" aria-label="Shopping cart"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg><span>Cart <span class="cart-count">1</span></span></a></div></header><main class="cart-main"><header class="cart-header"><p class="eyebrow">YOUR CART</p><h1>Your finds, ready to go.</h1></header><div class="cart-layout" id="cart-content"><section class="cart-items" aria-label="Cart items"><article class="cart-item" data-price="1250"><div class="cart-image">PRODUCT IMAGE</div><div><h2>Vintage Denim Jacket</h2><p class="cart-meta">Medium · Excellent condition</p><p class="cart-price">₱1,250</p><div class="quantity-control" aria-label="Quantity"><button type="button" class="quantity-minus" aria-label="Decrease quantity">−</button><span class="quantity">1</span><button type="button" class="quantity-plus" aria-label="Increase quantity">+</button></div><button type="button" class="remove-item">Remove</button></div><p class="cart-item-total">₱1,250</p></article></section><aside class="summary"><h2>Summary</h2><div class="summary-row"><span>Subtotal</span><strong id="subtotal">₱1,250</strong></div><div class="summary-row"><span>Shipping</span><strong>Calculated at checkout</strong></div><div class="summary-row summary-total"><span>Total</span><strong id="total">₱1,250</strong></div><a class="button button-primary" href="checkout.html">Proceed to checkout <span class="button-icon" aria-hidden="true">→</span></a><a class="continue-shopping" href="shop.html">← Continue shopping</a></aside></div><section class="empty-cart" id="empty-cart"><h2>Your cart is empty.</h2><p>Find something you love and it can be here.</p><a class="button button-primary" href="shop.html">Browse the collection <span class="button-icon" aria-hidden="true">→</span></a></section></main><footer class="site-footer"><div class="footer-brand">DATIHAN.PH</div><div class="footer-links"><a href="about.html">About</a><a href="contact.html">Contact</a><a href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer">TikTok</a></div><p>© <span id="current-year">2026</span> DATIHAN.PH</p></footer><script src="../js/global.js" defer></script><script>document.addEventListener('DOMContentLoaded',()=>{const item=document.querySelector('.cart-item');const qty=document.querySelector('.quantity');const subtotal=document.querySelector('#subtotal');const total=document.querySelector('#total');const content=document.querySelector('#cart-content');const empty=document.querySelector('#empty-cart');const update=()=>{if(!item)return;const q=Number(qty.textContent);const amount=1250*q;item.querySelector('.cart-item-total').textContent='₱'+amount.toLocaleString();subtotal.textContent='₱'+amount.toLocaleString();total.textContent='₱'+amount.toLocaleString()};document.querySelector('.quantity-plus')?.addEventListener('click',()=>{qty.textContent=Number(qty.textContent)+1;update()});document.querySelector('.quantity-minus')?.addEventListener('click',()=>{qty.textContent=Math.max(1,Number(qty.textContent)-1);update()});document.querySelector('.remove-item')?.addEventListener('click',()=>{content.style.display='none';empty.style.display='block'});});</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="cart.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="shop.html">Shop</a><a href="categories.html">Categories</a><a href="pop-ups.html">Pop-ups</a><a href="about.html">About</a>
+    </nav>
+    <div class="header-actions">
+      <a href="../auth/login.html" class="icon-link" aria-label="Account"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg><span>Account</span></a>
+      <a href="cart.html" class="icon-link" aria-label="Shopping cart"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg><span>Cart <span class="cart-count">0</span></span></a>
+    </div>
+  </header>
+
+  <main class="cart-main">
+    <header class="cart-header">
+      <p class="eyebrow">YOUR CART</p>
+      <h1>Your finds, ready to go.</h1>
+    </header>
+
+    <div class="cart-layout" id="cart-content">
+      <section class="cart-items" aria-label="Cart items"></section>
+      <aside class="summary">
+        <h2>Summary</h2>
+        <div class="summary-row"><span>Subtotal</span><strong id="subtotal">₱0</strong></div>
+        <div class="summary-row"><span>Shipping</span><strong>Calculated at checkout</strong></div>
+        <div class="summary-row summary-total"><span>Total</span><strong id="total">₱0</strong></div>
+        <a class="button button-primary" href="checkout.html">Proceed to checkout <span class="button-icon" aria-hidden="true">→</span></a>
+        <a class="continue-shopping" href="shop.html">← Continue shopping</a>
+      </aside>
+    </div>
+
+    <section class="empty-cart" id="empty-cart">
+      <h2>Your cart is empty.</h2>
+      <p>Find something you love and it can be here.</p>
+      <a class="button button-primary" href="shop.html">Browse the collection <span class="button-icon" aria-hidden="true">→</span></a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">DATIHAN.PH</div>
+    <div class="footer-links"><a href="about.html">About</a><a href="contact.html">Contact</a><a href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer">TikTok</a></div>
+    <p>© <span id="current-year">2026</span> DATIHAN.PH</p>
+  </footer>
+
+  <script src="../js/global.js" defer></script>
+  <script src="../js/cart.js" defer></script>
+</body>
+</html>
