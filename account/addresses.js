@@ -1,7 +1,9 @@
 const API = window.DatihanAddressAPI;
 let modal;
 let form;
+let deleteModal;
 let editingId = null;
+let pendingDeleteId = null;
 let addresses = [];
 
 const statusEl = () => document.getElementById('address-status');
@@ -100,6 +102,18 @@ const openModal = (address = null) => {
     }
 
     modal.hidden = false;
+};
+
+const openDeleteConfirmation = id => {
+    if (!deleteModal) return;
+    pendingDeleteId = id;
+    deleteModal.hidden = false;
+    document.getElementById('delete-confirm-button')?.focus();
+};
+
+const closeDeleteConfirmation = () => {
+    if (deleteModal) deleteModal.hidden = true;
+    pendingDeleteId = null;
 };
 
 const render = () => {
@@ -227,8 +241,6 @@ async function saveAddress(event) {
 }
 
 async function deleteAddress(id) {
-    if (!confirm('Are you sure you want to delete this address?')) return;
-
     try {
         await API.remove(id);
         await loadAddresses();
@@ -238,6 +250,27 @@ async function deleteAddress(id) {
         showStatus(`Delete failed: ${error.message || error}`, 'error');
     }
 }
+
+const confirmDeleteAddress = async () => {
+    const id = pendingDeleteId;
+    if (!id) return;
+
+    const button = document.getElementById('delete-confirm-button');
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'Deleting...';
+    }
+
+    try {
+        closeDeleteConfirmation();
+        await deleteAddress(id);
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'Delete address';
+        }
+    }
+};
 
 async function setDefaultAddress(id) {
     try {
@@ -253,12 +286,17 @@ async function setDefaultAddress(id) {
 const init = () => {
     modal = document.getElementById('address-modal');
     form = document.getElementById('address-form');
+    deleteModal = document.getElementById('delete-confirm-modal');
 
     document.getElementById('add-address')?.addEventListener('click', () => openModal());
     document.getElementById('close-address-modal')?.addEventListener('click', closeModal);
     document.getElementById('cancel-address-modal')?.addEventListener('click', closeModal);
     document.getElementById('address-modal-backdrop')?.addEventListener('click', closeModal);
     form?.addEventListener('submit', saveAddress);
+
+    document.getElementById('delete-cancel-button')?.addEventListener('click', closeDeleteConfirmation);
+    document.getElementById('delete-confirm-backdrop')?.addEventListener('click', closeDeleteConfirmation);
+    document.getElementById('delete-confirm-button')?.addEventListener('click', confirmDeleteAddress);
 
     document.getElementById('address-list')?.addEventListener('click', event => {
         const card = event.target.closest('.address-card');
@@ -267,12 +305,14 @@ const init = () => {
         const address = addresses.find(item => String(item.id) === String(id));
 
         if (event.target.closest('.edit-address')) openModal(address);
-        else if (event.target.closest('.delete-address')) deleteAddress(id);
+        else if (event.target.closest('.delete-address')) openDeleteConfirmation(id);
         else if (event.target.closest('.set-default')) setDefaultAddress(id);
     });
 
     document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && modal && !modal.hidden) closeModal();
+        if (event.key !== 'Escape') return;
+        if (deleteModal && !deleteModal.hidden) closeDeleteConfirmation();
+        else if (modal && !modal.hidden) closeModal();
     });
 
     loadAddresses();
