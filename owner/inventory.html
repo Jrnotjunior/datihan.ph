@@ -1,1 +1,70 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Inventory — Shop Owner — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">SHOP OWNER</p><h1>Inventory.</h1><p>Track available, reserved and sold thrift pieces.</p></header><div class="card-grid"><div class="content-card"><h2>Available</h2><p>Catalog inventory.</p></div><div class="content-card"><h2>Reserved</h2><p>Items temporarily held.</p></div><div class="content-card"><h2>Sold</h2><p>Completed sales.</p></div></div></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory — Shop Owner — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="inventory.css">
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">SHOP OWNER</p>
+      <h1>Inventory.</h1>
+      <p>Track product stock and see which pieces need your attention.</p>
+    </header>
+
+    <section class="content-card">
+      <div class="inventory-summary">
+        <article class="inventory-stat">
+          <span class="muted-label">AVAILABLE UNITS</span>
+          <strong id="available-count">—</strong>
+          <p>Current stock across your products.</p>
+        </article>
+        <article class="inventory-stat">
+          <span class="muted-label">LOW / OUT OF STOCK</span>
+          <strong id="low-stock-count">—</strong>
+          <p>Products with 2 units or fewer.</p>
+        </article>
+        <article class="inventory-stat">
+          <span class="muted-label">UNITS SOLD</span>
+          <strong id="sold-count">—</strong>
+          <p>Units in non-cancelled customer orders.</p>
+        </article>
+      </div>
+
+      <div class="inventory-toolbar">
+        <div>
+          <p class="eyebrow">YOUR INVENTORY</p>
+          <h2>Stock overview</h2>
+        </div>
+        <div class="inventory-filters">
+          <input id="inventory-search" type="search" placeholder="Search products" aria-label="Search inventory">
+          <select id="stock-filter" aria-label="Filter inventory by stock">
+            <option value="all">All stock</option>
+            <option value="healthy">In stock</option>
+            <option value="low">Low stock</option>
+            <option value="out">Out of stock</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="inventory-list" class="inventory-list">
+        <p class="loading">Loading inventory...</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/owner-inventory.js"></script>
+</body>
+</html>
