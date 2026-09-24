@@ -22,6 +22,9 @@ p { margin: 0; }
 .main-nav a:hover, .header-actions a:hover, .footer-links a:hover { opacity: 0.65; }
 .icon-link { display: inline-flex; align-items: center; gap: 0.45rem; }
 .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+/* Account and Cart are icon-only throughout the entire website. The cart badge remains visible. */
+.header-actions .icon-link > span { font-size: 0; line-height: 1; }
+.header-actions .icon-link > span .cart-count { font-size: 0.7rem; line-height: normal; }
 .button-icon, .link-icon { display: inline-block; margin-left: 0.45rem; line-height: 1; }
 .cart-count { display: inline-flex; min-width: 1.25rem; height: 1.25rem; align-items: center; justify-content: center; margin-left: 0.2rem; padding: 0 0.25rem; border-radius: 999px; background: var(--brown); color: var(--off-white); font-size: 0.7rem; }
 .section-shell { width: min(100%, var(--max-width)); margin-inline: auto; padding-inline: var(--page-padding); }
@@ -40,8 +43,6 @@ p { margin: 0; }
   .footer-links { flex-wrap: wrap; }
 }
 @media (max-width: 520px) {
-  .header-actions a:first-child { display: inline-flex; }
-  .header-actions a:first-child > span { display: none; }
   .header-actions { gap: 0.8rem; }
   .main-nav { gap: 1.25rem; }
 }
