@@ -9,20 +9,96 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <main class="page-main">
-    <header class="page-header">
+    <header class="page-header dashboard-header">
       <p class="eyebrow">SHOP OWNER</p>
       <h1>Your shop dashboard.</h1>
-      <p>Manage your shop, products, inventory, orders and pop-up events from one place.</p>
+      <p>A quick look at your products, inventory, orders and upcoming pop-up events.</p>
     </header>
-    <div class="card-grid">
-      <a class="content-card" href="products.html"><h2>Products</h2><p>Manage listings.</p></a>
-      <a class="content-card" href="inventory.html"><h2>Inventory</h2><p>Track availability.</p></a>
-      <a class="content-card" href="orders.html"><h2>Orders</h2><p>Review shop orders.</p></a>
-      <a class="content-card" href="pop-ups.html"><h2>Pop-up events</h2><p>Add, edit and remove your events.</p></a>
-    </div>
+
+    <section class="dashboard-section" aria-labelledby="overview-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">OVERVIEW</p>
+          <h2 id="overview-heading">Shop at a glance</h2>
+        </div>
+      </div>
+
+      <div class="dashboard-stats">
+        <a class="dashboard-stat" href="products.html">
+          <span class="muted-label">ACTIVE PRODUCTS</span>
+          <strong id="active-products">—</strong>
+          <span>Products currently visible to buyers.</span>
+        </a>
+        <a class="dashboard-stat" href="inventory.html">
+          <span class="muted-label">AVAILABLE UNITS</span>
+          <strong id="available-units">—</strong>
+          <span>Total stock across your products.</span>
+        </a>
+        <a class="dashboard-stat" href="orders.html">
+          <span class="muted-label">OPEN ORDERS</span>
+          <strong id="open-orders">—</strong>
+          <span>Orders still moving through fulfillment.</span>
+        </a>
+        <a class="dashboard-stat" href="pop-ups.html">
+          <span class="muted-label">UPCOMING EVENTS</span>
+          <strong id="upcoming-events">—</strong>
+          <span>Pop-up events scheduled from today onward.</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="dashboard-section dashboard-grid" aria-label="Shop activity">
+      <article class="content-card dashboard-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ORDERS</p>
+            <h2>Recent orders</h2>
+          </div>
+          <a class="text-link" href="orders.html">View all</a>
+        </div>
+        <div id="recent-orders" class="dashboard-list">
+          <p class="loading">Loading orders...</p>
+        </div>
+      </article>
+
+      <article class="content-card dashboard-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">QUICK ACTIONS</p>
+            <h2>Manage your shop</h2>
+          </div>
+        </div>
+        <div class="quick-actions">
+          <a class="quick-action" href="add-product.html">
+            <strong>Add product</strong>
+            <span>Create a new product listing.</span>
+          </a>
+          <a class="quick-action" href="inventory.html">
+            <strong>Check inventory</strong>
+            <span>Review low and out-of-stock items.</span>
+          </a>
+          <a class="quick-action" href="orders.html">
+            <strong>Process orders</strong>
+            <span>Update order status and view details.</span>
+          </a>
+          <a class="quick-action" href="pop-ups.html">
+            <strong>Manage pop-ups</strong>
+            <span>Add or update an upcoming event.</span>
+          </a>
+        </div>
+      </article>
+    </section>
+
+    <div id="dashboard-error" class="dashboard-error" hidden></div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
