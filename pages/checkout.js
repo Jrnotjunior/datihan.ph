@@ -150,17 +150,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       const label = document.createElement('label');
       label.className = `checkout-address-option${address.is_default ? ' selected' : ''}`;
       label.innerHTML = `<input type="radio" name="shipping-address" value="${String(address.id)}" ${address.is_default || (!list.some(a => a.is_default) && index === 0) ? 'checked' : ''}><span class="checkout-address-copy"><strong></strong><span></span><span></span><small></small></span>`;
+      const input = label.querySelector('input');
+      input.dataset.city = address.city || '';
+      input.dataset.province = address.province || '';
+      input.dataset.barangay = address.barangay || '';
       label.querySelector('strong').textContent = `${address.label || 'Address'}${address.is_default ? ' · Default' : ''}`;
       label.querySelectorAll('span')[1].textContent = `${address.first_name || ''} ${address.last_name || ''}`.trim();
-      label.querySelectorAll('span')[2].textContent = `${address.address_line || ''}, ${address.city || ''}, ${address.province || ''} ${address.postal_code || ''}`;
+      const barangay = address.barangay ? `${address.barangay}, ` : '';
+      label.querySelectorAll('span')[2].textContent = `${address.address_line || ''}, ${barangay}${address.city || ''}, ${address.province || ''} ${address.postal_code || ''}`;
       label.querySelector('small').textContent = address.phone || '';
-      label.querySelector('input').addEventListener('change', () => {
+      input.addEventListener('change', () => {
         document.querySelectorAll('.checkout-address-option').forEach(el => el.classList.remove('selected'));
         label.classList.add('selected');
         fillContact(address);
       });
       addressEl.appendChild(label);
-      if (label.querySelector('input').checked) fillContact(address);
+      if (input.checked) fillContact(address);
     });
   };
 
@@ -247,6 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       last_name: lastName,
       phone,
       address_line: selectedAddress.address_line || '',
+      barangay: selectedAddress.barangay || '',
       city: selectedAddress.city || '',
       province: selectedAddress.province || '',
       postal_code: selectedAddress.postal_code || '',
@@ -254,8 +260,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     try {
-      // Never trust the shipping fee supplied by the browser. Recalculate it in Supabase
-      // from the saved address and the selected shop owner before creating the order.
       const { data: authoritativeShippingFee, error: shippingFeeError } = await supabase.rpc('get_shipping_fee', {
         p_owner_id: rate.owner_id,
         p_shipping_address: shippingAddress
