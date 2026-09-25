@@ -6,16 +6,51 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const user = data.session.user;
+    const { data: profile, error: profileError } = await window.datihanSupabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile?.role) {
+      await window.datihanSupabase.auth.signOut();
+      window.location.replace('../auth/login.html');
+      return;
+    }
+
+    const role = profile.role;
+    const path = window.location.pathname;
+    const isAdminPage = path.includes('/admin/');
+    const isOwnerPage = path.includes('/owner/');
+    const isBuyerAccountPage = path.includes('/account/');
+
+    if (isAdminPage && role !== 'admin') {
+      window.location.replace(role === 'shop_owner' ? '../owner/dashboard.html' : '../account/');
+      return;
+    }
+
+    if (isOwnerPage && role !== 'shop_owner') {
+      window.location.replace(role === 'admin' ? '../admin/dashboard.html' : '../account/');
+      return;
+    }
+
+    if (isBuyerAccountPage && role !== 'buyer') {
+      window.location.replace(role === 'admin' ? '../admin/dashboard.html' : '../owner/dashboard.html');
+      return;
+    }
+
     window.datihanAuthSession = data.session;
+    window.datihanAuthProfile = profile;
     document.documentElement.classList.add('auth-ready');
 
     document.querySelectorAll('[data-auth-user-email]').forEach(el => {
-      const userEmail = data.session.user.email || '';
+      const userEmail = user.email || '';
       if ('value' in el) el.value = userEmail;
       else el.textContent = userEmail;
     });
 
-    if (window.location.pathname.includes('/owner/')) {
+    if (isOwnerPage) {
       const pageMain = document.querySelector('.page-main');
       if (pageMain && !document.querySelector('.owner-nav')) {
         const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
@@ -49,7 +84,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    window.dispatchEvent(new CustomEvent('datihan-auth-ready', { detail: { session: data.session } }));
+    window.dispatchEvent(new CustomEvent('datihan-auth-ready', {
+      detail: { session: data.session, profile }
+    }));
   } catch (error) {
     console.error('Auth guard error:', error);
     window.location.replace('../auth/login.html');
