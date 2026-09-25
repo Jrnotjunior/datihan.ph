@@ -121,6 +121,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!document.querySelector(".site-footer")) {
     const footer = document.createElement("footer");
     footer.className = "site-footer storefront-footer";
+    // The footer now has three desktop columns: About, Explore, and Follow Along.
+    // This keeps the existing global footer styling while removing the unused More column.
+    footer.style.gridTemplateColumns = "minmax(320px, 1.4fr) minmax(170px, 0.75fr) minmax(220px, 1fr)";
     footer.innerHTML = `
       <div class="footer-column footer-about">
         <a class="footer-brand" href="${window.location.pathname.includes("/pages/") ? "../index.html" : "index.html"}">DATIHAN</a>
@@ -133,13 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="${window.location.pathname.includes("/pages/") ? "shop.html" : "pages/shop.html"}">Shop</a>
           <a href="${window.location.pathname.includes("/pages/") ? "pop-ups.html" : "pages/pop-ups.html"}">Pop-ups</a>
           <a href="${window.location.pathname.includes("/pages/") ? "contact.html" : "pages/contact.html"}">Contact</a>
-        </nav>
-      </div>
-
-      <div class="footer-column footer-explore">
-        <h2>More</h2>
-        <nav class="footer-links" aria-label="Footer more navigation">
-          <a href="${window.location.pathname.includes("/pages/") ? "categories.html" : "pages/categories.html"}">Categories</a>
           <a href="${window.location.pathname.includes("/pages/") ? "about.html" : "pages/about.html"}">About</a>
         </nav>
       </div>
