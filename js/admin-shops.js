@@ -1,16 +1,43 @@
-document.addEventListener('datihan-auth-ready', loadAdminShops);
+let adminShopsStarted = false;
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.datihanAuthProfile?.role === 'admin') {
-    loadAdminShops();
+async function startAdminShops() {
+  if (adminShopsStarted) return;
+
+  const page = document.querySelector('[data-admin-shops]');
+  if (!page) return;
+
+  // Prefer the auth-ready event, but also verify the current session directly.
+  // This prevents the page from staying on "Loading shop owners…" if the
+  // auth-ready event happens before this script finishes initializing.
+  let role = window.datihanAuthProfile?.role;
+
+  if (!role) {
+    const { data: sessionData, error: sessionError } = await window.datihanSupabase.auth.getSession();
+    if (sessionError || !sessionData?.session?.user) return;
+
+    const { data: profile, error: profileError } = await window.datihanSupabase
+      .from('profiles')
+      .select('role')
+      .eq('id', sessionData.session.user.id)
+      .single();
+
+    if (profileError || !profile) return;
+    role = profile.role;
+    window.datihanAuthProfile = profile;
   }
-});
+
+  if (role !== 'admin') return;
+
+  adminShopsStarted = true;
+  await loadAdminShops();
+}
+
+document.addEventListener('datihan-auth-ready', startAdminShops);
+document.addEventListener('DOMContentLoaded', startAdminShops);
 
 async function loadAdminShops() {
   const page = document.querySelector('[data-admin-shops]');
-  if (!page || page.dataset.loaded === 'true') return;
-
-  page.dataset.loaded = 'true';
+  if (!page) return;
 
   const status = page.querySelector('[data-shops-status]');
   const table = page.querySelector('[data-shops-table]');
@@ -18,41 +45,49 @@ async function loadAdminShops() {
   const emptyState = page.querySelector('[data-shops-empty]');
   const errorBox = page.querySelector('[data-shops-error]');
 
-  const { data, error } = await window.datihanSupabase.rpc('get_admin_shops');
+  status.textContent = 'Loading shop owners…';
+  errorBox.hidden = true;
 
-  if (error) {
+  try {
+    const { data, error } = await window.datihanSupabase.rpc('get_admin_shops');
+
+    if (error) {
+      throw error;
+    }
+
+    const shops = data || [];
+    status.textContent = `${shops.length} shop owner${shops.length === 1 ? '' : 's'}`;
+
+    if (!shops.length) {
+      table.hidden = true;
+      emptyState.hidden = false;
+      return;
+    }
+
+    tableBody.innerHTML = shops.map(shop => `
+      <tr>
+        <td>
+          <strong class="admin-shop-name">${escapeHtml(shop.owner_name || 'Unnamed shop owner')}</strong>
+          <span class="admin-shop-id">${escapeHtml(shop.id)}</span>
+        </td>
+        <td>${escapeHtml(shop.email || '—')}</td>
+        <td><span class="admin-shop-count">${Number(shop.product_count || 0).toLocaleString('en-PH')}</span></td>
+        <td><span class="admin-shop-count">${Number(shop.popup_count || 0).toLocaleString('en-PH')}</span></td>
+        <td><span class="admin-shop-status">Active</span></td>
+        <td>${escapeHtml(formatDate(shop.created_at))}</td>
+      </tr>
+    `).join('');
+
+    table.hidden = false;
+    emptyState.hidden = true;
+  } catch (error) {
     console.error('Admin shops error:', error);
     status.textContent = 'Shop owners could not be loaded.';
-    errorBox.textContent = 'Please run supabase/admin-shops.sql in Supabase, then refresh this page.';
+    errorBox.textContent = error?.message
+      ? `Supabase error: ${error.message}`
+      : 'Please run supabase/admin-shops.sql in Supabase, then refresh this page.';
     errorBox.hidden = false;
-    return;
   }
-
-  const shops = data || [];
-  status.textContent = `${shops.length} shop owner${shops.length === 1 ? '' : 's'}`;
-
-  if (!shops.length) {
-    emptyState.hidden = false;
-    table.hidden = true;
-    return;
-  }
-
-  tableBody.innerHTML = shops.map(shop => `
-    <tr>
-      <td>
-        <strong class="admin-shop-name">${escapeHtml(shop.owner_name || 'Unnamed shop owner')}</strong>
-        <span class="admin-shop-id">${escapeHtml(shop.id)}</span>
-      </td>
-      <td>${escapeHtml(shop.email || '—')}</td>
-      <td><span class="admin-shop-count">${Number(shop.product_count || 0).toLocaleString('en-PH')}</span></td>
-      <td><span class="admin-shop-count">${Number(shop.popup_count || 0).toLocaleString('en-PH')}</span></td>
-      <td><span class="admin-shop-status">Active</span></td>
-      <td>${escapeHtml(formatDate(shop.created_at))}</td>
-    </tr>
-  `).join('');
-
-  table.hidden = false;
-  emptyState.hidden = true;
 }
 
 function formatDate(value) {
