@@ -1,5 +1,6 @@
 (() => {
     const BASE = 'https://psgc.cloud/api/v2';
+    const LEGACY_BASE = 'https://psgc.cloud/api/v1';
     const cache = new Map();
 
     const unwrap = payload => {
@@ -19,8 +20,8 @@
         return promise;
     };
 
-    const requestObject = async path => {
-        const url = `${BASE}${path}`;
+    const requestObject = async (base, path) => {
+        const url = `${base}${path}`;
         if (cache.has(url)) return cache.get(url);
         const promise = fetch(url, { headers: { Accept: 'application/json' } }).then(async response => {
             if (!response.ok) throw new Error(`Location data request failed (${response.status}).`);
@@ -37,7 +38,10 @@
     const listCities = provinceCode => request(`/provinces/${encodeURIComponent(provinceCode)}/cities-municipalities`);
     const listCitiesByRegion = regionCode => request(`/regions/${encodeURIComponent(regionCode)}/cities-municipalities`);
     const listBarangays = cityCode => request(`/cities-municipalities/${encodeURIComponent(cityCode)}/barangays`);
-    const getCityDetails = cityCode => requestObject(`/cities-municipalities/${encodeURIComponent(cityCode)}`);
+
+    // v2 is used for the hierarchy. The v1 locality detail still exposes the
+    // postal/ZIP field, which v2's city detail intentionally does not include.
+    const getCityDetails = cityCode => requestObject(LEGACY_BASE, `/cities-municipalities/${encodeURIComponent(cityCode)}`);
 
     window.DatihanLocations = {
         listRegions,
