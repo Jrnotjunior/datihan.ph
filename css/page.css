@@ -14,6 +14,16 @@
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--brown)}
 .notice{padding:1rem;border-left:3px solid var(--brown);background:var(--light-beige);font-size:14px}
 
+.faq-section{margin-top:clamp(4rem,8vw,7rem)}
+.faq-section>h2{margin:0 0 1.5rem;font-family:"Manrope",sans-serif;font-size:clamp(1.9rem,3.5vw,2.5rem);font-weight:700;letter-spacing:-.03em}
+.faq-list{border-top:1px solid var(--light-beige)}
+.faq-item{border-bottom:1px solid var(--light-beige);background:var(--off-white)}
+.faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.15rem 0;font-size:16px;font-weight:700;color:var(--dark-brown);cursor:pointer;list-style:none}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";flex:0 0 auto;font-size:20px;font-weight:400;line-height:1}
+.faq-item[open] summary::after{content:"−"}
+.faq-item p{max-width:680px;margin:0;padding:0 0 1.35rem;color:var(--brown);font-size:16px;line-height:1.65}
+
 .owner-nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:2rem;padding:.7rem .85rem;border:1px solid var(--light-beige);border-radius:14px;background:var(--off-white);box-shadow:0 4px 18px rgba(40,31,23,.04)}
 .owner-nav a{color:var(--dark-brown);text-decoration:none;font-size:14px;font-weight:600}
 .owner-nav a:hover{text-decoration:underline}
@@ -24,4 +34,4 @@
 .owner-nav-links a.is-active{background:var(--dark-brown);color:var(--off-white)}
 
 @media(max-width:800px){.card-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.owner-nav{align-items:flex-start;flex-direction:column}.owner-nav-links{justify-content:flex-start;width:100%}.owner-nav-links a{padding:.4rem .55rem}}
+@media(max-width:600px){.owner-nav{align-items:flex-start;flex-direction:column}.owner-nav-links{justify-content:flex-start;width:100%}.owner-nav-links a{padding:.4rem .55rem}.faq-item summary{padding:1rem 0;font-size:15px}.faq-item p{font-size:15px}}
