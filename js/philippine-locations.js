@@ -8,7 +8,7 @@
   const obj=async(b,p)=>{const z=b+p;if(C.has(z))return C.get(z);const q=fetch(z,{headers:{Accept:'application/json'}}).then(async r=>{if(!r.ok)throw Error(`Location data request failed (${r.status}).`);const x=await r.json();return x?.data||x});C.set(z,q);return q};
   const remember=a=>{a.forEach(x=>x?.code&&CC.set(String(x.code),x));return a};
   const slug=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').replace(/-+/g,'-');
-  const rslug=r=>{const n=String(r?.name||'');if(/^national capital region/i.test(n)||/^(NCR|13)/i.test(String(r?.code||'')))return'national-capital-region-NCR';const i=n.match(/\(([^)]+)\)/)?.[1],b=i||n.replace(/^Region\s+[IVX]+\s*/i,'').trim(),c=String(r?.code||'').match(/^(\d{2})/)?.[1]||'00';return`${slug(b)}-R${c}`};
+  const rslug=r=>{const n=String(r?.name||''),code=String(r?.code||'');if(/^national capital region/i.test(n)||/^(NCR|13)/i.test(code))return'national-capital-region-NCR';const i=n.match(/\(([^)]+)\)/)?.[1],b=i||n.replace(/^Region\s+[IVX]+\s*/i,'').trim(),m=code.match(/(?:R)?(\d{2})/)?.[1]||'00';return`${slug(b)}-R${m}`};
   const rememberRegion=a=>{a.forEach(x=>x?.code&&RC.set(String(x.code),x));return a};
   const rememberProvinces=(a,r)=>{a.forEach(x=>x?.code&&PRC.set(String(x.code),{...x,region:r}));return a};
   const regions=async()=>rememberRegion(await req(B,'/regions'));
