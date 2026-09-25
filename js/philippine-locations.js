@@ -19,7 +19,24 @@
     const code=String(r?.code||'').toUpperCase();
     const name=String(r?.name||'');
     const map={
-      '010000000':'ilocos-region-R01','R01':'ilocos-region-R01','020000000':'cagayan-valley-R02','R02':'cagayan-valley-R02','030000000':'central-luzon-R03','R03':'central-luzon-R03','040000000':'calabarzon-R04A','R04A':'calabarzon-R04A','040000000':'calabarzon-R04A','050000000':'bicol-region-R05','R05':'bicol-region-R05','060000000':'western-visayas-R06','R06':'western-visayas-R06','070000000':'central-visayas-R07','R07':'central-visayas-R07','080000000':'eastern-visayas-R08','R08':'eastern-visayas-R08','090000000':'zamboanga-peninsula-R09','R09':'zamboanga-peninsula-R09','100000000':'northern-mindanao-R10','R10':'northern-mindanao-R10','110000000':'davao-region-R11','R11':'davao-region-R11','120000000':'soccsksargen-R12','R12':'soccsksargen-R12','130000000':'national-capital-region-NCR','R13':'national-capital-region-NCR','140000000':'cordillera-administrative-region-CAR','CAR':'cordillera-administrative-region-CAR','150000000':'autonomous-region-in-muslim-mindanao-ARMM','ARMM':'autonomous-region-in-muslim-mindanao-ARMM','160000000':'caraga-R13','R13A':'caraga-R13','170000000':'mimaropa-region-R17','R17':'mimaropa-region-R17'
+      '0100000000':'ilocos-region-R01','R01':'ilocos-region-R01',
+      '0200000000':'cagayan-valley-R02','R02':'cagayan-valley-R02',
+      '0300000000':'central-luzon-R03','R03':'central-luzon-R03',
+      '0400000000':'calabarzon-R04A','R04A':'calabarzon-R04A',
+      '0500000000':'bicol-region-R05','R05':'bicol-region-R05',
+      '0600000000':'western-visayas-R06','R06':'western-visayas-R06',
+      '0700000000':'central-visayas-R07','R07':'central-visayas-R07',
+      '0800000000':'eastern-visayas-R08','R08':'eastern-visayas-R08',
+      '0900000000':'zamboanga-peninsula-R09','R09':'zamboanga-peninsula-R09',
+      '1000000000':'northern-mindanao-R10','R10':'northern-mindanao-R10',
+      '1100000000':'davao-region-R11','R11':'davao-region-R11',
+      '1200000000':'soccsksargen-R12','R12':'soccsksargen-R12',
+      '1300000000':'national-capital-region-NCR','NCR':'national-capital-region-NCR',
+      '1400000000':'cordillera-administrative-region-CAR','CAR':'cordillera-administrative-region-CAR',
+      '1500000000':'autonomous-region-in-muslim-mindanao-ARMM','ARMM':'autonomous-region-in-muslim-mindanao-ARMM',
+      '1600000000':'caraga-R13','R13':'caraga-R13',
+      '1700000000':'mimaropa-region-R17','R17':'mimaropa-region-R17',
+      '1900000000':'autonomous-region-in-muslim-mindanao-ARMM','BARMM':'autonomous-region-in-muslim-mindanao-ARMM'
     };
     if(map[code]) return map[code];
     if(/national capital region|\bncr\b/i.test(name)) return 'national-capital-region-NCR';
@@ -33,7 +50,7 @@
     return null;
   };
   const postal=async code=>{
-    const k=String(code||'');
+    const k=String(code||'').trim();
     if(PC.has(k))return PC.get(k);
     let regionCode=document.getElementById('address-region')?.value||'';
     let r=RC.get(String(regionCode));
@@ -46,7 +63,7 @@
     const q=RDC.has(url)?RDC.get(url):fetch(url,{headers:{Accept:'application/json'}}).then(async x=>{if(!x.ok)throw Error(`Barangay postal data request failed (${x.status}).`);return u(await x.json())});
     RDC.set(url,q);
     const result=q.then(rows=>{
-      const m=rows.find(item=>String(item?.id||item?.code?.id||item?.code||item?.code_id||item?.psgc_code||'').trim()===k.trim());
+      const m=rows.find(item=>String(item?.id||item?.code?.id||item?.code||item?.code_id||item?.psgc_code||'').trim()===k);
       if(!m)throw Error('Postal code is not available for the selected barangay.');
       return m;
     }).catch(e=>{PC.delete(k);throw e});
