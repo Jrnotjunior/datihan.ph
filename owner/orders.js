@@ -6,10 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const toast = document.getElementById('toast');
   const detailModal = document.getElementById('order-modal');
   const detailContent = document.getElementById('order-detail');
+  const confirmModal = document.getElementById('status-confirm-modal');
+  const confirmMessage = document.getElementById('status-confirm-message');
+  const confirmCancel = document.getElementById('status-confirm-cancel');
+  const confirmApprove = document.getElementById('status-confirm-approve');
 
   const state = { orders: [] };
   const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned_refunded'];
   const money = value => `₱${Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  let pendingConfirmation = null;
 
   function showToast(message, error = false) {
     if (!toast) return;
@@ -89,6 +94,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-status-select')?.addEventListener('change', event => updateStatus(order.id, event.target.value, event.target, true));
   }
 
+  function openStatusConfirmation(order, nextStatus, select, fromModal) {
+    const label = statusLabel(nextStatus);
+    const message = nextStatus === 'cancelled'
+      ? `Are you sure you want to cancel order ${order.order_number || ''}? This changes the order status.`
+      : `Are you sure you want to mark order ${order.order_number || ''} as Returned / Refunded? This changes the order status.`;
+    pendingConfirmation = { orderId: order.id, nextStatus, select, fromModal };
+    if (confirmMessage) confirmMessage.textContent = message;
+    if (confirmApprove) confirmApprove.textContent = `Confirm ${label}`;
+    confirmModal?.classList.add('is-open');
+    confirmModal?.setAttribute('aria-hidden', 'false');
+    confirmApprove?.focus();
+  }
+
+  function closeStatusConfirmation(restore = true) {
+    if (restore && pendingConfirmation?.select) {
+      const order = state.orders.find(item => String(item.id) === String(pendingConfirmation.orderId));
+      pendingConfirmation.select.value = order?.status || 'pending';
+    }
+    pendingConfirmation = null;
+    confirmModal?.classList.remove('is-open');
+    confirmModal?.setAttribute('aria-hidden', 'true');
+  }
+
+  async function confirmStatusChange() {
+    const pending = pendingConfirmation;
+    if (!pending) return;
+    closeStatusConfirmation(false);
+    await saveStatus(pending.orderId, pending.nextStatus, pending.select, pending.fromModal);
+  }
+
   async function getSession() {
     if (!supabase) throw new Error('Supabase client is not available.');
     const { data, error } = await supabase.auth.getSession();
@@ -121,19 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function updateStatus(orderId, nextStatus, select, fromModal = false) {
+  async function saveStatus(orderId, nextStatus, select, fromModal = false) {
     const order = state.orders.find(item => String(item.id) === String(orderId));
     if (!order || order.status === nextStatus) return;
     const previous = order.status || 'pending';
-    const isTerminalAction = nextStatus === 'cancelled' || nextStatus === 'returned_refunded';
-    if (isTerminalAction) {
-      const action = nextStatus === 'cancelled' ? 'cancel this order' : 'mark this order as Returned / Refunded';
-      const confirmed = window.confirm(`Are you sure you want to ${action}? This changes the order status.`);
-      if (!confirmed) {
-        select.value = previous;
-        return;
-      }
-    }
     select.disabled = true;
     try {
       const { data, error } = await supabase.from('orders').update({ status: nextStatus, updated_at: new Date().toISOString() }).eq('id', orderId).select('id, status').maybeSingle();
@@ -149,12 +175,30 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally { select.disabled = false; }
   }
 
+  async function updateStatus(orderId, nextStatus, select, fromModal = false) {
+    const order = state.orders.find(item => String(item.id) === String(orderId));
+    if (!order || order.status === nextStatus) return;
+    const isTerminalAction = nextStatus === 'cancelled' || nextStatus === 'returned_refunded';
+    if (isTerminalAction) {
+      openStatusConfirmation(order, nextStatus, select, fromModal);
+      return;
+    }
+    await saveStatus(orderId, nextStatus, select, fromModal);
+  }
+
   filter?.addEventListener('change', render);
   search?.addEventListener('input', render);
+  confirmCancel?.addEventListener('click', () => closeStatusConfirmation(true));
+  confirmApprove?.addEventListener('click', confirmStatusChange);
   list?.addEventListener('click', event => { const button = event.target.closest('[data-action="view"]'); if (!button) return; const order = state.orders.find(item => String(item.id) === String(button.dataset.id)); if (order) openOrder(order); });
   list?.addEventListener('change', event => { const select = event.target.closest('[data-action="status"]'); if (select) updateStatus(select.dataset.id, select.value, select); });
   detailModal?.addEventListener('click', event => { if (event.target === detailModal) closeOrder(); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeOrder(); });
+  confirmModal?.addEventListener('click', event => { if (event.target === confirmModal) closeStatusConfirmation(true); });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    if (confirmModal?.classList.contains('is-open')) closeStatusConfirmation(true);
+    else closeOrder();
+  });
   window.addEventListener('datihan-auth-ready', loadOrders);
   if (document.documentElement.classList.contains('auth-ready')) loadOrders();
 });
