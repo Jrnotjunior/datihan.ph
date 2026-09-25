@@ -19,11 +19,12 @@
       <p>Review customer purchases and keep every order moving through your shop.</p>
     </header>
 
-    <section class="content-card">
+    <section class="content-card orders-shell">
       <div class="owner-toolbar">
-        <div>
+        <div class="orders-heading">
           <p class="eyebrow">YOUR ORDERS</p>
           <h2>Order management</h2>
+          <p class="toolbar-help">Search orders, filter by status, or open an order for the full details.</p>
         </div>
         <div class="owner-tools">
           <input class="owner-search" id="order-search" type="search" placeholder="Search order or customer" aria-label="Search orders">
@@ -37,6 +38,15 @@
             <option value="returned_refunded">Returned / Refunded</option>
           </select>
         </div>
+      </div>
+      <div class="status-guide" aria-label="Order status flow">
+        <span><i class="status-dot status-dot-pending"></i>Pending</span>
+        <span class="status-arrow">→</span>
+        <span><i class="status-dot status-dot-confirmed"></i>Confirmed</span>
+        <span class="status-arrow">→</span>
+        <span><i class="status-dot status-dot-shipped"></i>Shipped</span>
+        <span class="status-arrow">→</span>
+        <span><i class="status-dot status-dot-delivered"></i>Delivered</span>
       </div>
       <div id="orders-list" class="orders-list">
         <p class="loading">Loading your orders...</p>
