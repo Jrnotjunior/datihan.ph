@@ -11,7 +11,6 @@ DECLARE
   v_city text;
   v_province text;
   v_area_name text;
-  v_shipping_fee numeric;
 BEGIN
   v_city := lower(trim(coalesce(p_shipping_address->>'city', '')));
   v_province := lower(trim(coalesce(p_shipping_address->>'province', '')));
@@ -21,13 +20,18 @@ BEGIN
     'metropolitan manila',
     'ncr',
     'national capital region'
+  ) OR v_city IN (
+    'caloocan', 'las pinas', 'las piñas', 'makati', 'malabon', 'mandaluyong',
+    'manila', 'marikina', 'muntinlupa', 'navotas', 'paranaque', 'parañaque',
+    'pasay', 'pasig', 'quezon city', 'san juan', 'taguig', 'valenzuela'
   ) THEN
     v_area_name := 'Metro Manila';
 
   ELSIF v_province IN (
     'cebu', 'bohol', 'iloilo', 'negros occidental', 'negros oriental',
     'leyte', 'southern leyte', 'eastern samar', 'northern samar', 'samar',
-    'biliran', 'capiz', 'aklan', 'antique', 'guimaras', 'romblon', 'siquijor'
+    'biliran', 'capiz', 'aklan', 'antique', 'guimaras', 'romblon', 'siquijor',
+    'central visayas', 'western visayas', 'eastern visayas'
   ) THEN
     v_area_name := 'Visayas';
 
