@@ -44,10 +44,11 @@
     const listProvinces = regionCode => request(BASE, `/regions/${encodeURIComponent(regionCode)}/provinces`);
     const listAllProvinces = () => request(BASE, '/provinces');
 
-    // v1 locality records include zip_code. Use them for city/municipality
-    // lists so the selected city can supply its postal code directly.
+    // Keep the hierarchy on v2. Its province codes are the same codes used by
+    // the v2 child endpoint; the v1 nested endpoint can reject newer codes
+    // (for example, provinces affected by PSGC code revisions).
     const listCities = async provinceCode => rememberCities(
-        await request(LEGACY_BASE, `/provinces/${encodeURIComponent(provinceCode)}/cities-municipalities`)
+        await request(BASE, `/provinces/${encodeURIComponent(provinceCode)}/cities-municipalities`)
     );
 
     const listCitiesByRegion = async regionCode => rememberCities(
@@ -56,9 +57,19 @@
 
     const listBarangays = cityCode => request(BASE, `/cities-municipalities/${encodeURIComponent(cityCode)}/barangays`);
 
+    // v2 city details do not expose zip_code. Use the v1 locality endpoint by
+    // city name as a compatibility lookup; v1 accepts a locality code or name.
     const getCityDetails = async cityCode => {
         const cached = cityCache.get(String(cityCode));
-        if (cached) return cached;
+        const localityName = cached?.name;
+        if (localityName) {
+            try {
+                return await requestObject(LEGACY_BASE, `/cities-municipalities/${encodeURIComponent(localityName)}`);
+            } catch (_) {
+                // Fall through to the code lookup for older PSGC records.
+            }
+        }
+
         const city = await requestObject(LEGACY_BASE, `/cities-municipalities/${encodeURIComponent(cityCode)}`);
         if (city?.code) cityCache.set(String(city.code), city);
         return city;
