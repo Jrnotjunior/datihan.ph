@@ -121,13 +121,14 @@
     const fee = Number(feeInput.value);
     if (!areaName || !Number.isFinite(fee) || fee < 0) return;
 
+    const wasEditing = Boolean(state.editingId);
     saveButton.disabled = true;
-    saveButton.textContent = state.editingId ? 'Saving...' : 'Adding...';
+    saveButton.textContent = wasEditing ? 'Saving...' : 'Adding...';
     try {
       const session = await getSession();
       const payload = { area_name: areaName, shipping_fee: fee, is_active: activeInput.checked, updated_at: new Date().toISOString() };
       let error;
-      if (state.editingId) {
+      if (wasEditing) {
         ({ error } = await supabaseClient.from('shipping_rates').update(payload).eq('id', state.editingId).eq('owner_id', session.user.id));
       } else {
         const maxSort = state.rates.reduce((max, rate) => Math.max(max, Number(rate.sort_order) || 0), -1);
@@ -135,14 +136,14 @@
       }
       if (error) throw error;
       closeModal();
-      showToast(state.editingId ? 'Shipping rate updated.' : 'Shipping rate added.');
+      showToast(wasEditing ? 'Shipping rate updated.' : 'Shipping rate added.');
       await loadRates();
     } catch (error) {
       console.error('Save shipping rate error:', error);
       showToast(error.message || 'Unable to save the shipping rate.', true);
     } finally {
       saveButton.disabled = false;
-      saveButton.textContent = state.editingId ? 'Save changes' : 'Add rate';
+      saveButton.textContent = wasEditing ? 'Save changes' : 'Add rate';
     }
   }
 
