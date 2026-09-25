@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       shippingRateHelp.textContent = 'No active shipping rates are available. The shop owner needs to add one before you can place an order.';
       showStatus('No active shipping rates are available yet. Please try again after the shop owner adds a delivery rate.', 'error');
     } else {
-      shippingRateHelp.textContent = 'Shipping fees are set by the shop owner and saved with your order.';
+      shippingRateHelp.textContent = 'Shipping fee is automatically calculated from your delivery address.';
     }
     updateTotals();
   };
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const [addressResult, shippingResult] = await Promise.all([
       supabase.from('saved_addresses').select('*').eq('user_id', currentUser.id).order('is_default', { ascending: false }).order('created_at', { ascending: false }),
-      supabase.from('shipping_rates').select('id, area_name, shipping_fee').eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: true })
+      supabase.from('shipping_rates').select('id, owner_id, area_name, shipping_fee').eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: true })
     ]);
 
     if (addressResult.error) throw addressResult.error;
@@ -213,7 +213,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     if (!rate) {
-      showStatus('Please select a delivery area before placing the order.', 'error');
+      showStatus('Please select a valid shipping rate for your address.', 'error');
+      return;
+    }
+    if (!rate.owner_id) {
+      showStatus('The selected shipping rate is missing its shop owner. Please refresh and try again.', 'error');
       return;
     }
 
@@ -237,9 +241,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     placeOrder.innerHTML = 'Placing order <span class="button-icon" aria-hidden="true">…</span>';
     showStatus('Creating your order…', 'success');
 
-    const shippingFee = Number(rate.shipping_fee || 0);
-    const orderTotal = subtotal + shippingFee;
-    const orderNumber = createOrderNumber();
     const shippingAddress = {
       label: selectedAddress.label || 'Address',
       first_name: firstName,
@@ -249,11 +250,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       city: selectedAddress.city || '',
       province: selectedAddress.province || '',
       postal_code: selectedAddress.postal_code || '',
-      notes: selectedAddress.notes || '',
-      shipping_area: rate.area_name
+      notes: selectedAddress.notes || ''
     };
 
     try {
+      // Never trust the shipping fee supplied by the browser. Recalculate it in Supabase
+      // from the saved address and the selected shop owner before creating the order.
+      const { data: authoritativeShippingFee, error: shippingFeeError } = await supabase.rpc('get_shipping_fee', {
+        p_owner_id: rate.owner_id,
+        p_shipping_address: shippingAddress
+      });
+
+      if (shippingFeeError) throw shippingFeeError;
+
+      const shippingFee = Number(authoritativeShippingFee);
+      if (!Number.isFinite(shippingFee) || shippingFee < 0) {
+        throw new Error('The calculated shipping fee is invalid.');
+      }
+
+      const orderTotal = subtotal + shippingFee;
+      const orderNumber = createOrderNumber();
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -297,8 +314,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const message = String(error?.message || error || 'Unknown error');
       if (message.toLowerCase().includes('row-level security') || message.toLowerCase().includes('rls')) {
         showToast('Your order could not be saved because of a database permission setting. Please check the order policies.', 'Order not placed', 'error');
+      } else if (message.toLowerCase().includes('shipping')) {
+        showToast('The shipping fee could not be verified for this address. Please check the selected address and try again.', 'Shipping not available', 'error');
       } else {
-        showToast('Something went wrong while placing your order. Please try again.', 'Order not placed', 'error');
+        showToast('Something went wrong while placing the order. Please try again.', 'Order not placed', 'error');
       }
     }
   });
