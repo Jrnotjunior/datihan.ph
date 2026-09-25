@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="footer-bottom">
         <p>© <span class="footer-current-year">${new Date().getFullYear()}</span> DATIHAN.PH. All items sold as-is unless noted.</p>
-        <p>Pop-ups posted on Instagram &amp; TikTok</p>
+        <p>Pop-ups posted on Instagram, TikTok &amp; Facebook</p>
       </div>`;
     document.body.appendChild(footer);
   }
