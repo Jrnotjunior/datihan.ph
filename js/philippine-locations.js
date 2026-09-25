@@ -23,11 +23,12 @@
     if(/national capital region|\bncr\b/i.test(name))return'national-capital-region-NCR';
     const roman=name.match(/Region\s+([IVXLCDM]+)\b/i)?.[1];
     const romanMap={I:'R01',II:'R02',III:'R03',IV:'R04A',V:'R05',VI:'R06',VII:'R07',VIII:'R08',IX:'R09',X:'R10',XI:'R11',XII:'R12',XIII:'R13',XVII:'R17'};
-    if(roman&&romanMap[roman]){const suffix=romanMap[roman];const slug=name.match(/\(([^)]+)\)/)?.[1]||name.replace(/^Region\s+[IVXLCDM]+\s*/i,'').trim();return`${slug.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${suffix}`}
+    if(roman&&romanMap[roman]){const suffix=romanMap[roman];const s=name.match(/\(([^)]+)\)/)?.[1]||name.replace(/^Region\s+[IVXLCDM]+\s*/i,'').trim();return`${s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${suffix}`}
     return null;
   };
-  const compactCode=code=>{const k=String(code||'').replace(/\D/g,'');return k.length>6?k.slice(-10).slice(0,6):k.padStart(6,'0').slice(0,6)};
+  const compactCode=code=>{const k=String(code||'').replace(/\D/g,'');return k.length>6?k.slice(0,6):k.padStart(6,'0').slice(0,6)};
   const slug=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/^city of\s+/i,'').replace(/^municipality of\s+/i,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const fetchRows=async urls=>{for(const url of urls){try{const r=await fetch(url,{headers:{Accept:'application/json'}});if(r.ok)return u(await r.json())}catch(_){} }throw Error('Barangay postal data request failed (404).')};
   const postal=async code=>{
     const k=String(code||'').trim();
     if(PC.has(k))return PC.get(k);
@@ -35,17 +36,20 @@
     const city=CC.get(String(cityCode));
     const regionCode=document.getElementById('address-region')?.value||'';
     const region=RC.get(String(regionCode));
-    let provinceCode=document.getElementById('address-province')?.value||'';
+    const provinceCode=document.getElementById('address-province')?.value||'';
     const province=provinceCode==='__ncr__'?{name:'Metro Manila',code:'1300000000'}:PRC.get(String(provinceCode));
     if(!cityCode||!city)throw Error('Barangay postal city context is unavailable.');
     if(!region||!province)throw Error('Barangay postal location context is unavailable.');
     const regionSlug=regionFile(region);
     const provinceSlug=province.name&&compactCode(province.code)?`${slug(province.name)}-${compactCode(province.code)}`:'';
-    const citySlug=city.name&&compactCode(city.code)?`${slug(city.name)}-${compactCode(city.code)}`:'';
-    if(!regionSlug||!provinceSlug||!citySlug)throw Error('Barangay postal location context is unavailable.');
-    const url=`${DATA}/${regionSlug}/${provinceSlug}/${citySlug}/barangay.json`;
-    const q=RDC.has(url)?RDC.get(url):fetch(url,{headers:{Accept:'application/json'}}).then(async r=>{if(!r.ok)throw Error(`Barangay postal data request failed (${r.status}).`);return u(await r.json())});
-    RDC.set(url,q);
+    const cityBase=city.name&&compactCode(city.code)?`${slug(city.name)}-${compactCode(city.code)}`:'';
+    const cityCode6=compactCode(city.code);
+    const cityName=String(city.name||'');
+    const citySlugCandidates=[cityBase,`${slug(cityName)}-city-${cityCode6}`].filter((v,i,a)=>v&&a.indexOf(v)===i);
+    if(!regionSlug||!provinceSlug||!citySlugCandidates.length)throw Error('Barangay postal location context is unavailable.');
+    const urls=citySlugCandidates.map(s=>`${DATA}/${regionSlug}/${provinceSlug}/${s}/barangay.json`);
+    const key=urls.join('|');
+    const q=RDC.has(key)?RDC.get(key):fetchRows(urls);RDC.set(key,q);
     const result=q.then(rows=>{const m=rows.find(item=>String(item?.id||item?.code?.id||item?.code||'').trim()===k);if(!m)throw Error('Postal code is not available for the selected barangay.');return m}).catch(e=>{PC.delete(k);throw e});
     PC.set(k,result);return result;
   };
