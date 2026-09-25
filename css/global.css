@@ -48,17 +48,17 @@ p { margin: 0; }
   border-radius: 0;
 }
 
-/* The real DATIHAN logo lives in /css/datihanlogo.jpg. */
+/* Header uses the DATIHAN wordmark text; no logo image is loaded here. */
 .brand {
   width: 150px;
   height: 42px;
-  display: block;
-  background-image: url("./datihanlogo.jpg");
-  background-position: left center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  font-size: 0;
-  line-height: 0;
+  display: flex;
+  align-items: center;
+  font-family: "Manrope", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 .footer-brand {
