@@ -6,8 +6,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const status = document.querySelector('#checkout-status');
   const itemsEl = document.querySelector('#checkout-items');
   const subtotalEl = document.querySelector('#checkout-subtotal');
+  const shippingEl = document.querySelector('#checkout-shipping');
   const totalEl = document.querySelector('#checkout-total');
   const addressEl = document.querySelector('#saved-addresses');
+  const shippingRateEl = document.querySelector('#shipping-rate');
+  const shippingRateHelp = document.querySelector('#shipping-rate-help');
   const placeOrder = document.querySelector('#place-order');
 
   const showStatus = (message, type = 'error') => {
@@ -18,7 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const showToast = (message, title = 'Success', type = 'success') => {
     let container = document.getElementById('toast-container');
-
     if (!container) {
       container = document.createElement('div');
       container.id = 'toast-container';
@@ -33,13 +35,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
     toast.innerHTML = `
       <div class="toast-icon" aria-hidden="true">${type === 'error' ? '!' : '✓'}</div>
-      <div class="toast-content">
-        <div class="toast-title"></div>
-        <div class="toast-message"></div>
-      </div>
+      <div class="toast-content"><div class="toast-title"></div><div class="toast-message"></div></div>
       <button class="toast-close" type="button" aria-label="Close notification">×</button>
     `;
-
     toast.querySelector('.toast-title').textContent = title;
     toast.querySelector('.toast-message').textContent = message;
 
@@ -49,10 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 220);
     };
-
     toast.querySelector('.toast-close').addEventListener('click', removeToast);
     container.appendChild(toast);
-
     requestAnimationFrame(() => toast.classList.add('show'));
     removeTimer = setTimeout(removeToast, 4500);
   };
@@ -78,11 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     : new Set(savedSelection.map(String));
   const cart = allCart.filter(item => selectedIds.has(String(item.id)));
 
-  if (!cart.length) {
-    showStatus('No items are selected for checkout. Return to your cart and select at least one item.', 'error');
-    if (placeOrder) placeOrder.disabled = true;
-  }
-
   let subtotal = 0;
   cart.forEach(item => {
     const quantity = Math.max(1, Number(item.quantity || 1));
@@ -99,8 +90,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (subtotalEl) subtotalEl.textContent = money(subtotal);
   if (totalEl) totalEl.textContent = money(subtotal);
 
+  if (!cart.length) {
+    showStatus('No items are selected for checkout. Return to your cart and select at least one item.', 'error');
+    if (placeOrder) placeOrder.disabled = true;
+  }
+
   let addresses = [];
+  let shippingRates = [];
   let currentUser = null;
+
+  const selectedShippingRate = () => shippingRates.find(rate => String(rate.id) === String(shippingRateEl?.value));
+
+  const updateTotals = () => {
+    const rate = selectedShippingRate();
+    const shippingFee = Number(rate?.shipping_fee || 0);
+    if (shippingEl) shippingEl.textContent = rate ? money(shippingFee) : 'Select a delivery area';
+    if (totalEl) totalEl.textContent = money(subtotal + shippingFee);
+    if (placeOrder) placeOrder.disabled = !cart.length || !rate;
+  };
+
+  const renderShippingRates = list => {
+    shippingRates = list;
+    if (!shippingRateEl) return;
+    shippingRateEl.innerHTML = '<option value="">Select a delivery area</option>';
+
+    list.forEach(rate => {
+      const option = document.createElement('option');
+      option.value = String(rate.id);
+      option.textContent = `${rate.area_name} — ${money(rate.shipping_fee)}`;
+      shippingRateEl.appendChild(option);
+    });
+
+    if (!list.length) {
+      shippingRateHelp.textContent = 'No active shipping rates are available. The shop owner needs to add one before you can place an order.';
+      showStatus('No active shipping rates are available yet. Please try again after the shop owner adds a delivery rate.', 'error');
+    } else {
+      shippingRateHelp.textContent = 'Shipping fees are set by the shop owner and saved with your order.';
+    }
+    updateTotals();
+  };
 
   const fillContact = address => {
     document.querySelector('#first-name').value = address.first_name || '';
@@ -151,27 +179,41 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     currentUser = data.session.user;
-    const result = await supabase
-      .from('saved_addresses')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .order('is_default', { ascending: false })
-      .order('created_at', { ascending: false });
-    if (result.error) throw result.error;
-    renderAddresses(result.data || []);
+
+    const [addressResult, shippingResult] = await Promise.all([
+      supabase.from('saved_addresses').select('*').eq('user_id', currentUser.id).order('is_default', { ascending: false }).order('created_at', { ascending: false }),
+      supabase.from('shipping_rates').select('id, area_name, shipping_fee').eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: true })
+    ]);
+
+    if (addressResult.error) throw addressResult.error;
+    if (shippingResult.error) throw shippingResult.error;
+
+    renderAddresses(addressResult.data || []);
+    renderShippingRates(shippingResult.data || []);
   } catch (error) {
-    console.error('Checkout address error:', error);
-    showStatus(`Unable to load saved addresses: ${error.message || error}`, 'error');
+    console.error('Checkout setup error:', error);
+    showStatus(`Unable to load checkout information: ${error.message || error}`, 'error');
+    if (placeOrder) placeOrder.disabled = true;
   }
+
+  shippingRateEl?.addEventListener('change', () => {
+    updateTotals();
+    if (selectedShippingRate()) showStatus('');
+  });
 
   placeOrder?.addEventListener('click', async () => {
     const selected = document.querySelector('input[name="shipping-address"]:checked');
+    const rate = selectedShippingRate();
     if (!cart.length) {
       showStatus('No items are selected for checkout. Return to your cart and select at least one item.', 'error');
       return;
     }
     if (!selected) {
       showStatus('Please select a shipping address before continuing.', 'error');
+      return;
+    }
+    if (!rate) {
+      showStatus('Please select a delivery area before placing the order.', 'error');
       return;
     }
 
@@ -185,7 +227,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lastName = document.querySelector('#last-name')?.value.trim() || selectedAddress.last_name || '';
     const email = document.querySelector('#email')?.value.trim() || currentUser?.email || '';
     const phone = document.querySelector('#phone')?.value.trim() || selectedAddress.phone || '';
-
     if (!firstName || !lastName || !email || !phone) {
       showStatus('Please complete your contact information before placing the order.', 'error');
       return;
@@ -196,6 +237,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     placeOrder.innerHTML = 'Placing order <span class="button-icon" aria-hidden="true">…</span>';
     showStatus('Creating your order…', 'success');
 
+    const shippingFee = Number(rate.shipping_fee || 0);
+    const orderTotal = subtotal + shippingFee;
     const orderNumber = createOrderNumber();
     const shippingAddress = {
       label: selectedAddress.label || 'Address',
@@ -206,7 +249,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       city: selectedAddress.city || '',
       province: selectedAddress.province || '',
       postal_code: selectedAddress.postal_code || '',
-      notes: selectedAddress.notes || ''
+      notes: selectedAddress.notes || '',
+      shipping_area: rate.area_name
     };
 
     try {
@@ -216,9 +260,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           order_number: orderNumber,
           user_id: currentUser.id,
           shipping_address: shippingAddress,
+          shipping_rate_id: rate.id,
           subtotal,
-          shipping_fee: 0,
-          total: subtotal,
+          shipping_fee: shippingFee,
+          total: orderTotal,
           status: 'pending'
         })
         .select('id, order_number')
@@ -229,20 +274,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const orderItems = cart.map(item => {
         const quantity = Math.max(1, Number(item.quantity || 1));
         const price = Number(item.price || 0);
-        return {
-          order_id: order.id,
-          product_id: String(item.id),
-          product_name: item.name || 'Product',
-          price,
-          quantity,
-          subtotal: price * quantity
-        };
+        return { order_id: order.id, product_id: String(item.id), product_name: item.name || 'Product', price, quantity, subtotal: price * quantity };
       });
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) {
         await supabase.from('orders').delete().eq('id', order.id);
         throw itemsError;
@@ -253,17 +288,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem(CART_KEY, JSON.stringify(remainingCart));
       localStorage.setItem(SELECTED_KEY, JSON.stringify(remainingCart.map(item => String(item.id))));
       window.dispatchEvent(new Event('datihan-cart-updated'));
-
       window.location.href = `order-confirmation.html?order=${encodeURIComponent(order.order_number)}`;
     } catch (error) {
       console.error('Order placement error:', error);
       placeOrder.disabled = false;
       placeOrder.innerHTML = placeOrder.dataset.originalText || 'Place order <span class="button-icon" aria-hidden="true">→</span>';
       showStatus('');
-
       const message = String(error?.message || error || 'Unknown error');
       if (message.toLowerCase().includes('row-level security') || message.toLowerCase().includes('rls')) {
-        showToast('Your order could not be saved because of a database permission setting. Please try again after the order policy is fixed.', 'Order not placed', 'error');
+        showToast('Your order could not be saved because of a database permission setting. Please check the order policies.', 'Order not placed', 'error');
       } else {
         showToast('Something went wrong while placing your order. Please try again.', 'Order not placed', 'error');
       }
