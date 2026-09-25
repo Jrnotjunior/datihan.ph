@@ -1,1 +1,72 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Shops — Admin — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">ADMIN</p><h1>Shops.</h1><p>Manage participating shop-owner storefronts and their status.</p></header><div class="content-card"><h2>Shop management</h2><p style="margin-top:1rem;color:var(--brown)">Shop records will be loaded from Supabase.</p></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/auth-guard.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shops — Admin — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <style>
+    .admin-shop-table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+    .admin-shop-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .admin-shop-table th,
+    .admin-shop-table td { padding: 1rem 1.1rem; text-align: left; border-bottom: 1px solid var(--line, #dfd0c3); }
+    .admin-shop-table th { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brown); }
+    .admin-shop-table td { color: var(--ink, #241d18); }
+    .admin-shop-name { display: block; font-weight: 700; }
+    .admin-shop-id { display: block; margin-top: .3rem; font-size: .72rem; color: var(--brown); word-break: break-all; }
+    .admin-shop-count { font-weight: 700; }
+    .admin-shop-status { display: inline-flex; padding: .35rem .65rem; border-radius: 999px; background: #dfcfbe; font-size: .78rem; font-weight: 700; }
+    .admin-shop-empty { padding: 2rem 0; color: var(--brown); }
+    .admin-shop-error { margin-top: 1rem; color: #8b3a2e; }
+  </style>
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">ADMIN</p>
+      <h1>Shops.</h1>
+      <p>Manage participating shop-owner storefronts and review their activity.</p>
+    </header>
+
+    <section class="content-card" data-admin-shops>
+      <div class="section-heading">
+        <div>
+          <h2>Shop owners</h2>
+          <p data-shops-status>Loading shop owners…</p>
+        </div>
+      </div>
+
+      <div class="admin-shop-error" data-shops-error hidden></div>
+
+      <div class="admin-shop-table-wrap">
+        <table class="admin-shop-table" data-shops-table hidden>
+          <thead>
+            <tr>
+              <th>Shop owner</th>
+              <th>Email</th>
+              <th>Products</th>
+              <th>Pop-ups</th>
+              <th>Status</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody data-shops-body></tbody>
+        </table>
+        <div class="admin-shop-empty" data-shops-empty hidden>
+          No shop owners have been registered yet.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/admin-shops.js"></script>
+</body>
+</html>
