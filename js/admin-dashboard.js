@@ -1,4 +1,4 @@
-document.addEventListener('datihan-auth-ready', loadAdminDashboard);
+window.addEventListener('datihan-auth-ready', loadAdminDashboard);
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.datihanAuthProfile?.role === 'admin') {
