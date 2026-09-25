@@ -1,6 +1,14 @@
 (() => {
   const supabaseClient = window.datihanSupabase;
-  const state = { editingId: null, products: [], pendingDeleteId: null };
+  const PRODUCT_IMAGE_BUCKET = 'product-images';
+  const state = {
+    editingId: null,
+    products: [],
+    pendingDeleteId: null,
+    selectedImageFile: null,
+    currentImageUrl: null,
+    removeCurrentImage: false
+  };
 
   const list = document.getElementById('products-list');
   const modal = document.getElementById('product-modal');
@@ -13,6 +21,12 @@
   const deleteModal = document.getElementById('product-delete-confirm-modal');
   const deleteConfirmButton = document.getElementById('product-delete-confirm-button');
   const deleteCancelButton = document.getElementById('product-delete-cancel-button');
+  const imageFileInput = document.getElementById('product-image-file');
+  const chooseImageButton = document.getElementById('choose-product-image');
+  const imagePreview = document.getElementById('image-preview');
+  const imagePreviewElement = document.getElementById('product-image-preview');
+  const imageFileName = document.getElementById('image-file-name');
+  const removeImageButton = document.getElementById('remove-product-image');
 
   const fields = {
     name: document.getElementById('product-name'),
@@ -22,7 +36,6 @@
     size: document.getElementById('product-size'),
     condition: document.getElementById('product-condition'),
     stock: document.getElementById('product-stock'),
-    imageUrl: document.getElementById('product-image-url'),
     active: document.getElementById('product-active')
   };
 
@@ -129,8 +142,39 @@
     }
   }
 
+  function resetImageState() {
+    state.selectedImageFile = null;
+    state.currentImageUrl = null;
+    state.removeCurrentImage = false;
+    if (imageFileInput) imageFileInput.value = '';
+    if (imagePreview) imagePreview.hidden = true;
+    if (imagePreviewElement) {
+      imagePreviewElement.removeAttribute('src');
+    }
+    if (imageFileName) imageFileName.textContent = '';
+  }
+
+  function showImagePreview(file, fileLabel = file?.name || '') {
+    if (!file || !imagePreviewElement || !imagePreview) return;
+    const previewUrl = URL.createObjectURL(file);
+    imagePreviewElement.onload = () => URL.revokeObjectURL(previewUrl);
+    imagePreviewElement.src = previewUrl;
+    imagePreview.hidden = false;
+    if (imageFileName) imageFileName.textContent = fileLabel;
+  }
+
+  function showExistingImage(url) {
+    if (!url || !imagePreviewElement || !imagePreview) return;
+    imagePreviewElement.src = url;
+    imagePreview.hidden = false;
+    if (imageFileName) imageFileName.textContent = 'Current product photo';
+  }
+
   function openModal(product = null) {
     state.editingId = product?.id || null;
+    state.selectedImageFile = null;
+    state.currentImageUrl = product?.image_url || null;
+    state.removeCurrentImage = false;
     modalTitle.textContent = product ? 'Edit product' : 'Add product';
     saveButton.textContent = product ? 'Save changes' : 'Add product';
     fields.name.value = product?.name || '';
@@ -140,8 +184,10 @@
     fields.size.value = product?.size || '';
     fields.condition.value = product?.condition || '';
     fields.stock.value = product?.stock ?? 0;
-    fields.imageUrl.value = product?.image_url || '';
     fields.active.checked = product?.is_active !== false;
+    if (imageFileInput) imageFileInput.value = '';
+    if (product?.image_url) showExistingImage(product.image_url);
+    else resetImageState();
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     window.setTimeout(() => fields.name.focus(), 0);
@@ -154,6 +200,7 @@
     form.reset();
     fields.stock.value = 0;
     fields.active.checked = true;
+    resetImageState();
   }
 
   function openDeleteConfirmation(id) {
@@ -195,6 +242,22 @@
     }
   }
 
+  async function uploadProductImage(session, file) {
+    if (!file) return null;
+    if (!file.type.startsWith('image/')) throw new Error('Please choose an image file.');
+    if (file.size > 8 * 1024 * 1024) throw new Error('Product images must be 8 MB or smaller.');
+
+    const extension = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
+    const { error } = await supabaseClient.storage
+      .from(PRODUCT_IMAGE_BUCKET)
+      .upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
+    if (error) throw error;
+
+    const { data } = supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
   async function saveProduct(event) {
     event.preventDefault();
     if (!fields.name.value.trim()) return showToast('Product name is required.', true);
@@ -205,6 +268,14 @@
 
     try {
       const session = await getSession();
+      let imageUrl = state.currentImageUrl;
+
+      if (state.selectedImageFile) {
+        imageUrl = await uploadProductImage(session, state.selectedImageFile);
+      } else if (state.removeCurrentImage) {
+        imageUrl = null;
+      }
+
       const payload = {
         name: fields.name.value.trim(),
         description: fields.description.value.trim() || null,
@@ -213,7 +284,7 @@
         size: fields.size.value.trim() || null,
         condition: fields.condition.value || null,
         stock: Number(fields.stock.value || 0),
-        image_url: fields.imageUrl.value.trim() || null,
+        image_url: imageUrl,
         is_active: fields.active.checked,
         updated_at: new Date().toISOString()
       };
@@ -263,6 +334,25 @@
   form.addEventListener('submit', saveProduct);
   searchInput.addEventListener('input', renderProducts);
   categoryFilter.addEventListener('change', renderProducts);
+
+  chooseImageButton?.addEventListener('click', () => imageFileInput?.click());
+  imageFileInput?.addEventListener('change', event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    state.selectedImageFile = file;
+    state.removeCurrentImage = false;
+    showImagePreview(file);
+  });
+
+  removeImageButton?.addEventListener('click', () => {
+    state.selectedImageFile = null;
+    state.removeCurrentImage = Boolean(state.currentImageUrl);
+    state.currentImageUrl = null;
+    if (imageFileInput) imageFileInput.value = '';
+    if (imagePreview) imagePreview.hidden = true;
+    if (imagePreviewElement) imagePreviewElement.removeAttribute('src');
+    if (imageFileName) imageFileName.textContent = '';
+  });
 
   deleteCancelButton?.addEventListener('click', closeDeleteConfirmation);
   document.getElementById('product-delete-confirm-backdrop')?.addEventListener('click', closeDeleteConfirmation);
