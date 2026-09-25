@@ -94,12 +94,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="footer-column footer-explore">
         <h2>Explore</h2>
-        <nav class="footer-links" aria-label="Footer navigation">
+        <nav class="footer-links" aria-label="Footer explore navigation">
           <a href="${window.location.pathname.includes("/pages/") ? "shop.html" : "pages/shop.html"}">Shop</a>
-          <a href="${window.location.pathname.includes("/pages/") ? "categories.html" : "pages/categories.html"}">Categories</a>
           <a href="${window.location.pathname.includes("/pages/") ? "pop-ups.html" : "pages/pop-ups.html"}">Pop-ups</a>
-          <a href="${window.location.pathname.includes("/pages/") ? "about.html" : "pages/about.html"}">About</a>
           <a href="${window.location.pathname.includes("/pages/") ? "contact.html" : "pages/contact.html"}">Contact</a>
+        </nav>
+      </div>
+
+      <div class="footer-column footer-explore">
+        <h2>More</h2>
+        <nav class="footer-links" aria-label="Footer more navigation">
+          <a href="${window.location.pathname.includes("/pages/") ? "categories.html" : "pages/categories.html"}">Categories</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "about.html" : "pages/about.html"}">About</a>
         </nav>
       </div>
 
