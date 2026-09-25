@@ -7,9 +7,12 @@ create table if not exists public.promotions (
   title text not null,
   description text,
   discount_type text not null default 'percentage'
-    check (discount_type in ('percentage', 'fixed')),
-  discount_value numeric(12,2) not null
-    check (discount_value > 0),
+    check (discount_type in ('percentage', 'fixed', 'free_shipping')),
+  discount_value numeric(12,2) not null default 0
+    check (
+      (discount_type = 'free_shipping' and discount_value = 0)
+      or (discount_type <> 'free_shipping' and discount_value > 0)
+    ),
   code text,
   product_ids text[] not null default '{}',
   start_date date,
@@ -22,6 +25,29 @@ create table if not exists public.promotions (
   constraint promotions_percentage_limit
     check (discount_type <> 'percentage' or discount_value <= 100)
 );
+
+-- Migration for an existing promotions table.
+alter table public.promotions drop constraint if exists promotions_discount_type_check;
+alter table public.promotions drop constraint if exists promotions_discount_value_check;
+alter table public.promotions drop constraint if exists promotions_percentage_limit;
+
+alter table public.promotions
+  alter column discount_value set default 0;
+
+alter table public.promotions
+  add constraint promotions_discount_type_check
+  check (discount_type in ('percentage', 'fixed', 'free_shipping'));
+
+alter table public.promotions
+  add constraint promotions_discount_value_check
+  check (
+    (discount_type = 'free_shipping' and discount_value = 0)
+    or (discount_type <> 'free_shipping' and discount_value > 0)
+  );
+
+alter table public.promotions
+  add constraint promotions_percentage_limit
+  check (discount_type <> 'percentage' or discount_value <= 100);
 
 create index if not exists promotions_owner_id_idx
   on public.promotions(owner_id);
