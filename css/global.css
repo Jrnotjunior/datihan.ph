@@ -73,7 +73,13 @@ p { margin: 0; }
   padding-top: 3rem;
 }
 .footer-column { min-width: 0; }
-.footer-about { max-width: 360px; }
+.footer-about {
+  max-width: 360px;
+  padding: 1.25rem 1.4rem;
+  background: rgba(220, 201, 184, 0.38);
+  border: 1px solid var(--light-beige);
+  border-radius: 14px;
+}
 .footer-about .footer-brand { display: inline-block; margin-bottom: 0.8rem; font-size: 20px; }
 .footer-about p { font-size: 14px; line-height: 1.7; }
 .footer-column h2 { margin-bottom: 0.8rem; font-family: "Manrope", sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
