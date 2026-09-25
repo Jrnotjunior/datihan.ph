@@ -48,7 +48,7 @@ p { margin: 0; }
   border-radius: 0;
 }
 
-/* Header uses the DATIHAN wordmark text; no logo image is loaded here. */
+/* Header uses the DATIHAN wordmark text only. The uploaded logo image is hidden. */
 .brand {
   width: 150px;
   height: 42px;
@@ -59,6 +59,16 @@ p { margin: 0; }
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
+  font-size: 0;
+}
+.brand img {
+  display: none !important;
+}
+.brand::after {
+  content: "DATIHAN";
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .footer-brand {
