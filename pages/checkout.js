@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const addressEl = document.querySelector('#saved-addresses');
   const shippingRateEl = document.querySelector('#shipping-rate');
   const shippingRateHelp = document.querySelector('#shipping-rate-help');
+  const autoShippingRateEl = document.querySelector('#auto-shipping-rate');
   const placeOrder = document.querySelector('#place-order');
 
   const showStatus = (message, type = 'error') => {
@@ -99,13 +100,97 @@ document.addEventListener('DOMContentLoaded', async () => {
   let shippingRates = [];
   let currentUser = null;
 
-  const selectedShippingRate = () => shippingRates.find(rate => String(rate.id) === String(shippingRateEl?.value));
+  const normalise = value => String(value || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/city of |municipality of /g, '')
+    .replace(/\s+city$|\s+municipality$/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const METRO_MANILA_CITIES = new Set([
+    'caloocan', 'las pinas', 'makati', 'malabon', 'mandaluyong', 'manila',
+    'marikina', 'muntinlupa', 'navotas', 'paranaque', 'pasay', 'pasig',
+    'quezon city', 'san juan', 'taguig', 'valenzuela'
+  ]);
+
+  const VISAYAS_PROVINCES = new Set([
+    'aklan', 'antique', 'capiz', 'guimaras', 'iloilo', 'negros occidental',
+    'negros oriental', 'cebu', 'bohol', 'siquijor', 'biliran', 'eastern samar',
+    'leyte', 'northern samar', 'samar', 'western samar', 'southern leyte',
+    'romblon', 'central visayas', 'western visayas', 'eastern visayas'
+  ]);
+
+  const MINDANAO_PROVINCES = new Set([
+    'zamboanga del norte', 'zamboanga del sur', 'zamboanga sibugay', 'basilan',
+    'bukidnon', 'camiguin', 'lanao del norte', 'lanao del sur', 'maguindanao',
+    'maguindanao del norte', 'maguindanao del sur', 'sulu', 'tawi tawi',
+    'davao de oro', 'davao del norte', 'davao del sur', 'davao occidental',
+    'davao oriental', 'cotabato', 'north cotabato', 'south cotabato', 'sarangani',
+    'sultan kudarat', 'agusan del norte', 'agusan del sur', 'dinagat islands',
+    'surigao del norte', 'surigao del sur', 'misamis occidental', 'misamis oriental'
+  ]);
+
+  const detectZone = address => {
+    const city = normalise(address?.city);
+    const province = normalise(address?.province);
+
+    if (
+      ['metro manila', 'metropolitan manila', 'ncr', 'national capital region'].includes(province) ||
+      METRO_MANILA_CITIES.has(city)
+    ) return 'Metro Manila';
+
+    if (VISAYAS_PROVINCES.has(province)) return 'Visayas';
+    if (MINDANAO_PROVINCES.has(province)) return 'Mindanao';
+    return 'Luzon (Outside Metro Manila)';
+  };
+
+  const rateZone = areaName => {
+    const name = normalise(areaName);
+    if (/^metro manila$|^metropolitan manila$|^national capital region$|^ncr$/.test(name)) return 'Metro Manila';
+    if (/visayas/.test(name)) return 'Visayas';
+    if (/mindanao/.test(name)) return 'Mindanao';
+    if (/luzon|outside metro manila|outside ncr|nationwide/.test(name)) return 'Luzon (Outside Metro Manila)';
+    return name;
+  };
+
+  const findRateForAddress = address => {
+    const zone = detectZone(address);
+    const match = shippingRates.find(rate => rateZone(rate.area_name) === zone);
+    return { zone, match };
+  };
 
   const updateTotals = () => {
-    const rate = selectedShippingRate();
+    const selectedAddress = document.querySelector('input[name="shipping-address"]:checked');
+    const address = addresses.find(item => String(item.id) === String(selectedAddress?.value));
+    const result = address ? findRateForAddress(address) : { zone: '', match: null };
+    const rate = result.match;
     const shippingFee = Number(rate?.shipping_fee || 0);
-    if (shippingEl) shippingEl.textContent = rate ? money(shippingFee) : 'Select a delivery area';
+
+    if (shippingRateEl) {
+      shippingRateEl.value = rate ? String(rate.id) : '';
+      shippingRateEl.hidden = true;
+      shippingRateEl.disabled = true;
+    }
+
+    if (autoShippingRateEl) {
+      autoShippingRateEl.hidden = false;
+      autoShippingRateEl.innerHTML = '';
+      const zoneEl = document.createElement('strong');
+      const feeEl = document.createElement('span');
+      zoneEl.textContent = result.zone || 'Shipping';
+      feeEl.textContent = rate ? money(shippingFee) : 'No shipping rate available';
+      autoShippingRateEl.append(zoneEl, feeEl);
+    }
+
+    if (shippingEl) shippingEl.textContent = rate ? money(shippingFee) : 'No shipping rate available';
     if (totalEl) totalEl.textContent = money(subtotal + shippingFee);
+    if (shippingRateHelp) {
+      shippingRateHelp.textContent = rate
+        ? 'Shipping fee is automatically calculated from your delivery address.'
+        : 'The shop does not currently have a shipping rate for this delivery area.';
+    }
     if (placeOrder) placeOrder.disabled = !cart.length || !rate;
   };
 
@@ -113,7 +198,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     shippingRates = list;
     if (!shippingRateEl) return;
     shippingRateEl.innerHTML = '<option value="">Select a delivery area</option>';
-
     list.forEach(rate => {
       const option = document.createElement('option');
       option.value = String(rate.id);
@@ -124,8 +208,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!list.length) {
       shippingRateHelp.textContent = 'No active shipping rates are available. The shop owner needs to add one before you can place an order.';
       showStatus('No active shipping rates are available yet. Please try again after the shop owner adds a delivery rate.', 'error');
-    } else {
-      shippingRateHelp.textContent = 'Shipping fee is automatically calculated from your delivery address.';
     }
     updateTotals();
   };
@@ -151,9 +233,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       label.className = `checkout-address-option${address.is_default ? ' selected' : ''}`;
       label.innerHTML = `<input type="radio" name="shipping-address" value="${String(address.id)}" ${address.is_default || (!list.some(a => a.is_default) && index === 0) ? 'checked' : ''}><span class="checkout-address-copy"><strong></strong><span></span><span></span><small></small></span>`;
       const input = label.querySelector('input');
-      input.dataset.city = address.city || '';
-      input.dataset.province = address.province || '';
-      input.dataset.barangay = address.barangay || '';
       label.querySelector('strong').textContent = `${address.label || 'Address'}${address.is_default ? ' · Default' : ''}`;
       label.querySelectorAll('span')[1].textContent = `${address.first_name || ''} ${address.last_name || ''}`.trim();
       const barangay = address.barangay ? `${address.barangay}, ` : '';
@@ -163,10 +242,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.checkout-address-option').forEach(el => el.classList.remove('selected'));
         label.classList.add('selected');
         fillContact(address);
+        updateTotals();
       });
       addressEl.appendChild(label);
       if (input.checked) fillContact(address);
     });
+    updateTotals();
   };
 
   const createOrderNumber = () => {
@@ -201,14 +282,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (placeOrder) placeOrder.disabled = true;
   }
 
-  shippingRateEl?.addEventListener('change', () => {
-    updateTotals();
-    if (selectedShippingRate()) showStatus('');
-  });
-
   placeOrder?.addEventListener('click', async () => {
     const selected = document.querySelector('input[name="shipping-address"]:checked');
-    const rate = selectedShippingRate();
     if (!cart.length) {
       showStatus('No items are selected for checkout. Return to your cart and select at least one item.', 'error');
       return;
@@ -217,18 +292,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       showStatus('Please select a shipping address before continuing.', 'error');
       return;
     }
+
+    const selectedAddress = addresses.find(address => String(address.id) === String(selected.value));
+    const { match: rate } = findRateForAddress(selectedAddress);
+    if (!selectedAddress) {
+      showStatus('The selected shipping address could not be found. Please refresh and try again.', 'error');
+      return;
+    }
     if (!rate) {
-      showStatus('Please select a valid shipping rate for your address.', 'error');
+      showStatus('No shipping rate is configured for this delivery area.', 'error');
       return;
     }
     if (!rate.owner_id) {
       showStatus('The selected shipping rate is missing its shop owner. Please refresh and try again.', 'error');
-      return;
-    }
-
-    const selectedAddress = addresses.find(address => String(address.id) === String(selected.value));
-    if (!selectedAddress) {
-      showStatus('The selected shipping address could not be found. Please refresh and try again.', 'error');
       return;
     }
 
@@ -268,27 +344,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (shippingFeeError) throw shippingFeeError;
 
       const shippingFee = Number(authoritativeShippingFee);
-      if (!Number.isFinite(shippingFee) || shippingFee < 0) {
-        throw new Error('The calculated shipping fee is invalid.');
-      }
+      if (!Number.isFinite(shippingFee) || shippingFee < 0) throw new Error('The calculated shipping fee is invalid.');
 
       const orderTotal = subtotal + shippingFee;
       const orderNumber = createOrderNumber();
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_number: orderNumber,
-          user_id: currentUser.id,
-          shipping_address: shippingAddress,
-          shipping_rate_id: rate.id,
-          subtotal,
-          shipping_fee: shippingFee,
-          total: orderTotal,
-          status: 'pending'
-        })
-        .select('id, order_number')
-        .single();
+      const { data: order, error: orderError } = await supabase.from('orders').insert({
+        order_number: orderNumber,
+        user_id: currentUser.id,
+        shipping_address: shippingAddress,
+        shipping_rate_id: rate.id,
+        subtotal,
+        shipping_fee: shippingFee,
+        total: orderTotal,
+        status: 'pending'
+      }).select('id, order_number').single();
 
       if (orderError) throw orderError;
 
