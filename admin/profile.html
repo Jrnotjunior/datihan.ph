@@ -6,17 +6,28 @@
   <title>Profile — Admin — DATIHAN.PH</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="../css/admin.css">
   <style>
-    .admin-back-button{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin-bottom:1.25rem;border:1px solid var(--light-beige);border-radius:50%;background:var(--off-white);color:var(--black);text-decoration:none;font-size:1.35rem;line-height:1;transition:transform .15s ease,background .15s ease}.admin-back-button:hover{transform:translateX(-2px);background:var(--light-beige)}.admin-back-button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
-    .admin-settings-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}.admin-settings-card{border:1px solid var(--line,#dfcdbb);border-radius:18px;padding:1.5rem;background:rgba(255,255,255,.08)}.admin-settings-card h2{margin:0;font-size:1.25rem}.admin-settings-card>p{margin:.5rem 0 1.25rem;color:var(--brown,#704b37)}.admin-settings-field{margin-bottom:1rem}.admin-settings-field label{display:block;margin-bottom:.45rem;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brown,#704b37)}.admin-settings-field input{width:100%;box-sizing:border-box;padding:.8rem .9rem;border:1px solid var(--line,#dfcdbb);border-radius:12px;background:transparent;color:inherit;font:inherit}.admin-settings-field input:focus{outline:2px solid currentColor;outline-offset:1px}.admin-settings-meta{display:grid;gap:.8rem}.admin-settings-meta-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-bottom:.8rem;border-bottom:1px solid var(--line,#dfcdbb)}.admin-settings-meta-row:last-child{padding-bottom:0;border-bottom:0}.admin-settings-meta-label{color:var(--brown,#704b37);font-size:.9rem}.admin-settings-meta-value{font-weight:600;text-align:right;word-break:break-word}.admin-settings-actions{display:flex;align-items:center;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap}.admin-settings-button{border:0;border-radius:999px;padding:.75rem 1rem;background:#e1d0bd;color:#17120f;font:inherit;font-weight:700;cursor:pointer}.admin-settings-button:hover{opacity:.88}.admin-settings-button:disabled{opacity:.55;cursor:wait}.admin-settings-button-danger{background:transparent;border:1px solid var(--line,#dfcdbb)}.admin-settings-message{min-height:1.25rem;margin-top:.75rem;color:var(--brown,#704b37);font-size:.9rem}.admin-settings-message.is-error{color:#9b2c2c}@media(max-width:760px){.admin-settings-grid{grid-template-columns:1fr}}
+    .admin-profile-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}.admin-profile-card{border:1px solid var(--line,#dfcdbb);border-radius:18px;padding:1.5rem;background:rgba(255,255,255,.08)}.admin-profile-card h2{margin:0;font-size:1.25rem}.admin-profile-card>p{margin:.5rem 0 1.25rem;color:var(--brown,#704b37)}.admin-profile-field{margin-bottom:1rem}.admin-profile-field label{display:block;margin-bottom:.45rem;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brown,#704b37)}.admin-profile-field input{width:100%;box-sizing:border-box;padding:.8rem .9rem;border:1px solid var(--line,#dfcdbb);border-radius:12px;background:transparent;color:inherit;font:inherit}.admin-profile-field input:focus{outline:2px solid currentColor;outline-offset:1px}.admin-profile-meta{display:grid;gap:.8rem}.admin-profile-meta-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-bottom:.8rem;border-bottom:1px solid var(--line,#dfcdbb)}.admin-profile-meta-row:last-child{padding-bottom:0;border-bottom:0}.admin-profile-meta-label{color:var(--brown,#704b37);font-size:.9rem}.admin-profile-meta-value{font-weight:600;text-align:right;word-break:break-word}.admin-profile-actions{display:flex;align-items:center;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap}.admin-profile-button{border:0;border-radius:999px;padding:.75rem 1rem;background:#e1d0bd;color:#17120f;font:inherit;font-weight:700;cursor:pointer}.admin-profile-button:hover{opacity:.88}.admin-profile-button:disabled{opacity:.55;cursor:wait}.admin-profile-button-danger{background:transparent;border:1px solid var(--line,#dfcdbb)}.admin-profile-message{min-height:1.25rem;margin-top:.75rem;color:var(--brown,#704b37);font-size:.9rem}.admin-profile-message.is-error{color:#9b2c2c}@media(max-width:760px){.admin-profile-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <main class="page-main">
-    <a class="admin-back-button" href="dashboard.html" aria-label="Back to admin dashboard" title="Back to dashboard">←</a>
+    <nav class="admin-nav admin-subnav" aria-label="Admin navigation">
+      <a class="admin-back-link" href="dashboard.html" aria-label="Back to admin dashboard">← Dashboard</a>
+      <div class="dashboard-nav-links">
+        <a href="users.html">Users</a>
+        <a href="shops.html">Shops</a>
+        <a href="products.html">Products</a>
+        <a href="orders.html">Orders</a>
+      </div>
+      <a class="admin-account-button" href="profile.html" aria-current="page" aria-label="Profile" title="Profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.8 19.2a6.2 6.2 0 0 1 12.4 0"></path></svg>
+      </a>
+    </nav>
 
     <header class="page-header">
       <p class="eyebrow">ADMIN</p>
@@ -24,33 +35,33 @@
       <p>Manage your administrator profile and authentication settings.</p>
     </header>
 
-    <section class="admin-settings-grid" aria-label="Administrator profile and security">
-      <article class="admin-settings-card">
+    <section class="admin-profile-grid" aria-label="Administrator profile and security">
+      <article class="admin-profile-card">
         <h2>Account information</h2>
         <p>Details for the currently signed-in administrator.</p>
-        <div class="admin-settings-meta">
-          <div class="admin-settings-meta-row"><span class="admin-settings-meta-label">Email</span><span class="admin-settings-meta-value" data-settings-email>Loading…</span></div>
-          <div class="admin-settings-meta-row"><span class="admin-settings-meta-label">Role</span><span class="admin-settings-meta-value" data-settings-role>Loading…</span></div>
-          <div class="admin-settings-meta-row"><span class="admin-settings-meta-label">User ID</span><span class="admin-settings-meta-value" data-settings-user-id>Loading…</span></div>
+        <div class="admin-profile-meta">
+          <div class="admin-profile-meta-row"><span class="admin-profile-meta-label">Email</span><span class="admin-profile-meta-value" data-settings-email>Loading…</span></div>
+          <div class="admin-profile-meta-row"><span class="admin-profile-meta-label">Role</span><span class="admin-profile-meta-value" data-settings-role>Loading…</span></div>
+          <div class="admin-profile-meta-row"><span class="admin-profile-meta-label">User ID</span><span class="admin-profile-meta-value" data-settings-user-id>Loading…</span></div>
         </div>
       </article>
 
-      <article class="admin-settings-card">
+      <article class="admin-profile-card">
         <h2>Change password</h2>
         <p>Set a new password for this administrator account.</p>
         <form data-password-form>
-          <div class="admin-settings-field"><label for="new-password">New password</label><input id="new-password" name="password" type="password" minlength="8" autocomplete="new-password" required></div>
-          <div class="admin-settings-field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></div>
-          <div class="admin-settings-actions"><button class="admin-settings-button" type="submit" data-password-button>Update password</button></div>
-          <p class="admin-settings-message" data-password-message aria-live="polite"></p>
+          <div class="admin-profile-field"><label for="new-password">New password</label><input id="new-password" name="password" type="password" minlength="8" autocomplete="new-password" required></div>
+          <div class="admin-profile-field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></div>
+          <div class="admin-profile-actions"><button class="admin-profile-button" type="submit" data-password-button>Update password</button></div>
+          <p class="admin-profile-message" data-password-message aria-live="polite"></p>
         </form>
       </article>
 
-      <article class="admin-settings-card">
+      <article class="admin-profile-card">
         <h2>Session</h2>
         <p>End the current administrator session on this device.</p>
-        <div class="admin-settings-actions"><button class="admin-settings-button admin-settings-button-danger" type="button" data-sign-out>Sign out</button></div>
-        <p class="admin-settings-message" data-session-message aria-live="polite"></p>
+        <div class="admin-profile-actions"><button class="admin-profile-button admin-profile-button-danger" type="button" data-sign-out>Sign out</button></div>
+        <p class="admin-profile-message" data-session-message aria-live="polite"></p>
       </article>
     </section>
   </main>
@@ -76,20 +87,52 @@
       const sessionMessage = document.querySelector('[data-session-message]');
 
       form.addEventListener('submit', async (event) => {
-        event.preventDefault(); message.textContent = ''; message.classList.remove('is-error');
-        const password = form.elements.password.value; const confirmation = form.elements.confirm_password.value;
-        if (password.length < 8) { message.textContent = 'Password must be at least 8 characters.'; message.classList.add('is-error'); return; }
-        if (password !== confirmation) { message.textContent = 'Passwords do not match.'; message.classList.add('is-error'); return; }
-        button.disabled = true; button.textContent = 'Updating…';
-        try { const { error } = await window.datihanSupabase.auth.updateUser({ password }); if (error) throw error; form.reset(); message.textContent = 'Password updated successfully.'; }
-        catch (error) { console.error('Password update error:', error); message.textContent = error.message || 'Unable to update the password.'; message.classList.add('is-error'); }
-        finally { button.disabled = false; button.textContent = 'Update password'; }
+        event.preventDefault();
+        message.textContent = '';
+        message.classList.remove('is-error');
+        const password = form.elements.password.value;
+        const confirmation = form.elements.confirm_password.value;
+        if (password.length < 8) {
+          message.textContent = 'Password must be at least 8 characters.';
+          message.classList.add('is-error');
+          return;
+        }
+        if (password !== confirmation) {
+          message.textContent = 'Passwords do not match.';
+          message.classList.add('is-error');
+          return;
+        }
+        button.disabled = true;
+        button.textContent = 'Updating…';
+        try {
+          const { error } = await window.datihanSupabase.auth.updateUser({ password });
+          if (error) throw error;
+          form.reset();
+          message.textContent = 'Password updated successfully.';
+        } catch (error) {
+          console.error('Password update error:', error);
+          message.textContent = error.message || 'Unable to update the password.';
+          message.classList.add('is-error');
+        } finally {
+          button.disabled = false;
+          button.textContent = 'Update password';
+        }
       });
 
       signOutButton.addEventListener('click', async () => {
-        signOutButton.disabled = true; sessionMessage.textContent = 'Signing out…';
-        try { const { error } = await window.datihanSupabase.auth.signOut(); if (error) throw error; window.location.replace('../auth/login.html'); }
-        catch (error) { console.error('Sign out error:', error); sessionMessage.textContent = error.message || 'Unable to sign out.'; sessionMessage.classList.add('is-error'); signOutButton.disabled = false; }
+        signOutButton.disabled = true;
+        sessionMessage.textContent = 'Signing out…';
+        sessionMessage.classList.remove('is-error');
+        try {
+          const { error } = await window.datihanSupabase.auth.signOut();
+          if (error) throw error;
+          window.location.replace('../auth/login.html');
+        } catch (error) {
+          console.error('Sign out error:', error);
+          sessionMessage.textContent = error.message || 'Unable to sign out.';
+          sessionMessage.classList.add('is-error');
+          signOutButton.disabled = false;
+        }
       });
     });
   </script>
