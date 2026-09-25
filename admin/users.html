@@ -1,1 +1,64 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Users — Admin — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">ADMIN</p><h1>Users.</h1><p>Manage buyer, shop owner and admin accounts after Supabase authentication is connected.</p></header><div class="card-grid"><div class="content-card"><h2>Buyers</h2><p>Customer accounts.</p></div><div class="content-card"><h2>Shop Owners</h2><p>Vendor accounts.</p></div><div class="content-card"><h2>Admins</h2><p>Platform administrators.</p></div></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/auth-guard.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users — Admin — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="../css/admin-users.css">
+</head>
+<body>
+  <main class="page-main admin-users" data-admin-users>
+    <header class="page-header">
+      <p class="eyebrow">ADMIN</p>
+      <h1>Users.</h1>
+      <p>View every platform account and its assigned role.</p>
+    </header>
+
+    <section aria-labelledby="users-heading">
+      <div class="admin-users-toolbar">
+        <div>
+          <h2 id="users-heading">All accounts</h2>
+          <p class="admin-users-status" data-users-status>Loading users…</p>
+        </div>
+
+        <label>
+          <span class="sr-only">Filter users by role</span>
+          <select class="admin-users-filter" data-users-filter>
+            <option value="all">All roles</option>
+            <option value="buyer">Buyers</option>
+            <option value="shop_owner">Shop owners</option>
+            <option value="admin">Admins</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table">
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody data-users-body></tbody>
+        </table>
+        <div class="admin-users-empty" data-users-empty hidden>
+          No accounts match this filter.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/admin-users.js"></script>
+</body>
+</html>
