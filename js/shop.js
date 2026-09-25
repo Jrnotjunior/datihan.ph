@@ -35,6 +35,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     maximumFractionDigits: 2
   }).format(Number(value || 0));
 
+  const imageLightbox = document.createElement("div");
+  imageLightbox.className = "shop-image-lightbox";
+  imageLightbox.hidden = true;
+  imageLightbox.innerHTML = `
+    <div class="shop-image-lightbox-backdrop" data-lightbox-close></div>
+    <div class="shop-image-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Product image">
+      <button class="shop-image-lightbox-close" type="button" aria-label="Close image" data-lightbox-close>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+      <img class="shop-image-lightbox-image" alt="">
+    </div>
+  `;
+  document.body.appendChild(imageLightbox);
+  const lightboxImage = imageLightbox.querySelector(".shop-image-lightbox-image");
+
+  const closeLightbox = () => {
+    imageLightbox.hidden = true;
+    document.body.classList.remove("shop-lightbox-open");
+    lightboxImage.removeAttribute("src");
+    lightboxImage.alt = "";
+  };
+
+  const openLightbox = (src, alt) => {
+    if (!src) return;
+    lightboxImage.src = src;
+    lightboxImage.alt = alt || "Product image";
+    imageLightbox.hidden = false;
+    document.body.classList.add("shop-lightbox-open");
+  };
+
+  imageLightbox.addEventListener("click", (event) => {
+    if (event.target.closest("[data-lightbox-close]")) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !imageLightbox.hidden) closeLightbox();
+  });
+
   const renderCategoryOptions = () => {
     const current = category.value;
     const categories = [...new Set(products.map(product => product.category).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
@@ -53,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     card.dataset.price = Number(product.price || 0);
 
     const image = product.image_url
-      ? `<img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" loading="lazy">`
+      ? `<button class="shop-product-image-button" type="button" aria-label="View ${escapeHtml(product.name)} image"><img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" loading="lazy"></button>`
       : "PRODUCT IMAGE";
 
     card.innerHTML = `
@@ -72,6 +110,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         <button class="button button-primary add-to-cart" type="button">Add to cart</button>
       </div>
     `;
+
+    const imageButton = card.querySelector(".shop-product-image-button");
+    if (imageButton) {
+      imageButton.addEventListener("click", () => openLightbox(product.image_url, product.name));
+    }
 
     const cartButton = card.querySelector(".add-to-cart");
     cartButton.addEventListener("click", () => {
