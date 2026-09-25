@@ -1,7 +1,7 @@
 (() => {
-    // DATIHAN.PH currently treats postal codes as optional. Keep a hidden
-    // compatibility field so the existing address form can continue working
-    // until the Supabase address schema is migrated.
+    // Postal code is currently optional in DATIHAN.PH.
+    // Keep a hidden compatibility field for the existing Supabase schema,
+    // but do not perform any postal-code lookup or DOM observation.
     const hidePostalField = () => {
         const input = document.getElementById('address-postal');
         if (!input) return;
@@ -34,25 +34,14 @@
         api.__postalDisabled = true;
     };
 
-    const hidePostalFromCards = () => {
-        document.querySelectorAll('.address-lines').forEach(el => {
-            el.innerHTML = el.innerHTML.replace(/\s+\d{4}(<br>|$)/g, '$1');
-        });
-    };
-
     const init = () => {
         hidePostalField();
         disablePostalLookup();
         stripPostalForApi();
-        hidePostalFromCards();
     };
 
+    // Run once after the script loads. Do NOT attach a MutationObserver here:
+    // repeatedly rewriting the address cards caused an infinite DOM mutation loop
+    // and made the page unresponsive.
     init();
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-    new MutationObserver(() => {
-        hidePostalField();
-        disablePostalLookup();
-        stripPostalForApi();
-        hidePostalFromCards();
-    }).observe(document.body, { childList: true, subtree: true });
 })();
