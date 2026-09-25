@@ -11,6 +11,7 @@ DECLARE
   v_city text;
   v_province text;
   v_area_name text;
+  v_shipping_fee numeric;
 BEGIN
   v_city := lower(trim(coalesce(p_shipping_address->>'city', '')));
   v_province := lower(trim(coalesce(p_shipping_address->>'province', '')));
