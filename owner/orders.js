@@ -30,14 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function statusLabel(value) {
-    const labels = {
-      pending: 'Pending',
-      confirmed: 'Confirmed',
-      shipped: 'Shipped',
-      delivered: 'Delivered',
-      cancelled: 'Cancelled',
-      returned_refunded: 'Returned / Refunded'
-    };
+    const labels = { pending: 'Pending', confirmed: 'Confirmed', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled', returned_refunded: 'Returned / Refunded' };
     return labels[String(value || 'pending')] || String(value || 'pending').replaceAll('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
   }
 
@@ -132,6 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const order = state.orders.find(item => String(item.id) === String(orderId));
     if (!order || order.status === nextStatus) return;
     const previous = order.status || 'pending';
+    const isTerminalAction = nextStatus === 'cancelled' || nextStatus === 'returned_refunded';
+    if (isTerminalAction) {
+      const action = nextStatus === 'cancelled' ? 'cancel this order' : 'mark this order as Returned / Refunded';
+      const confirmed = window.confirm(`Are you sure you want to ${action}? This changes the order status.`);
+      if (!confirmed) {
+        select.value = previous;
+        return;
+      }
+    }
     select.disabled = true;
     try {
       const { data, error } = await supabase.from('orders').update({ status: nextStatus, updated_at: new Date().toISOString() }).eq('id', orderId).select('id, status').maybeSingle();
