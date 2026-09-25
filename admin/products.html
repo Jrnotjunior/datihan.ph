@@ -11,15 +11,14 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
   <style>
+    .admin-product-back{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin-bottom:1.25rem;border:1px solid var(--light-beige);border-radius:50%;background:var(--off-white);color:var(--black);text-decoration:none;font-size:1.35rem;line-height:1;transition:transform .15s ease,background .15s ease}.admin-product-back:hover{transform:translateX(-2px);background:var(--light-beige)}.admin-product-back:focus-visible{outline:2px solid currentColor;outline-offset:3px}
     .admin-product-toolbar { display:flex; gap:1rem; align-items:center; justify-content:space-between; margin-top:1.5rem; flex-wrap:wrap; }
     .admin-product-filters { display:flex; gap:.75rem; flex-wrap:wrap; flex:1; }
-    .admin-product-filters input,
-    .admin-product-filters select { min-height:44px; border:1px solid var(--line,#dfd0c3); border-radius:999px; background:transparent; padding:.7rem 1rem; font:inherit; color:var(--ink,#241d18); }
+    .admin-product-filters input,.admin-product-filters select { min-height:44px; border:1px solid var(--line,#dfd0c3); border-radius:999px; background:transparent; padding:.7rem 1rem; font:inherit; color:var(--ink,#241d18); }
     .admin-product-filters input { min-width:260px; flex:1; }
     .admin-product-table-wrap { overflow-x:auto; margin-top:1.5rem; }
     .admin-product-table { width:100%; border-collapse:collapse; min-width:1000px; }
-    .admin-product-table th,
-    .admin-product-table td { padding:1rem 1.1rem; text-align:left; border-bottom:1px solid var(--line,#dfd0c3); }
+    .admin-product-table th,.admin-product-table td { padding:1rem 1.1rem; text-align:left; border-bottom:1px solid var(--line,#dfd0c3); }
     .admin-product-table th { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--brown); }
     .admin-product-table td { color:var(--ink,#241d18); }
     .admin-product-name { display:block; font-weight:700; }
@@ -32,6 +31,8 @@
 </head>
 <body>
   <main class="page-main">
+    <a class="admin-product-back" href="dashboard.html" aria-label="Back to admin dashboard" title="Back to dashboard">←</a>
+
     <header class="page-header">
       <p class="eyebrow">ADMIN</p>
       <h1>All products.</h1>
@@ -60,15 +61,7 @@
       <div class="admin-product-table-wrap">
         <table class="admin-product-table" data-products-table hidden>
           <thead>
-            <tr>
-              <th>Product</th>
-              <th>Shop owner</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Status</th>
-              <th>Created</th>
-            </tr>
+            <tr><th>Product</th><th>Shop owner</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Created</th></tr>
           </thead>
           <tbody data-products-body></tbody>
         </table>
