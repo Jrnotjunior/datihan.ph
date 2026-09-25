@@ -1,7 +1,7 @@
 (()=>{
   const B='https://psgc.cloud/api/v2';
   const L='https://psgc.cloud/api/v1';
-  const DATA='https://raw.githubusercontent.com/open-admin-data/philippines-administrative-divisions/main/data/barangay-by-region';
+  const DATA='https://raw.githubusercontent.com/open-admin-data/philippines-administrative-divisions/main/divisions';
   const C=new Map(),CC=new Map(),PC=new Map(),RC=new Map(),PRC=new Map(),RDC=new Map();
   const u=x=>Array.isArray(x)?x:Array.isArray(x?.data)?x.data:[];
   const req=async(b,p)=>{const z=b+p;if(C.has(z))return C.get(z);const q=fetch(z,{headers:{Accept:'application/json'}}).then(async r=>{if(!r.ok)throw Error(`Location data request failed (${r.status}).`);return u(await r.json())});C.set(z,q);return q};
@@ -18,57 +18,36 @@
   const regionFile=r=>{
     const code=String(r?.code||'').toUpperCase();
     const name=String(r?.name||'');
-    const map={
-      '0100000000':'ilocos-region-R01','R01':'ilocos-region-R01',
-      '0200000000':'cagayan-valley-R02','R02':'cagayan-valley-R02',
-      '0300000000':'central-luzon-R03','R03':'central-luzon-R03',
-      '0400000000':'calabarzon-R04A','R04A':'calabarzon-R04A',
-      '0500000000':'bicol-region-R05','R05':'bicol-region-R05',
-      '0600000000':'western-visayas-R06','R06':'western-visayas-R06',
-      '0700000000':'central-visayas-R07','R07':'central-visayas-R07',
-      '0800000000':'eastern-visayas-R08','R08':'eastern-visayas-R08',
-      '0900000000':'zamboanga-peninsula-R09','R09':'zamboanga-peninsula-R09',
-      '1000000000':'northern-mindanao-R10','R10':'northern-mindanao-R10',
-      '1100000000':'davao-region-R11','R11':'davao-region-R11',
-      '1200000000':'soccsksargen-R12','R12':'soccsksargen-R12',
-      '1300000000':'national-capital-region-NCR','NCR':'national-capital-region-NCR',
-      '1400000000':'cordillera-administrative-region-CAR','CAR':'cordillera-administrative-region-CAR',
-      '1500000000':'autonomous-region-in-muslim-mindanao-ARMM','ARMM':'autonomous-region-in-muslim-mindanao-ARMM',
-      '1600000000':'caraga-R13','R13':'caraga-R13',
-      '1700000000':'mimaropa-region-R17','R17':'mimaropa-region-R17',
-      '1900000000':'autonomous-region-in-muslim-mindanao-ARMM','BARMM':'autonomous-region-in-muslim-mindanao-ARMM'
-    };
-    if(map[code]) return map[code];
-    if(/national capital region|\bncr\b/i.test(name)) return 'national-capital-region-NCR';
+    const map={'0100000000':'ilocos-region-R01','R01':'ilocos-region-R01','0200000000':'cagayan-valley-R02','R02':'cagayan-valley-R02','0300000000':'central-luzon-R03','R03':'central-luzon-R03','0400000000':'calabarzon-R04A','R04A':'calabarzon-R04A','0500000000':'bicol-region-R05','R05':'bicol-region-R05','0600000000':'western-visayas-R06','R06':'western-visayas-R06','0700000000':'central-visayas-R07','R07':'central-visayas-R07','0800000000':'eastern-visayas-R08','R08':'eastern-visayas-R08','0900000000':'zamboanga-peninsula-R09','R09':'zamboanga-peninsula-R09','1000000000':'northern-mindanao-R10','R10':'northern-mindanao-R10','1100000000':'davao-region-R11','R11':'davao-region-R11','1200000000':'soccsksargen-R12','R12':'soccsksargen-R12','1300000000':'national-capital-region-NCR','NCR':'national-capital-region-NCR','1400000000':'cordillera-administrative-region-CAR','CAR':'cordillera-administrative-region-CAR','1500000000':'autonomous-region-in-muslim-mindanao-ARMM','ARMM':'autonomous-region-in-muslim-mindanao-ARMM','1600000000':'caraga-R13','R13':'caraga-R13','1700000000':'mimaropa-region-R17','R17':'mimaropa-region-R17','1900000000':'autonomous-region-in-muslim-mindanao-ARMM','BARMM':'autonomous-region-in-muslim-mindanao-ARMM'};
+    if(map[code])return map[code];
+    if(/national capital region|\bncr\b/i.test(name))return'national-capital-region-NCR';
     const roman=name.match(/Region\s+([IVXLCDM]+)\b/i)?.[1];
     const romanMap={I:'R01',II:'R02',III:'R03',IV:'R04A',V:'R05',VI:'R06',VII:'R07',VIII:'R08',IX:'R09',X:'R10',XI:'R11',XII:'R12',XIII:'R13',XVII:'R17'};
-    if(roman&&romanMap[roman]){
-      const suffix=romanMap[roman];
-      const slug=name.match(/\(([^)]+)\)/)?.[1]||name.replace(/^Region\s+[IVXLCDM]+\s*/i,'').trim();
-      return `${slug.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${suffix}`;
-    }
+    if(roman&&romanMap[roman]){const suffix=romanMap[roman];const slug=name.match(/\(([^)]+)\)/)?.[1]||name.replace(/^Region\s+[IVXLCDM]+\s*/i,'').trim();return`${slug.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${suffix}`}
     return null;
   };
+  const compactCode=code=>{const k=String(code||'').replace(/\D/g,'');return k.length>6?k.slice(-10).slice(0,6):k.padStart(6,'0').slice(0,6)};
+  const slug=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/^city of\s+/i,'').replace(/^municipality of\s+/i,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const postal=async code=>{
     const k=String(code||'').trim();
     if(PC.has(k))return PC.get(k);
-    let regionCode=document.getElementById('address-region')?.value||'';
-    let r=RC.get(String(regionCode));
-    if(!r){try{await regions();r=RC.get(String(regionCode))}catch(_){}
-    }
-    if(!r)throw Error('Barangay postal region context is unavailable.');
-    const file=regionFile(r);
-    if(!file)throw Error('Barangay postal region context is unavailable.');
-    const url=`${DATA}/${file}.json`;
-    const q=RDC.has(url)?RDC.get(url):fetch(url,{headers:{Accept:'application/json'}}).then(async x=>{if(!x.ok)throw Error(`Barangay postal data request failed (${x.status}).`);return u(await x.json())});
+    const cityCode=document.getElementById('address-city')?.value||'';
+    const city=CC.get(String(cityCode));
+    const regionCode=document.getElementById('address-region')?.value||'';
+    const region=RC.get(String(regionCode));
+    let provinceCode=document.getElementById('address-province')?.value||'';
+    const province=provinceCode==='__ncr__'?{name:'Metro Manila',code:'1300000000'}:PRC.get(String(provinceCode));
+    if(!cityCode||!city)throw Error('Barangay postal city context is unavailable.');
+    if(!region||!province)throw Error('Barangay postal location context is unavailable.');
+    const regionSlug=regionFile(region);
+    const provinceSlug=province.name&&compactCode(province.code)?`${slug(province.name)}-${compactCode(province.code)}`:'';
+    const citySlug=city.name&&compactCode(city.code)?`${slug(city.name)}-${compactCode(city.code)}`:'';
+    if(!regionSlug||!provinceSlug||!citySlug)throw Error('Barangay postal location context is unavailable.');
+    const url=`${DATA}/${regionSlug}/${provinceSlug}/${citySlug}/barangay.json`;
+    const q=RDC.has(url)?RDC.get(url):fetch(url,{headers:{Accept:'application/json'}}).then(async r=>{if(!r.ok)throw Error(`Barangay postal data request failed (${r.status}).`);return u(await r.json())});
     RDC.set(url,q);
-    const result=q.then(rows=>{
-      const m=rows.find(item=>String(item?.id||item?.code?.id||item?.code||item?.code_id||item?.psgc_code||'').trim()===k);
-      if(!m)throw Error('Postal code is not available for the selected barangay.');
-      return m;
-    }).catch(e=>{PC.delete(k);throw e});
-    PC.set(k,result);
-    return result;
+    const result=q.then(rows=>{const m=rows.find(item=>String(item?.id||item?.code?.id||item?.code||'').trim()===k);if(!m)throw Error('Postal code is not available for the selected barangay.');return m}).catch(e=>{PC.delete(k);throw e});
+    PC.set(k,result);return result;
   };
   const zip=async b=>{const m=await postal(b),v=[m?.postal_code,m?.zip_code,...(Array.isArray(m?.zip_codes)?m.zip_codes:[])];return v.map(x=>String(x||'').replace(/\D/g,'')).find(x=>/^\d{4}$/.test(x))||''};
   const details=async c=>{const b=document.getElementById('address-barangay')?.value||'';if(b)try{const z=await zip(b);if(z)return{zip_code:z,postal_code:z,source:'barangay'}}catch(_){}const x=CC.get(String(c));if(x?.name)try{return await obj(L,`/cities-municipalities/${encodeURIComponent(x.name)}`)}catch(_){}return obj(L,`/cities-municipalities/${encodeURIComponent(c)}`)};
