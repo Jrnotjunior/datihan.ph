@@ -1,13 +1,22 @@
 const API = window.DatihanAddressAPI;
+const LOCATIONS = window.DatihanLocations;
 let modal;
 let form;
 let deleteModal;
 let editingId = null;
 let pendingDeleteId = null;
 let addresses = [];
+let regions = [];
+let allProvinces = [];
+let locationLoading = false;
 
 const statusEl = () => document.getElementById('address-status');
 const formStatusEl = () => document.getElementById('address-form-status');
+const regionEl = () => document.getElementById('address-region');
+const provinceEl = () => document.getElementById('address-province');
+const cityEl = () => document.getElementById('address-city');
+const barangayEl = () => document.getElementById('address-barangay');
+const postalEl = () => document.getElementById('address-postal');
 
 const showStatus = (message, type = 'success') => {
     const el = statusEl();
@@ -25,7 +34,6 @@ const showFormStatus = (message, type = 'success') => {
 
 const showToast = (message, title = 'Success') => {
     let container = document.getElementById('toast-container');
-
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
@@ -40,13 +48,9 @@ const showToast = (message, title = 'Success') => {
     toast.setAttribute('role', 'status');
     toast.innerHTML = `
         <div class="toast-icon" aria-hidden="true">✓</div>
-        <div class="toast-content">
-            <div class="toast-title"></div>
-            <div class="toast-message"></div>
-        </div>
+        <div class="toast-content"><div class="toast-title"></div><div class="toast-message"></div></div>
         <button class="toast-close" type="button" aria-label="Close notification">×</button>
     `;
-
     toast.querySelector('.toast-title').textContent = title;
     toast.querySelector('.toast-message').textContent = message;
 
@@ -56,10 +60,8 @@ const showToast = (message, title = 'Success') => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 220);
     };
-
     toast.querySelector('.toast-close').addEventListener('click', removeToast);
     container.appendChild(toast);
-
     requestAnimationFrame(() => toast.classList.add('show'));
     removeTimer = setTimeout(removeToast, 3500);
 };
@@ -71,38 +73,215 @@ const setSaving = saving => {
     button.textContent = saving ? 'Saving...' : 'Save address';
 };
 
+const normalise = value => String(value || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/city of |municipality of /g, '')
+    .replace(/\s+city$|\s+municipality$/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const setOptions = (select, items, placeholder, getValue = item => item.code, getLabel = item => item.name) => {
+    select.innerHTML = '';
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = placeholder;
+    select.appendChild(placeholderOption);
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = String(getValue(item));
+        option.textContent = getLabel(item);
+        select.appendChild(option);
+    });
+};
+
+const setDisabled = (select, disabled) => {
+    select.disabled = disabled;
+};
+
+const clearLocationFrom = level => {
+    if (level <= 1) {
+        setOptions(provinceEl(), [], 'Select province');
+        setDisabled(provinceEl(), true);
+    }
+    if (level <= 2) {
+        setOptions(cityEl(), [], 'Select city / municipality');
+        setDisabled(cityEl(), true);
+    }
+    if (level <= 3) {
+        setOptions(barangayEl(), [], 'Select barangay');
+        setDisabled(barangayEl(), true);
+    }
+    if (level <= 4) postalEl().value = '';
+};
+
+const selectedRegion = () => regions.find(item => String(item.code) === regionEl().value);
+const selectedProvince = () => allProvinces.find(item => String(item.code) === provinceEl().value);
+
+const loadRegions = async () => {
+    if (!LOCATIONS) throw new Error('Philippine location data is unavailable.');
+    regions = await LOCATIONS.listRegions();
+    setOptions(regionEl(), regions, 'Select region');
+};
+
+const loadProvincesForRegion = async (regionCode, preferredName = '') => {
+    clearLocationFrom(1);
+    if (!regionCode) return;
+
+    const region = regions.find(item => String(item.code) === String(regionCode));
+    const isNcr = /national capital region|ncr/i.test(String(region?.name || ''));
+
+    if (isNcr) {
+        const option = document.createElement('option');
+        option.value = '__ncr__';
+        option.textContent = 'Metro Manila';
+        provinceEl().appendChild(option);
+        setDisabled(provinceEl(), false);
+        if (preferredName && normalise(preferredName) === 'metro manila') provinceEl().value = '__ncr__';
+        return;
+    }
+
+    const provinces = await LOCATIONS.listProvinces(regionCode);
+    setOptions(provinceEl(), provinces, 'Select province');
+    setDisabled(provinceEl(), false);
+    if (preferredName) {
+        const target = normalise(preferredName);
+        const match = provinces.find(item => normalise(item.name) === target);
+        if (match) provinceEl().value = String(match.code);
+    }
+};
+
+const loadCitiesForSelection = async (preferredName = '') => {
+    clearLocationFrom(2);
+    const region = selectedRegion();
+    const province = selectedProvince();
+    if (!region) return;
+
+    const isNcr = provinceEl().value === '__ncr__';
+    const cities = isNcr
+        ? await LOCATIONS.listCitiesByRegion(region.code)
+        : province
+            ? await LOCATIONS.listCities(province.code)
+            : [];
+
+    setOptions(cityEl(), cities, 'Select city / municipality');
+    setDisabled(cityEl(), false);
+
+    if (preferredName) {
+        const target = normalise(preferredName);
+        const match = cities.find(item => normalise(item.name) === target);
+        if (match) cityEl().value = String(match.code);
+    }
+};
+
+const loadBarangaysForCity = async (preferredName = '') => {
+    clearLocationFrom(3);
+    const cityCode = cityEl().value;
+    if (!cityCode) return;
+
+    const barangays = await LOCATIONS.listBarangays(cityCode);
+    setOptions(barangayEl(), barangays, 'Select barangay');
+    setDisabled(barangayEl(), false);
+
+    if (preferredName) {
+        const target = normalise(preferredName);
+        const match = barangays.find(item => normalise(item.name) === target);
+        if (match) barangayEl().value = String(match.code);
+    }
+
+    try {
+        const city = await LOCATIONS.getCityDetails(cityCode);
+        const zip = String(city?.zip_code || city?.postal_code || '').replace(/\D/g, '').slice(0, 4);
+        postalEl().value = zip;
+    } catch (_) {
+        postalEl().value = '';
+    }
+};
+
+const setLocationFromAddress = async address => {
+    const provinceName = normalise(address?.province);
+    const cityName = normalise(address?.city);
+    const barangayName = normalise(address?.barangay);
+
+    let region = null;
+    if (provinceName === 'metro manila' || provinceName === 'ncr' || /valenzuela|manila|quezon city|makati|taguig|pasig|pasay|marikina|malabon|navotas|paranaque|muntinlupa|mandaluyong|san juan|caloocan/.test(cityName)) {
+        region = regions.find(item => /national capital region|ncr/i.test(String(item.name)));
+    }
+
+    if (!region) {
+        region = allProvinces.find(item => normalise(item.name) === provinceName)?.region;
+        if (region && typeof region === 'string') {
+            region = regions.find(item => normalise(item.name) === normalise(region));
+        } else if (region?.code) {
+            region = regions.find(item => String(item.code) === String(region.code)) || region;
+        }
+    }
+
+    if (!region) {
+        const allMatch = allProvinces.find(item => normalise(item.name) === provinceName);
+        if (allMatch?.region?.code) region = regions.find(item => String(item.code) === String(allMatch.region.code));
+    }
+
+    if (!region) throw new Error('Could not match this saved address to a Philippine region. Please edit the address and select its location again.');
+
+    regionEl().value = String(region.code);
+    await loadProvincesForRegion(region.code, address.province);
+    await loadCitiesForSelection(address.city);
+    await loadBarangaysForCity(address.barangay);
+};
+
+const resetLocationFields = () => {
+    regionEl().value = '';
+    clearLocationFrom(1);
+};
+
 const closeModal = () => {
     if (modal) modal.hidden = true;
     if (form) form.reset();
+    resetLocationFields();
     editingId = null;
+    locationLoading = false;
     showFormStatus('');
     const title = document.getElementById('address-modal-title');
     if (title) title.textContent = 'Add address';
 };
 
-const openModal = (address = null) => {
+const openModal = async (address = null) => {
     if (!modal) return;
     editingId = address?.id || null;
     if (form) form.reset();
+    resetLocationFields();
     showFormStatus('');
 
     const title = document.getElementById('address-modal-title');
     if (title) title.textContent = address ? 'Edit address' : 'Add address';
 
-    if (address) {
-        document.getElementById('address-label-input').value = address.label || '';
-        document.getElementById('address-first-name').value = address.first_name || '';
-        document.getElementById('address-last-name').value = address.last_name || '';
-        document.getElementById('address-line').value = address.address_line || '';
-        document.getElementById('address-barangay').value = address.barangay || '';
-        document.getElementById('address-city').value = address.city || '';
-        document.getElementById('address-province').value = address.province || '';
-        document.getElementById('address-postal').value = address.postal_code || '';
-        document.getElementById('address-phone').value = address.phone || '';
-        document.getElementById('address-default').checked = !!address.is_default;
-    }
-
+    document.getElementById('address-label-input').value = address?.label || '';
+    document.getElementById('address-first-name').value = address?.first_name || '';
+    document.getElementById('address-last-name').value = address?.last_name || '';
+    document.getElementById('address-line').value = address?.address_line || '';
+    document.getElementById('address-phone').value = address?.phone || '';
+    document.getElementById('address-default').checked = !!address?.is_default;
+    document.getElementById('save-address-button').disabled = true;
     modal.hidden = false;
+
+    try {
+        locationLoading = true;
+        if (address) {
+            showFormStatus('Loading saved location...', 'success');
+            await setLocationFromAddress(address);
+            if (!postalEl().value) postalEl().value = address.postal_code || '';
+        }
+        document.getElementById('save-address-button').disabled = false;
+        showFormStatus('');
+    } catch (error) {
+        console.error('Location form error:', error);
+        document.getElementById('save-address-button').disabled = false;
+        showFormStatus(`Unable to load location data: ${error.message || error}`, 'error');
+    } finally {
+        locationLoading = false;
+    }
 };
 
 const openDeleteConfirmation = id => {
@@ -131,10 +310,7 @@ const render = () => {
         card.dataset.id = address.id;
         card.innerHTML = `
             <div class="address-top">
-                <div>
-                    <span class="address-label"></span>
-                    ${address.is_default ? '<span class="default-badge">Default</span>' : ''}
-                </div>
+                <div><span class="address-label"></span>${address.is_default ? '<span class="default-badge">Default</span>' : ''}</div>
                 <button class="text-button delete-address" type="button">Delete</button>
             </div>
             <p class="address-name"></p>
@@ -168,13 +344,8 @@ const loadAddresses = async () => {
 
 const validate = () => {
     const requiredIds = [
-        'address-label-input',
-        'address-first-name',
-        'address-last-name',
-        'address-line',
-        'address-barangay',
-        'address-city',
-        'address-province'
+        'address-label-input', 'address-first-name', 'address-last-name', 'address-line',
+        'address-region', 'address-province', 'address-city', 'address-barangay', 'address-postal'
     ];
 
     for (const id of requiredIds) {
@@ -186,17 +357,14 @@ const validate = () => {
 
     const phone = document.getElementById('address-phone').value.trim();
     const postal = document.getElementById('address-postal').value.trim();
-
     if (!/^09\d{9}$/.test(phone)) {
         showFormStatus('Contact number must be exactly 11 digits and start with 09.', 'error');
         return false;
     }
-
     if (!/^\d{4}$/.test(postal)) {
-        showFormStatus('Postal code must be exactly 4 digits.', 'error');
+        showFormStatus('Postal code could not be determined. Please select your city or municipality again.', 'error');
         return false;
     }
-
     return true;
 };
 
@@ -205,37 +373,28 @@ const getPayload = () => ({
     first_name: document.getElementById('address-first-name').value.trim(),
     last_name: document.getElementById('address-last-name').value.trim(),
     address_line: document.getElementById('address-line').value.trim(),
-    barangay: document.getElementById('address-barangay').value.trim(),
-    city: document.getElementById('address-city').value.trim(),
-    province: document.getElementById('address-province').value.trim(),
-    postal_code: document.getElementById('address-postal').value.trim(),
+    barangay: barangayEl().selectedOptions[0]?.textContent.trim() || '',
+    city: cityEl().selectedOptions[0]?.textContent.trim() || '',
+    province: provinceEl().selectedOptions[0]?.textContent.trim() || '',
+    postal_code: postalEl().value.trim(),
     phone: document.getElementById('address-phone').value.trim(),
     is_default: document.getElementById('address-default').checked
 });
 
 async function saveAddress(event) {
     event.preventDefault();
-    if (!validate()) return;
+    if (locationLoading || !validate()) return;
 
     setSaving(true);
     showFormStatus('Saving address...', 'success');
-
     try {
         const payload = getPayload();
         const wasEditing = Boolean(editingId);
-
-        if (wasEditing) {
-            await API.update(editingId, payload);
-        } else {
-            await API.create(payload);
-        }
-
+        if (wasEditing) await API.update(editingId, payload);
+        else await API.create(payload);
         closeModal();
         await loadAddresses();
-        showToast(
-            wasEditing ? 'Your address has been updated.' : 'Your new address has been saved.',
-            wasEditing ? 'Address updated' : 'Address saved'
-        );
+        showToast(wasEditing ? 'Your address has been updated.' : 'Your new address has been saved.', wasEditing ? 'Address updated' : 'Address saved');
     } catch (error) {
         console.error('Save address error:', error);
         showFormStatus(`Save failed: ${error.message || error}`, 'error');
@@ -258,22 +417,10 @@ async function deleteAddress(id) {
 const confirmDeleteAddress = async () => {
     const id = pendingDeleteId;
     if (!id) return;
-
     const button = document.getElementById('delete-confirm-button');
-    if (button) {
-        button.disabled = true;
-        button.textContent = 'Deleting...';
-    }
-
-    try {
-        closeDeleteConfirmation();
-        await deleteAddress(id);
-    } finally {
-        if (button) {
-            button.disabled = false;
-            button.textContent = 'Delete address';
-        }
-    }
+    if (button) { button.disabled = true; button.textContent = 'Deleting...'; }
+    try { closeDeleteConfirmation(); await deleteAddress(id); }
+    finally { if (button) { button.disabled = false; button.textContent = 'Delete address'; } }
 };
 
 async function setDefaultAddress(id) {
@@ -287,7 +434,7 @@ async function setDefaultAddress(id) {
     }
 }
 
-const init = () => {
+const init = async () => {
     modal = document.getElementById('address-modal');
     form = document.getElementById('address-form');
     deleteModal = document.getElementById('delete-confirm-modal');
@@ -298,17 +445,37 @@ const init = () => {
     document.getElementById('address-modal-backdrop')?.addEventListener('click', closeModal);
     form?.addEventListener('submit', saveAddress);
 
+    regionEl()?.addEventListener('change', async () => {
+        if (locationLoading) return;
+        try { locationLoading = true; await loadProvincesForRegion(regionEl().value); }
+        catch (error) { showFormStatus(`Unable to load provinces: ${error.message || error}`, 'error'); }
+        finally { locationLoading = false; }
+    });
+
+    provinceEl()?.addEventListener('change', async () => {
+        if (locationLoading) return;
+        try { locationLoading = true; await loadCitiesForSelection(); }
+        catch (error) { showFormStatus(`Unable to load cities: ${error.message || error}`, 'error'); }
+        finally { locationLoading = false; }
+    });
+
+    cityEl()?.addEventListener('change', async () => {
+        if (locationLoading) return;
+        try { locationLoading = true; await loadBarangaysForCity(); }
+        catch (error) { showFormStatus(`Unable to load barangays: ${error.message || error}`, 'error'); }
+        finally { locationLoading = false; }
+    });
+
     document.getElementById('delete-cancel-button')?.addEventListener('click', closeDeleteConfirmation);
     document.getElementById('delete-confirm-backdrop')?.addEventListener('click', closeDeleteConfirmation);
     document.getElementById('delete-confirm-button')?.addEventListener('click', confirmDeleteAddress);
 
-    document.getElementById('address-list')?.addEventListener('click', event => {
+    document.getElementById('address-list')?.addEventListener('click', async event => {
         const card = event.target.closest('.address-card');
         if (!card) return;
         const id = card.dataset.id;
         const address = addresses.find(item => String(item.id) === String(id));
-
-        if (event.target.closest('.edit-address')) openModal(address);
+        if (event.target.closest('.edit-address')) await openModal(address);
         else if (event.target.closest('.delete-address')) openDeleteConfirmation(id);
         else if (event.target.closest('.set-default')) setDefaultAddress(id);
     });
@@ -319,7 +486,17 @@ const init = () => {
         else if (modal && !modal.hidden) closeModal();
     });
 
-    loadAddresses();
+    try {
+        await Promise.all([
+            loadRegions(),
+            LOCATIONS.listAllProvinces().then(data => { allProvinces = data; })
+        ]);
+    } catch (error) {
+        console.error('Location initialization error:', error);
+        showStatus(`Unable to load Philippine locations: ${error.message || error}`, 'error');
+    }
+
+    await loadAddresses();
 };
 
 if (document.readyState === 'loading') {
