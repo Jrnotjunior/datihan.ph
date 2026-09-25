@@ -81,4 +81,47 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("storage", updateCartCount);
   window.addEventListener("datihan-cart-updated", updateCartCount);
   window.addEventListener("pageshow", updateCartCount);
+
+  // Render one shared buyer-facing footer on every storefront page.
+  if (!document.querySelector(".site-footer")) {
+    const footer = document.createElement("footer");
+    footer.className = "site-footer storefront-footer";
+    footer.innerHTML = `
+      <div class="footer-column footer-about">
+        <a class="footer-brand" href="${window.location.pathname.includes("/pages/") ? "../index.html" : "index.html"}">DATIHAN</a>
+        <p>Pre-loved pants, shirts, and shoes — sold and consigned at pop-ups around the city, no storefront required.</p>
+      </div>
+
+      <div class="footer-column footer-explore">
+        <h2>Explore</h2>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="${window.location.pathname.includes("/pages/") ? "shop.html" : "pages/shop.html"}">Shop</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "categories.html" : "pages/categories.html"}">Categories</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "pop-ups.html" : "pages/pop-ups.html"}">Pop-ups</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "about.html" : "pages/about.html"}">About</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "contact.html" : "pages/contact.html"}">Contact</a>
+        </nav>
+      </div>
+
+      <div class="footer-column footer-follow">
+        <h2>Follow along</h2>
+        <div class="footer-social-icons" aria-label="DATIHAN social media">
+          <a class="footer-social-icon" href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>
+          </a>
+          <a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg>
+          </a>
+          <a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61577434115016" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z"></path></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© <span class="footer-current-year">${new Date().getFullYear()}</span> DATIHAN.PH. All items sold as-is unless noted.</p>
+        <p>Pop-ups posted on Instagram &amp; TikTok</p>
+      </div>`;
+    document.body.appendChild(footer);
+  }
 });
