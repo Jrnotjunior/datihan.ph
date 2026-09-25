@@ -190,19 +190,21 @@ const loadBarangaysForCity = async (preferredName = '') => {
         if (match) barangayEl().value = String(match.code);
     }
 
-    try {
-        const city = await LOCATIONS.getCityDetails(cityCode);
-        const zip = String(city?.zip_code || city?.postal_code || '').replace(/\D/g, '').slice(0, 4);
-        postalEl().value = zip;
-    } catch (_) {
-        postalEl().value = '';
+    // Postal code is intentionally derived from the selected barangay, not the city.
+    // For a new city selection, wait until a barangay is chosen.
+    postalEl().value = '';
+    if (barangayEl().value) {
+        try {
+            postalEl().value = await LOCATIONS.getBarangayPostalCode(barangayEl().value);
+        } catch (_) {
+            postalEl().value = '';
+        }
     }
 };
 
 const setLocationFromAddress = async address => {
     const provinceName = normalise(address?.province);
     const cityName = normalise(address?.city);
-    const barangayName = normalise(address?.barangay);
 
     let region = null;
     if (provinceName === 'metro manila' || provinceName === 'ncr' || /valenzuela|manila|quezon city|makati|taguig|pasig|pasay|marikina|malabon|navotas|paranaque|muntinlupa|mandaluyong|san juan|caloocan/.test(cityName)) {
@@ -271,7 +273,7 @@ const openModal = async (address = null) => {
         if (address) {
             showFormStatus('Loading saved location...', 'success');
             await setLocationFromAddress(address);
-            if (!postalEl().value) postalEl().value = address.postal_code || '';
+            if (!postalEl().value && address.postal_code) postalEl().value = address.postal_code;
         }
         document.getElementById('save-address-button').disabled = false;
         showFormStatus('');
@@ -362,7 +364,7 @@ const validate = () => {
         return false;
     }
     if (!/^\d{4}$/.test(postal)) {
-        showFormStatus('Postal code could not be determined. Please select your city or municipality again.', 'error');
+        showFormStatus('Postal code could not be determined. Please select your barangay again.', 'error');
         return false;
     }
     return true;
