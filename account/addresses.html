@@ -70,7 +70,7 @@
         <form id="address-form" class="address-form" novalidate>
             <div class="field">
                 <label for="address-label-input">Address label</label>
-                <input id="address-label-input" autocomplete="address-line1">
+                <input id="address-label-input" autocomplete="address-line1" placeholder="e.g. Home">
             </div>
 
             <div class="form-row">
@@ -86,29 +86,44 @@
 
             <div class="field">
                 <label for="address-line">Street / unit / building</label>
-                <input id="address-line" autocomplete="street-address">
+                <input id="address-line" autocomplete="street-address" placeholder="House no., street, unit, building">
             </div>
 
-            <div class="field">
-                <label for="address-barangay">Barangay</label>
-                <input id="address-barangay" autocomplete="address-level3" placeholder="e.g. Barangay 1">
+            <div class="form-row">
+                <div class="field">
+                    <label for="address-region">Region</label>
+                    <select id="address-region" autocomplete="address-level1">
+                        <option value="">Select region</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="address-province">Province</label>
+                    <select id="address-province" autocomplete="address-level1" disabled>
+                        <option value="">Select province</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-row">
                 <div class="field">
                     <label for="address-city">City / municipality</label>
-                    <input id="address-city" autocomplete="address-level2">
+                    <select id="address-city" autocomplete="address-level2" disabled>
+                        <option value="">Select city / municipality</option>
+                    </select>
                 </div>
                 <div class="field">
-                    <label for="address-province">Province</label>
-                    <input id="address-province" autocomplete="address-level1">
+                    <label for="address-barangay">Barangay</label>
+                    <select id="address-barangay" autocomplete="address-level3" disabled>
+                        <option value="">Select barangay</option>
+                    </select>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="field">
                     <label for="address-postal">Postal code</label>
-                    <input id="address-postal" inputmode="numeric" maxlength="4" autocomplete="postal-code">
+                    <input id="address-postal" inputmode="numeric" maxlength="4" autocomplete="postal-code" readonly placeholder="Automatically filled">
+                    <small class="field-help">Automatically filled from the selected city or municipality.</small>
                 </div>
                 <div class="field">
                     <label for="address-phone">Phone number</label>
@@ -157,6 +172,7 @@
 <script src="../js/auth-guard.js?v=5"></script>
 <script src="../js/global.js?v=5"></script>
 <script src="../js/address-api.js?v=1"></script>
-<script src="addresses.js?v=27"></script>
+<script src="../js/philippine-locations.js?v=1"></script>
+<script src="addresses.js?v=28"></script>
 </body>
 </html>
