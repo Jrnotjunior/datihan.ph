@@ -16,9 +16,15 @@ create table if not exists public.shipping_rates (
 create index if not exists shipping_rates_owner_id_idx
   on public.shipping_rates(owner_id);
 
+-- Store the rate selected by the customer with each order.
+alter table public.orders
+  add column if not exists shipping_rate_id uuid
+  references public.shipping_rates(id) on delete set null;
+
 alter table public.shipping_rates enable row level security;
 
 drop policy if exists "Owners can view their shipping rates" on public.shipping_rates;
+drop policy if exists "Customers can view active shipping rates" on public.shipping_rates;
 drop policy if exists "Owners can create their shipping rates" on public.shipping_rates;
 drop policy if exists "Owners can update their shipping rates" on public.shipping_rates;
 drop policy if exists "Owners can delete their shipping rates" on public.shipping_rates;
@@ -28,6 +34,13 @@ on public.shipping_rates
 for select
 to authenticated
 using (auth.uid() = owner_id);
+
+-- Customers need to see active delivery areas and fees at checkout.
+create policy "Customers can view active shipping rates"
+on public.shipping_rates
+for select
+to authenticated
+using (is_active = true);
 
 create policy "Owners can create their shipping rates"
 on public.shipping_rates
