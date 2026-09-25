@@ -30,6 +30,7 @@
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/city of |municipality of /g, '')
+    .replace(/\s+city$|\s+municipality$/g, '')
     .replace(/[^a-z0-9 ]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -75,8 +76,11 @@
     if (!address || !select || select.options.length <= 1) return;
 
     const result = findRate(select, address.dataset.city, address.dataset.province);
-    select.value = result.match?.value || '';
-    select.dispatchEvent(new Event('change', { bubbles: true }));
+    const nextValue = result.match?.value || '';
+    if (select.value !== nextValue) {
+      select.value = nextValue;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 
     const display = document.getElementById('auto-shipping-rate');
     if (!display) return;
