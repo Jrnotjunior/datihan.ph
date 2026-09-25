@@ -36,44 +36,21 @@
         <input id="shop-search" type="search" placeholder="Search pieces" autocomplete="off">
       </label>
       <select id="shop-category" class="shop-select" aria-label="Filter by category">
-        <option value="all">All categories</option><option value="tops">Tops</option><option value="outerwear">Outerwear</option><option value="bottoms">Bottoms</option><option value="accessories">Accessories</option>
+        <option value="all">All categories</option>
       </select>
       <select id="shop-sort" class="shop-select" aria-label="Sort products">
         <option value="featured">Sort: Featured</option><option value="price-low">Price: Low to high</option><option value="price-high">Price: High to low</option>
       </select>
     </section>
 
-    <p class="shop-count" id="shop-count">6 pieces</p>
-    <section class="shop-product-grid" aria-label="Products">
-      <article class="shop-product-card" data-name="Vintage Graphic Tee" data-category="tops" data-price="450">
-        <div class="shop-product-media">PRODUCT IMAGE<button class="wishlist-button" type="button" aria-label="Add Vintage Graphic Tee to wishlist" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg></button></div>
-        <div class="shop-product-info"><p class="shop-product-name">Vintage Graphic Tee</p><div class="shop-product-meta"><span>Good condition</span><span class="shop-product-price">₱450</span></div></div>
-      </article>
-      <article class="shop-product-card" data-name="Denim Jacket" data-category="outerwear" data-price="850">
-        <div class="shop-product-media">PRODUCT IMAGE<button class="wishlist-button" type="button" aria-label="Add Denim Jacket to wishlist" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg></button></div>
-        <div class="shop-product-info"><p class="shop-product-name">Denim Jacket</p><div class="shop-product-meta"><span>Very good</span><span class="shop-product-price">₱850</span></div></div>
-      </article>
-      <article class="shop-product-card" data-name="Cargo Pants" data-category="bottoms" data-price="700">
-        <div class="shop-product-media">PRODUCT IMAGE<button class="wishlist-button" type="button" aria-label="Add Cargo Pants to wishlist" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg></button></div>
-        <div class="shop-product-info"><p class="shop-product-name">Cargo Pants</p><div class="shop-product-meta"><span>Good condition</span><span class="shop-product-price">₱700</span></div></div>
-      </article>
-      <article class="shop-product-card" data-name="Vintage Windbreaker" data-category="outerwear" data-price="650">
-        <div class="shop-product-media">PRODUCT IMAGE<button class="wishlist-button" type="button" aria-label="Add Vintage Windbreaker to wishlist" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg></button></div>
-        <div class="shop-product-info"><p class="shop-product-name">Vintage Windbreaker</p><div class="shop-product-meta"><span>Very good</span><span class="shop-product-price">₱650</span></div></div>
-      </article>
-      <article class="shop-product-card" data-name="Relaxed Cotton Shirt" data-category="tops" data-price="550">
-        <div class="shop-product-media">PRODUCT IMAGE<button class="wishlist-button" type="button" aria-label="Add Relaxed Cotton Shirt to wishlist" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg></button></div>
-        <div class="shop-product-info"><p class="shop-product-name">Relaxed Cotton Shirt</p><div class="shop-product-meta"><span>Good condition</span><span class="shop-product-price">₱550</span></div></div>
-      </article>
-      <article class="shop-product-card" data-name="Classic Leather Belt" data-category="accessories" data-price="500">
-        <div class="shop-product-media">PRODUCT IMAGE<button class="wishlist-button" type="button" aria-label="Add Classic Leather Belt to wishlist" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg></button></div>
-        <div class="shop-product-info"><p class="shop-product-name">Classic Leather Belt</p><div class="shop-product-meta"><span>Very good</span><span class="shop-product-price">₱500</span></div></div>
-      </article>
-    </section>
+    <p class="shop-count" id="shop-count">Loading pieces…</p>
+    <section class="shop-product-grid" id="shop-product-grid" aria-label="Products"></section>
 
-    <section class="shop-empty" id="shop-empty" aria-live="polite"><h2>No pieces found.</h2><p>Try a different search or category.</p></section>
+    <section class="shop-empty" id="shop-empty" aria-live="polite" hidden><h2>No pieces found.</h2><p>Try a different search or category.</p></section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
   <script src="../js/global.js" defer></script>
   <script src="../js/shop.js" defer></script>
 </body>
