@@ -43,9 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", cartIcon);
     link.classList.add("icon-link");
 
-    // Always provide one dedicated badge element on every storefront page.
-    // Older markup nested the badge inside a hidden text span, which made the
-    // notification disappear on some pages. Move/reuse it as a direct child.
     let badge = link.querySelector(".cart-count");
     if (!badge) {
       badge = document.createElement("span");
@@ -58,6 +55,44 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (badge.parentElement !== link) link.appendChild(badge);
   });
+
+  // Responsive mobile navigation uses the existing main navigation links.
+  const header = document.querySelector(".site-header");
+  const mainNav = header?.querySelector(".main-nav");
+  if (header && mainNav && !header.querySelector(".mobile-menu-toggle")) {
+    const menuToggle = document.createElement("button");
+    menuToggle.type = "button";
+    menuToggle.className = "mobile-menu-toggle";
+    menuToggle.setAttribute("aria-label", "Open navigation menu");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+      </svg>`;
+
+    header.appendChild(menuToggle);
+
+    const setMenuState = (open) => {
+      header.classList.toggle("menu-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+      menuToggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+      menuToggle.innerHTML = open
+        ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>`
+        : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>`;
+    };
+
+    menuToggle.addEventListener("click", () => {
+      setMenuState(!header.classList.contains("menu-open"));
+    });
+
+    mainNav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setMenuState(false));
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 900) setMenuState(false);
+    });
+  }
 
   const updateCartCount = () => {
     let count = 0;
