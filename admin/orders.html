@@ -1,1 +1,168 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Orders — Admin — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">ADMIN</p><h1>All orders.</h1><p>Review platform-wide orders and status after the commerce system is connected.</p></header><div class="content-card"><h2>Order management</h2><p style="margin-top:1rem;color:var(--brown)">Order records will be loaded from Supabase.</p></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/auth-guard.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Orders — Admin — DATIHAN.PH</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+
+  <style>
+    .admin-order-table-wrap {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+    }
+
+    .admin-order-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 950px;
+    }
+
+    .admin-order-table th,
+    .admin-order-table td {
+      padding: 1rem 1.1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line, #dfd0c3);
+    }
+
+    .admin-order-table th {
+      font-size: .75rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--brown);
+    }
+
+    .admin-order-number {
+      display: block;
+      font-weight: 700;
+    }
+
+    .admin-order-id {
+      display: block;
+      margin-top: .3rem;
+      font-size: .7rem;
+      color: var(--brown);
+      word-break: break-all;
+    }
+
+    .admin-order-status {
+      display: inline-flex;
+      padding: .35rem .65rem;
+      border-radius: 999px;
+      background: #dfcfbe;
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .admin-order-status.cancelled {
+      opacity: .7;
+    }
+
+    .admin-order-status.returned_refunded {
+      background: #d8c5b7;
+    }
+
+    .admin-order-empty {
+      padding: 2rem 0;
+      color: var(--brown);
+    }
+
+    .admin-order-error {
+      margin-top: 1rem;
+      color: #8b3a2e;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page-main">
+
+    <header class="page-header">
+      <p class="eyebrow">ADMIN</p>
+
+      <h1>All orders.</h1>
+
+      <p>
+        Review platform-wide orders and status after the commerce system is connected.
+      </p>
+    </header>
+
+    <section class="content-card" data-admin-orders>
+
+      <div class="section-heading">
+        <div>
+          <h2>Order management</h2>
+
+          <p data-orders-status>
+            Loading orders…
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="admin-order-error"
+        data-orders-error
+        hidden
+      ></div>
+
+      <div class="admin-order-table-wrap">
+
+        <table
+          class="admin-order-table"
+          data-orders-table
+          hidden
+        >
+
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Buyer</th>
+              <th>Subtotal</th>
+              <th>Shipping</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+
+          <tbody data-orders-body></tbody>
+
+        </table>
+
+        <div
+          class="admin-order-empty"
+          data-orders-empty
+          hidden
+        ></div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/admin-orders.js"></script>
+
+</body>
+</html>
