@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shipping — Shop Owner — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="shipping.css">
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">SHOP OWNER</p>
+      <h1>Shipping.</h1>
+      <p>Set the delivery rates your customers will pay at checkout.</p>
+    </header>
+
+    <section class="content-card shipping-shell">
+      <div class="shipping-toolbar">
+        <div>
+          <p class="eyebrow">YOUR SHIPPING RATES</p>
+          <h2>Delivery rate management</h2>
+          <p class="toolbar-help">Create rates by area. You control the fee; the saved rate will later be used to calculate each order.</p>
+        </div>
+        <button class="button button-primary" id="add-rate-button" type="button">Add shipping rate</button>
+      </div>
+
+      <div class="shipping-note">
+        <strong>How it works</strong>
+        <span>For now, this page only stores your rates. We will connect these rates to customer checkout next, then save the selected shipping fee with each order.</span>
+      </div>
+
+      <div id="shipping-rates-list" class="shipping-rates-list">
+        <p class="loading">Loading shipping rates...</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="shipping-modal" id="shipping-modal" aria-hidden="true">
+    <div class="shipping-modal-card" role="dialog" aria-modal="true" aria-labelledby="shipping-modal-title">
+      <div class="shipping-modal-header">
+        <div>
+          <p class="eyebrow">SHIPPING RATE</p>
+          <h2 id="shipping-modal-title">Add shipping rate</h2>
+        </div>
+        <button class="modal-close" id="close-shipping-modal" type="button" aria-label="Close">×</button>
+      </div>
+
+      <form id="shipping-form">
+        <div class="shipping-form-grid">
+          <div class="field field-full">
+            <label for="shipping-area">Area / location</label>
+            <input id="shipping-area" type="text" maxlength="120" placeholder="e.g. Metro Manila" required>
+          </div>
+          <div class="field">
+            <label for="shipping-fee">Shipping fee</label>
+            <div class="currency-input"><span>₱</span><input id="shipping-fee" type="number" min="0" step="0.01" placeholder="80.00" required></div>
+          </div>
+          <div class="field checkbox-field">
+            <input id="shipping-active" type="checkbox" checked>
+            <label for="shipping-active">Rate is active</label>
+          </div>
+        </div>
+
+        <div class="shipping-form-actions">
+          <button class="button button-secondary" id="cancel-shipping" type="button">Cancel</button>
+          <button class="button button-primary" id="save-shipping" type="submit">Add rate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="confirm-modal" id="shipping-delete-confirm-modal" hidden>
+    <div class="confirm-backdrop"></div>
+    <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="shipping-delete-title">
+      <div class="confirm-icon" aria-hidden="true">!</div>
+      <div class="confirm-content">
+        <p class="eyebrow">DELETE SHIPPING RATE</p>
+        <h2 id="shipping-delete-title">Delete this rate?</h2>
+        <p id="shipping-delete-message">This shipping rate will be permanently removed.</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="button button-secondary" id="shipping-delete-cancel" type="button">Cancel</button>
+        <button class="button button-danger" id="shipping-delete-confirm" type="button">Delete rate</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="shipping.js"></script>
+</body>
+</html>
