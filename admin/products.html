@@ -1,1 +1,85 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Products — Admin — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">ADMIN</p><h1>All products.</h1><p>Review and manage product listings across participating shops.</p></header><div class="content-card"><h2>Product management</h2><p style="margin-top:1rem;color:var(--brown)">Product records will be loaded from Supabase.</p></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/auth-guard.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products — Admin — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <style>
+    .admin-product-toolbar { display:flex; gap:1rem; align-items:center; justify-content:space-between; margin-top:1.5rem; flex-wrap:wrap; }
+    .admin-product-filters { display:flex; gap:.75rem; flex-wrap:wrap; flex:1; }
+    .admin-product-filters input,
+    .admin-product-filters select { min-height:44px; border:1px solid var(--line,#dfd0c3); border-radius:999px; background:transparent; padding:.7rem 1rem; font:inherit; color:var(--ink,#241d18); }
+    .admin-product-filters input { min-width:260px; flex:1; }
+    .admin-product-table-wrap { overflow-x:auto; margin-top:1.5rem; }
+    .admin-product-table { width:100%; border-collapse:collapse; min-width:1000px; }
+    .admin-product-table th,
+    .admin-product-table td { padding:1rem 1.1rem; text-align:left; border-bottom:1px solid var(--line,#dfd0c3); }
+    .admin-product-table th { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--brown); }
+    .admin-product-table td { color:var(--ink,#241d18); }
+    .admin-product-name { display:block; font-weight:700; }
+    .admin-product-id { display:block; margin-top:.3rem; font-size:.7rem; color:var(--brown); word-break:break-all; }
+    .admin-product-status { display:inline-flex; padding:.35rem .65rem; border-radius:999px; background:#dfcfbe; font-size:.78rem; font-weight:700; }
+    .admin-product-status.inactive { opacity:.65; }
+    .admin-product-empty { padding:2rem 0; color:var(--brown); }
+    .admin-product-error { margin-top:1rem; color:#8b3a2e; }
+  </style>
+</head>
+<body>
+  <main class="page-main">
+    <header class="page-header">
+      <p class="eyebrow">ADMIN</p>
+      <h1>All products.</h1>
+      <p>Review product listings across participating shops.</p>
+    </header>
+
+    <section class="content-card" data-admin-products>
+      <div class="section-heading">
+        <div>
+          <h2>Product listings</h2>
+          <p data-products-status>Loading products…</p>
+        </div>
+      </div>
+
+      <div class="admin-product-toolbar">
+        <div class="admin-product-filters">
+          <input data-products-search type="search" placeholder="Search products or shop owner" aria-label="Search products">
+          <select data-products-category aria-label="Filter products by category">
+            <option value="">All categories</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="admin-product-error" data-products-error hidden></div>
+
+      <div class="admin-product-table-wrap">
+        <table class="admin-product-table" data-products-table hidden>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Shop owner</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody data-products-body></tbody>
+        </table>
+        <div class="admin-product-empty" data-products-empty hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/admin-products.js"></script>
+</body>
+</html>
