@@ -1,1 +1,98 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Dashboard — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"></head><body><main class="page-main"><header class="page-header"><p class="eyebrow">ADMIN</p><h1>Platform dashboard.</h1><p>Manage the entire DATIHAN.PH platform, including users, shops, products and orders.</p></header><div class="card-grid"><a class="content-card" href="users.html"><h2>Users</h2><p>Manage platform accounts.</p></a><a class="content-card" href="shops.html"><h2>Shops</h2><p>Manage shop owners and shops.</p></a><a class="content-card" href="products.html"><h2>Products</h2><p>Review platform listings.</p></a><a class="content-card" href="orders.html"><h2>Orders</h2><p>Review platform orders.</p></a></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/auth-guard.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <main class="page-main admin-dashboard" data-admin-dashboard>
+    <header class="page-header">
+      <p class="eyebrow">ADMIN</p>
+      <h1>Platform dashboard.</h1>
+      <p>Manage the entire DATIHAN.PH platform, including users, shops, products and orders.</p>
+    </header>
+
+    <section aria-labelledby="overview-heading">
+      <div class="admin-section-heading">
+        <h2 id="overview-heading">Overview</h2>
+        <p class="admin-dashboard-status" data-dashboard-status>Loading platform data…</p>
+      </div>
+
+      <div class="admin-stats">
+        <article class="admin-stat">
+          <p class="admin-stat-label">Total users</p>
+          <p class="admin-stat-value" data-stat="total_users">—</p>
+          <p class="admin-stat-note">All platform accounts</p>
+        </article>
+        <article class="admin-stat">
+          <p class="admin-stat-label">Buyers</p>
+          <p class="admin-stat-value" data-stat="buyers">—</p>
+          <p class="admin-stat-note">Customer accounts</p>
+        </article>
+        <article class="admin-stat">
+          <p class="admin-stat-label">Shop owner</p>
+          <p class="admin-stat-value" data-stat="shop_owners">—</p>
+          <p class="admin-stat-note">Seller accounts</p>
+        </article>
+        <article class="admin-stat">
+          <p class="admin-stat-label">Admins</p>
+          <p class="admin-stat-value" data-stat="admins">—</p>
+          <p class="admin-stat-note">Platform administrators</p>
+        </article>
+        <article class="admin-stat">
+          <p class="admin-stat-label">Products</p>
+          <p class="admin-stat-value" data-stat="total_products">—</p>
+          <p class="admin-stat-note">Platform listings</p>
+        </article>
+        <article class="admin-stat">
+          <p class="admin-stat-label">Orders</p>
+          <p class="admin-stat-value" data-stat="total_orders">—</p>
+          <p class="admin-stat-note">All platform orders</p>
+        </article>
+        <article class="admin-stat">
+          <p class="admin-stat-label">Pending orders</p>
+          <p class="admin-stat-value" data-stat="pending_orders">—</p>
+          <p class="admin-stat-note">Awaiting confirmation</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="management-heading">
+      <div class="admin-section-heading">
+        <h2 id="management-heading">Management</h2>
+      </div>
+
+      <div class="admin-nav-grid">
+        <a class="content-card admin-nav-card" href="users.html">
+          <h2>Users</h2>
+          <p>Manage platform accounts.</p>
+        </a>
+        <a class="content-card admin-nav-card" href="shops.html">
+          <h2>Shops</h2>
+          <p>Manage shop owners and shops.</p>
+        </a>
+        <a class="content-card admin-nav-card" href="products.html">
+          <h2>Products</h2>
+          <p>Review platform listings.</p>
+        </a>
+        <a class="content-card admin-nav-card" href="orders.html">
+          <h2>Orders</h2>
+          <p>Review platform orders.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js"></script>
+  <script src="../js/admin-dashboard.js"></script>
+</body>
+</html>
