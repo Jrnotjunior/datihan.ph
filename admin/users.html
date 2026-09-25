@@ -10,52 +10,27 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
   <link rel="stylesheet" href="../css/admin-users.css">
+  <style>.admin-back-button{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin-bottom:1.25rem;border:1px solid var(--light-beige);border-radius:50%;background:var(--off-white);color:var(--black);text-decoration:none;font-size:1.35rem;line-height:1;transition:transform .15s ease,background .15s ease}.admin-back-button:hover{transform:translateX(-2px);background:var(--light-beige)}.admin-back-button:focus-visible{outline:2px solid currentColor;outline-offset:3px}</style>
 </head>
 <body>
   <main class="page-main admin-users" data-admin-users>
+    <a class="admin-back-button" href="dashboard.html" aria-label="Back to admin dashboard" title="Back to dashboard">←</a>
     <header class="page-header">
       <p class="eyebrow">ADMIN</p>
       <h1>Users.</h1>
       <p>View every platform account and its assigned role.</p>
     </header>
-
     <section aria-labelledby="users-heading">
       <div class="admin-users-toolbar">
-        <div>
-          <h2 id="users-heading">All accounts</h2>
-          <p class="admin-users-status" data-users-status>Loading users…</p>
-        </div>
-
-        <label>
-          <span class="sr-only">Filter users by role</span>
-          <select class="admin-users-filter" data-users-filter>
-            <option value="all">All roles</option>
-            <option value="buyer">Buyers</option>
-            <option value="shop_owner">Shop owners</option>
-            <option value="admin">Admins</option>
-          </select>
-        </label>
+        <div><h2 id="users-heading">All accounts</h2><p class="admin-users-status" data-users-status>Loading users…</p></div>
+        <label><span class="sr-only">Filter users by role</span><select class="admin-users-filter" data-users-filter><option value="all">All roles</option><option value="buyer">Buyers</option><option value="shop_owner">Shop owners</option><option value="admin">Admins</option></select></label>
       </div>
-
       <div class="admin-users-table-wrap">
-        <table class="admin-users-table">
-          <thead>
-            <tr>
-              <th>Account</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody data-users-body></tbody>
-        </table>
-        <div class="admin-users-empty" data-users-empty hidden>
-          No accounts match this filter.
-        </div>
+        <table class="admin-users-table"><thead><tr><th>Account</th><th>Email</th><th>Role</th><th>Created</th></tr></thead><tbody data-users-body></tbody></table>
+        <div class="admin-users-empty" data-users-empty hidden>No accounts match this filter.</div>
       </div>
     </section>
   </main>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/auth-guard.js"></script>
