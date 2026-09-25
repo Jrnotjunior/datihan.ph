@@ -131,6 +131,10 @@ p { margin: 0; }
   font-weight: 800;
 }
 
+/* The mobile menu button exists in the DOM on all pages, but must not
+   participate in the desktop header grid. It is enabled below 900px. */
+.mobile-menu-toggle { display: none; }
+
 .button-icon,
 .link-icon { display: inline-block; margin-left: 0.45rem; line-height: 1; }
 .cart-count {
