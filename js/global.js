@@ -42,23 +42,43 @@ document.addEventListener("DOMContentLoaded", () => {
     removeLegacyEmoji(link, '🛒');
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", cartIcon);
     link.classList.add("icon-link");
+
+    // Always provide one dedicated badge element on every storefront page.
+    // Older markup nested the badge inside a hidden text span, which made the
+    // notification disappear on some pages. Move/reuse it as a direct child.
+    let badge = link.querySelector(".cart-count");
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "cart-count";
+      badge.setAttribute("aria-label", "Cart item count");
+      link.appendChild(badge);
+    }
+    link.querySelectorAll(".cart-count").forEach((candidate) => {
+      if (candidate !== badge) candidate.remove();
+    });
+    if (badge.parentElement !== link) link.appendChild(badge);
   });
 
   const updateCartCount = () => {
     let count = 0;
     try {
       const cart = JSON.parse(localStorage.getItem("datihan_cart") || "[]");
-      count = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      count = Array.isArray(cart)
+        ? cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+        : 0;
     } catch (_) {
       count = 0;
     }
-    document.querySelectorAll(".cart-count").forEach((el) => {
+
+    document.querySelectorAll(".header-actions .cart-count").forEach((el) => {
       el.textContent = String(count);
       el.hidden = count === 0;
+      el.setAttribute("aria-label", `${count} ${count === 1 ? "item" : "items"} in cart`);
     });
   };
 
   updateCartCount();
   window.addEventListener("storage", updateCartCount);
   window.addEventListener("datihan-cart-updated", updateCartCount);
+  window.addEventListener("pageshow", updateCartCount);
 });
