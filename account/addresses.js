@@ -94,6 +94,7 @@ const openModal = (address = null) => {
         document.getElementById('address-first-name').value = address.first_name || '';
         document.getElementById('address-last-name').value = address.last_name || '';
         document.getElementById('address-line').value = address.address_line || '';
+        document.getElementById('address-barangay').value = address.barangay || '';
         document.getElementById('address-city').value = address.city || '';
         document.getElementById('address-province').value = address.province || '';
         document.getElementById('address-postal').value = address.postal_code || '';
@@ -146,7 +147,8 @@ const render = () => {
 
         card.querySelector('.address-label').textContent = address.label || 'Address';
         card.querySelector('.address-name').textContent = `${address.first_name || ''} ${address.last_name || ''}`.trim();
-        card.querySelector('.address-lines').innerHTML = `${address.address_line || ''}<br>${address.city || ''}, ${address.province || ''} ${address.postal_code || ''}<br>Philippines`;
+        const barangayLine = address.barangay ? `${address.barangay}, ` : '';
+        card.querySelector('.address-lines').innerHTML = `${address.address_line || ''}<br>${barangayLine}${address.city || ''}, ${address.province || ''} ${address.postal_code || ''}<br>Philippines`;
         card.querySelector('.address-phone').textContent = address.phone || '';
         list.appendChild(card);
     });
@@ -170,6 +172,7 @@ const validate = () => {
         'address-first-name',
         'address-last-name',
         'address-line',
+        'address-barangay',
         'address-city',
         'address-province'
     ];
@@ -202,6 +205,7 @@ const getPayload = () => ({
     first_name: document.getElementById('address-first-name').value.trim(),
     last_name: document.getElementById('address-last-name').value.trim(),
     address_line: document.getElementById('address-line').value.trim(),
+    barangay: document.getElementById('address-barangay').value.trim(),
     city: document.getElementById('address-city').value.trim(),
     province: document.getElementById('address-province').value.trim(),
     postal_code: document.getElementById('address-postal').value.trim(),
