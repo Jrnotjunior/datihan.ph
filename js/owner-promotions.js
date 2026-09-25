@@ -14,6 +14,7 @@
   const deleteModal = document.getElementById('promotion-delete-confirm-modal');
   const deleteConfirmButton = document.getElementById('promotion-delete-confirm-button');
   const deleteCancelButton = document.getElementById('promotion-delete-cancel-button');
+  const discountValueField = document.getElementById('promotion-discount-value-field');
 
   const fields = {
     title: document.getElementById('promotion-title'),
@@ -30,14 +31,12 @@
     toast.textContent = message;
     toast.classList.toggle('error', isError);
     toast.classList.add('is-visible');
-    window.clearTimeout(showToast.timer);
-    showToast.timer = window.setTimeout(() => toast.classList.remove('is-visible'), 3200);
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove('is-visible'), 3200);
   }
 
   function escapeHtml(value) {
-    return String(value ?? '')
-      .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
   }
 
   function peso(value) {
@@ -61,6 +60,7 @@
   }
 
   function promotionValue(promotion) {
+    if (promotion.discount_type === 'free_shipping') return 'FREE SHIPPING';
     return promotion.discount_type === 'percentage'
       ? `${Number(promotion.discount_value || 0)}% OFF`
       : `${peso(promotion.discount_value)} OFF`;
@@ -90,29 +90,9 @@
       list.innerHTML = '<div class="empty-state"><h3>No promotions found.</h3><p>Create a promotion or try another search/filter.</p></div>';
       return;
     }
-
     list.innerHTML = promotions.map(promotion => {
       const status = getScheduleStatus(promotion);
-      return `
-        <article class="promotion-card">
-          <div class="promotion-heading">
-            <div>
-              <span class="status-badge ${status.className}">${status.label}</span>
-              <h2>${escapeHtml(promotion.title)}</h2>
-            </div>
-            <strong class="promotion-value">${escapeHtml(promotionValue(promotion))}</strong>
-          </div>
-          ${promotion.description ? `<p class="promotion-description">${escapeHtml(promotion.description)}</p>` : ''}
-          <div class="promotion-meta">
-            <span>${formatDate(promotion.start_date)}${promotion.end_date ? ` – ${formatDate(promotion.end_date)}` : ' – No end date'}</span>
-            <span>${escapeHtml(productNames(promotion))}</span>
-            ${promotion.code ? `<span>Code: <strong>${escapeHtml(promotion.code)}</strong></span>` : ''}
-          </div>
-          <div class="promotion-actions">
-            <button class="button button-secondary button-small" type="button" data-action="edit" data-id="${escapeHtml(promotion.id)}">Edit</button>
-            <button class="button button-secondary button-small" type="button" data-action="delete" data-id="${escapeHtml(promotion.id)}">Delete</button>
-          </div>
-        </article>`;
+      return `<article class="promotion-card"><div class="promotion-heading"><div><span class="status-badge ${status.className}">${status.label}</span><h2>${escapeHtml(promotion.title)}</h2></div><strong class="promotion-value">${escapeHtml(promotionValue(promotion))}</strong></div>${promotion.description ? `<p class="promotion-description">${escapeHtml(promotion.description)}</p>` : ''}<div class="promotion-meta"><span>${formatDate(promotion.start_date)}${promotion.end_date ? ` – ${formatDate(promotion.end_date)}` : ' – No end date'}</span><span>${escapeHtml(productNames(promotion))}</span>${promotion.code ? `<span>Code: <strong>${escapeHtml(promotion.code)}</strong></span>` : ''}</div><div class="promotion-actions"><button class="button button-secondary button-small" type="button" data-action="edit" data-id="${escapeHtml(promotion.id)}">Edit</button><button class="button button-secondary button-small" type="button" data-action="delete" data-id="${escapeHtml(promotion.id)}">Delete</button></div></article>`;
     }).join('');
   }
 
@@ -150,11 +130,17 @@
       return;
     }
     const selected = new Set(selectedIds);
-    productPicker.innerHTML = state.products.map(product => `
-      <label class="product-option">
-        <input type="checkbox" value="${escapeHtml(product.id)}" ${selected.has(product.id) ? 'checked' : ''}>
-        <span>${escapeHtml(product.name)}</span>
-      </label>`).join('');
+    productPicker.innerHTML = state.products.map(product => `<label class="product-option"><input type="checkbox" value="${escapeHtml(product.id)}" ${selected.has(product.id) ? 'checked' : ''}><span>${escapeHtml(product.name)}</span></label>`).join('');
+  }
+
+  function syncDiscountType() {
+    const freeShipping = fields.type.value === 'free_shipping';
+    fields.value.disabled = freeShipping;
+    fields.value.required = !freeShipping;
+    fields.value.min = freeShipping ? '0' : '0.01';
+    fields.value.value = freeShipping ? '0' : fields.value.value;
+    discountValueField.querySelector('label').textContent = freeShipping ? 'Discount value' : 'Discount value';
+    discountValueField.title = freeShipping ? 'Free shipping does not require a discount amount.' : '';
   }
 
   function openModal(promotion = null) {
@@ -170,9 +156,10 @@
     fields.endDate.value = promotion?.end_date || '';
     fields.active.checked = promotion?.is_active !== false;
     renderProductPicker(promotion?.product_ids || []);
+    syncDiscountType();
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
-    window.setTimeout(() => fields.title.focus(), 0);
+    setTimeout(() => fields.title.focus(), 0);
   }
 
   function closeModal() {
@@ -182,6 +169,7 @@
     form.reset();
     fields.type.value = 'percentage';
     fields.active.checked = true;
+    syncDiscountType();
     renderProductPicker([]);
   }
 
@@ -227,10 +215,11 @@
 
   async function savePromotion(event) {
     event.preventDefault();
-    if (!fields.title.value.trim()) return showToast('Promotion title is required.', true);
+    const type = fields.type.value;
     const value = Number(fields.value.value);
-    if (!Number.isFinite(value) || value <= 0) return showToast('Discount value must be greater than 0.', true);
-    if (fields.type.value === 'percentage' && value > 100) return showToast('Percentage discount cannot exceed 100%.', true);
+    if (!fields.title.value.trim()) return showToast('Promotion title is required.', true);
+    if (type !== 'free_shipping' && (!Number.isFinite(value) || value <= 0)) return showToast('Discount value must be greater than 0.', true);
+    if (type === 'percentage' && value > 100) return showToast('Percentage discount cannot exceed 100%.', true);
     if (fields.startDate.value && fields.endDate.value && fields.endDate.value < fields.startDate.value) return showToast('End date cannot be before the start date.', true);
 
     saveButton.disabled = true;
@@ -240,8 +229,8 @@
       const payload = {
         title: fields.title.value.trim(),
         description: fields.description.value.trim() || null,
-        discount_type: fields.type.value,
-        discount_value: value,
+        discount_type: type,
+        discount_value: type === 'free_shipping' ? 0 : value,
         code: fields.code.value.trim().toUpperCase() || null,
         product_ids: selectedProductIds(),
         start_date: fields.startDate.value || null,
@@ -273,6 +262,7 @@
   document.getElementById('add-promotion-button').addEventListener('click', () => openModal());
   document.getElementById('close-promotion-modal').addEventListener('click', closeModal);
   document.getElementById('cancel-promotion').addEventListener('click', closeModal);
+  fields.type.addEventListener('change', syncDiscountType);
   form.addEventListener('submit', savePromotion);
   searchInput.addEventListener('input', renderPromotions);
   statusFilter.addEventListener('change', renderPromotions);
