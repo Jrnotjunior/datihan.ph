@@ -13,7 +13,7 @@
     'aklan', 'antique', 'capiz', 'guimaras', 'iloilo', 'negros occidental',
     'negros oriental', 'cebu', 'bohol', 'siquijor', 'biliran', 'eastern samar',
     'leyte', 'northern samar', 'samar', 'western samar', 'southern leyte',
-    'romblon'
+    'romblon', 'central visayas', 'western visayas', 'eastern visayas'
   ]);
 
   const MINDANAO_PROVINCES = new Set([
@@ -49,9 +49,13 @@
 
   const rateMatchesZone = (rateName, zone) => {
     const name = normalise(rateName);
-    if (zone === 'Metro Manila') return /metro manila|metropolitan manila|national capital region|\bncr\b/.test(name);
-    if (zone === 'Visayas') return /visayas/.test(name);
-    if (zone === 'Mindanao') return /mindanao/.test(name);
+
+    // Do not let "Luzon (Outside Metro Manila)" match Metro Manila.
+    if (zone === 'Metro Manila') {
+      return /^(metro manila|metropolitan manila|national capital region|ncr)(\s|$)/.test(name);
+    }
+    if (zone === 'Visayas') return /(^|\s)visayas(\s|$)/.test(name);
+    if (zone === 'Mindanao') return /(^|\s)mindanao(\s|$)/.test(name);
     return /luzon|outside metro manila|outside ncr|nationwide/.test(name);
   };
 
@@ -88,7 +92,7 @@
     display.innerHTML = '<strong></strong><span></span>';
     display.querySelector('strong').textContent = result.zone;
     display.querySelector('span').textContent = result.match
-      ? formatRateText(result.match).replace(new RegExp(`^${result.zone}\\s*[—-]?\\s*`, 'i'), '').trim()
+      ? formatRateText(result.match).replace(/^.*?\s*[—-]\s*(₱.*)$/i, '$1').trim()
       : 'No shipping rate is available for this address.';
     display.hidden = false;
     select.hidden = true;
