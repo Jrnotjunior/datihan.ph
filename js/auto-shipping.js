@@ -38,8 +38,6 @@
     const cityName = normalise(city);
     const provinceName = normalise(province);
 
-    // Province is authoritative for NCR addresses, while city is a fallback
-    // for older saved addresses that may not have "Metro Manila" in province.
     if (METRO_MANILA_PROVINCES.has(provinceName) || METRO_MANILA_CITIES.has(cityName)) {
       return 'Metro Manila';
     }
@@ -61,7 +59,6 @@
     const options = [...select.options].filter(option => option.value);
     let match = options.find(option => rateMatchesZone(option.textContent, zone));
 
-    // For non-Metro areas, support shops that use a single catch-all rate.
     if (!match && zone !== 'Metro Manila') {
       match = options.find(option => /outside metro manila|outside ncr|nationwide/.test(normalise(option.textContent)));
     }
@@ -87,7 +84,7 @@
     display.innerHTML = '<strong></strong><span></span>';
     display.querySelector('strong').textContent = result.zone;
     display.querySelector('span').textContent = result.match
-      ? formatRateText(result.match).replace(/\s*[—-]\s*₱[\d,.]+$/, '').replace(new RegExp(`^${result.zone}\\s*[—-]?\\s*`, 'i'), '').trim()
+      ? formatRateText(result.match).replace(new RegExp(`^${result.zone}\\s*[—-]?\\s*`, 'i'), '').trim()
       : 'No shipping rate is available for this address.';
     display.hidden = false;
     select.hidden = true;
