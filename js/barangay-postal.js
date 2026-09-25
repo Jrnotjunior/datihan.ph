@@ -28,8 +28,9 @@
     const region=regionSlug();
     if(!region||!cityCode||!provinceCode) throw Error('Barangay postal location context is unavailable.');
     const province=`${slug(provinceName)}-${provinceCode}`;
-    const city=`${slug(cityName)}-${cityCode}`;
-    return {region,province,city,barangay:String(b.value),key:`${region}/${province}/${city}`};
+    const cityBase=slug(cityName);
+    const cityNames=[`${cityBase}-${cityCode}`,`${cityBase}-city-${cityCode}`].filter((v,i,a)=>v&&a.indexOf(v)===i);
+    return {region,province,cityNames,barangay:String(b.value)};
   };
   const decode=content=>{
     const bin=atob(String(content||'').replace(/\n/g,''));
@@ -37,8 +38,13 @@
     return JSON.parse(new TextDecoder().decode(bytes));
   };
   const load=async ctx=>{
-    if(cache.has(ctx.key)) return cache.get(ctx.key);
-    const urls=[`${ROOT}/${ctx.key}/barangay.json`,`${API}/${ctx.key}/barangay.json?ref=main`];
+    const key=`${ctx.region}/${ctx.province}/${ctx.cityNames.join('|')}`;
+    if(cache.has(key)) return cache.get(key);
+    const urls=[];
+    ctx.cityNames.forEach(city=>{
+      const path=`${ctx.region}/${ctx.province}/${city}/barangay.json`;
+      urls.push(`${ROOT}/${path}`,`${API}/${path}?ref=main`);
+    });
     const promise=(async()=>{
       let last=0;
       for(const url of urls){
@@ -55,7 +61,7 @@
       }
       throw Error(`Barangay postal data request failed (${last||404}).`);
     })();
-    cache.set(ctx.key,promise);
+    cache.set(key,promise);
     return promise;
   };
   const variants=code=>{const s=String(code||'').replace(/\D/g,'');const a=[s];if(s.length===10&&s.endsWith('0'))a.push(s.slice(0,-1));if(s.length===9)a.push(`${s}0`);return [...new Set(a)];};
@@ -68,10 +74,7 @@
     if(!z) throw Error('Postal code is not available for the selected barangay.');
     return z;
   };
-  const original=window.DatihanLocations?.getBarangayPostalCode;
-  if(window.DatihanLocations){
-    window.DatihanLocations.getBarangayPostalCode=lookup;
-  }
+  if(window.DatihanLocations) window.DatihanLocations.getBarangayPostalCode=lookup;
   const b=document.getElementById('address-barangay');
   if(b){b.addEventListener('change',async()=>{
     const postal=document.getElementById('address-postal');
