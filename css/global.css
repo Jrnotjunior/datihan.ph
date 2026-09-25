@@ -401,3 +401,46 @@ p { margin: 0; }
   }
   .footer-about .footer-brand { font-size: 30px; }
 }
+
+/* Page styles load after this shared stylesheet. Keep the approved global
+   header geometry authoritative so page-specific CSS cannot stretch it or
+   turn the desktop navigation into a second grid row. */
+body .site-header {
+  grid-template-rows: 1fr;
+  align-items: center;
+}
+body .site-header .main-nav {
+  grid-column: auto;
+  grid-row: 1;
+  width: auto;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+}
+body .site-header .header-actions {
+  width: auto;
+  grid-column: 3;
+  grid-row: 1;
+}
+
+@media (max-width: 900px) {
+  body .site-header {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 1fr;
+  }
+  body .site-header .main-nav {
+    display: none;
+    grid-column: auto;
+    grid-row: auto;
+    width: min(240px, calc(100vw - 2rem));
+    overflow: visible;
+    padding: 2.25rem 1.5rem 1.5rem;
+    margin: 0;
+  }
+  body .site-header.menu-open .main-nav { display: flex; }
+  body .site-header .header-actions {
+    width: auto;
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
