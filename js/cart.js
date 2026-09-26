@@ -1,6 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const CART_KEY = "datihan_cart";
-  const SELECTED_KEY = "datihan_selected_cart_items";
+document.addEventListener("DOMContentLoaded", async () => {
   const content = document.querySelector("#cart-content");
   const itemsContainer = document.querySelector(".cart-items");
   const empty = document.querySelector("#empty-cart");
@@ -8,32 +6,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalEl = document.querySelector("#total");
   const checkoutLink = document.querySelector('.summary a[href="checkout.html"]');
 
-  const readCart = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-      return Array.isArray(cart) ? cart : [];
-    } catch (_) {
-      return [];
-    }
-  };
+  if (window.datihanCartStore) await window.datihanCartStore.ready();
+  if (!window.datihanCartStore?.isAuthenticated()) {
+    const redirect = encodeURIComponent("../pages/cart.html");
+    window.location.replace(`../auth/login.html?redirect=${redirect}`);
+    return;
+  }
 
-  const writeCart = (cart) => {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    window.dispatchEvent(new Event("datihan-cart-updated"));
-  };
-
-  const readSelected = () => {
-    try {
-      const value = JSON.parse(localStorage.getItem(SELECTED_KEY) || "null");
-      return Array.isArray(value) ? value.map(String) : null;
-    } catch (_) {
-      return null;
-    }
-  };
-
-  const writeSelected = (ids) => {
-    localStorage.setItem(SELECTED_KEY, JSON.stringify(ids.map(String)));
-  };
+  const readCart = () => window.datihanCartStore.read();
+  const writeCart = (cart) => window.datihanCartStore.write(cart);
+  const readSelected = () => window.datihanCartStore.readSelected();
+  const writeSelected = (ids) => window.datihanCartStore.writeSelected(ids);
 
   const money = (value) => `₱${Number(value || 0).toLocaleString("en-PH")}`;
   const escapeHtml = (value) => String(value ?? "")
@@ -94,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      if (changed) localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      if (changed) writeCart(cart);
     } catch (error) {
       console.error("Hydrate cart product data error:", error);
     }
@@ -103,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const getSelection = (cart) => {
     const ids = cart.map((item) => String(item.id));
     const saved = readSelected();
-
     const selected = saved === null ? ids : saved.filter((id) => ids.includes(id));
     writeSelected(selected);
     return new Set(selected);
