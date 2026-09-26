@@ -56,6 +56,8 @@ p { margin: 0; }
   display: inline-flex;
   align-items: center;
   justify-self: start;
+  grid-column: 1;
+  grid-row: 1;
   background-image: url("../datihanlogo1.jpg");
   background-position: center;
   background-repeat: no-repeat;
@@ -70,6 +72,9 @@ p { margin: 0; }
   display: flex;
   align-items: center;
   justify-content: center;
+  justify-self: center;
+  grid-column: 2;
+  grid-row: 1;
   gap: clamp(1rem, 2.2vw, 2rem);
 }
 .main-nav a {
@@ -82,6 +87,8 @@ p { margin: 0; }
 
 .header-actions {
   justify-self: end;
+  grid-column: 3;
+  grid-row: 1;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -411,12 +418,13 @@ body .site-header {
   align-items: center;
 }
 body .site-header .main-nav {
-  grid-column: auto;
+  grid-column: 2;
   grid-row: 1;
   width: auto;
   overflow: visible;
   padding: 0;
   margin: 0;
+  justify-self: center;
 }
 body .site-header .header-actions {
   width: auto;
