@@ -5,6 +5,12 @@
 .content-card{padding:clamp(1.25rem,3vw,2rem);border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white)}
 .content-card h2{margin-bottom:1rem}
 .content-card p + p{margin-top:.75rem}
+
+/* Policy pages: keep each numbered section visually separated and readable. */
+.policy-content h2{margin:1.5rem 0 .55rem}
+.policy-content h2:first-child{margin-top:0}
+.policy-content p{margin:0;line-height:1.65}
+
 .card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
 .placeholder-media{aspect-ratio:4/5;display:grid;place-items:center;border-radius:var(--radius);background:var(--light-beige);color:var(--brown);font-family:"Manrope",sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em}
 .form-grid{display:grid;gap:1rem;max-width:680px;margin-inline:auto}
@@ -34,4 +40,4 @@
 .owner-nav-links a.is-active{background:var(--dark-brown);color:var(--off-white)}
 
 @media(max-width:800px){.card-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.owner-nav{align-items:flex-start;flex-direction:column}.owner-nav-links{justify-content:flex-start;width:100%}.owner-nav-links a{padding:.4rem .55rem}.faq-item summary{padding:1rem 0;font-size:15px}.faq-item p{font-size:15px}}
+@media(max-width:600px){.owner-nav{align-items:flex-start;flex-direction:column}.owner-nav-links{justify-content:flex-start;width:100%}.owner-nav-links a{padding:.4rem .55rem}.faq-item summary{padding:1rem 0;font-size:15px}.faq-item p{font-size:15px}.policy-content h2{margin-top:1.25rem}.policy-content p{line-height:1.6}}
