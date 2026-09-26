@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Prevent duplicate initialization if global.js is loaded more than once.
+  if (window.__datihanGlobalInitialized) return;
+  window.__datihanGlobalInitialized = true;
+
   const year = document.querySelector("#current-year");
   if (year) year.textContent = new Date().getFullYear();
 
@@ -178,8 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("pageshow", updateCartCount);
 
   // Render one shared buyer-facing footer on every storefront page.
-  if (!document.querySelector(".site-footer")) {
+  // Use a dedicated id so this footer can never be inserted twice.
+  if (!document.querySelector("#datihan-global-footer")) {
     const footer = document.createElement("footer");
+    footer.id = "datihan-global-footer";
     footer.className = "site-footer storefront-footer";
     footer.style.gridTemplateColumns = "minmax(320px, 1.4fr) minmax(170px, 0.75fr) minmax(170px, 0.75fr) minmax(220px, 1fr)";
     footer.innerHTML = `
