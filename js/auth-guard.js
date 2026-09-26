@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <a href="inventory.html" data-page="inventory.html">Inventory</a>
             <a href="orders.html" data-page="orders.html">Orders</a>
             <a href="pop-ups.html" data-page="pop-ups.html">Pop-ups</a>
+            <a href="shipping.html" data-page="shipping.html">Shipping</a>
             <a href="promotions.html" data-page="promotions.html">Promotions</a>
           </div>
         `;
