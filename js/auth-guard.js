@@ -52,7 +52,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (isOwnerPage) {
       const pageMain = document.querySelector('.page-main');
-      if (pageMain && !document.querySelector('.owner-nav')) {
+      const existingNav = document.querySelector('.owner-nav');
+
+      if (existingNav) {
+        const existingLinks = existingNav.querySelector('.owner-nav-links') || existingNav.querySelector(':scope > div');
+        if (existingLinks && !existingLinks.querySelector('a[href="shipping.html"]')) {
+          const shippingLink = document.createElement('a');
+          shippingLink.href = 'shipping.html';
+          shippingLink.textContent = 'Shipping';
+          shippingLink.dataset.page = 'shipping.html';
+          existingLinks.appendChild(shippingLink);
+        }
+      }
+
+      if (pageMain && !existingNav) {
         const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
         const nav = document.createElement('nav');
         nav.className = 'owner-nav';
