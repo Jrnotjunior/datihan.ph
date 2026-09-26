@@ -12,42 +12,14 @@
   <link rel="stylesheet" href="cart.css?v=2">
 </head>
 <body>
-  <header class="site-header">
-    <a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
-    <nav class="main-nav" aria-label="Main navigation">
-      <a href="shop.html">Shop</a><a href="pop-ups.html">Pop-ups</a><a href="about.html">About</a>
-    </nav>
-    <div class="header-actions">
-      <a href="../auth/login.html" class="icon-link" aria-label="Account"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg><span>Account</span></a>
-      <a href="cart.html" class="icon-link" aria-label="Shopping cart"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg><span>Cart <span class="cart-count">0</span></span></a>
-    </div>
-  </header>
-
   <main class="cart-main">
-    <header class="cart-header">
-      <p class="eyebrow">YOUR CART</p>
-      <h1>Your finds, ready to go.</h1>
-    </header>
-
+    <header class="cart-header"><p class="eyebrow">YOUR CART</p><h1>Your finds, ready to go.</h1></header>
     <div class="cart-layout" id="cart-content">
       <section class="cart-items" aria-label="Cart items"></section>
-      <aside class="summary">
-        <h2>Summary</h2>
-        <div class="summary-row"><span>Selected subtotal</span><strong id="subtotal">₱0</strong></div>
-        <div class="summary-row"><span>Shipping</span><strong>Calculated at checkout</strong></div>
-        <div class="summary-row summary-total"><span>Total</span><strong id="total">₱0</strong></div>
-        <a class="button button-primary" href="checkout.html">Proceed to checkout <span class="button-icon" aria-hidden="true">→</span></a>
-        <a class="continue-shopping" href="shop.html">← Continue shopping</a>
-      </aside>
+      <aside class="summary"><h2>Summary</h2><div class="summary-row"><span>Selected subtotal</span><strong id="subtotal">₱0</strong></div><div class="summary-row"><span>Shipping</span><strong>Calculated at checkout</strong></div><div class="summary-row summary-total"><span>Total</span><strong id="total">₱0</strong></div><a class="button button-primary" href="checkout.html">Proceed to checkout <span class="button-icon" aria-hidden="true">→</span></a><a class="continue-shopping" href="shop.html">← Continue shopping</a></aside>
     </div>
-
-    <section class="empty-cart" id="empty-cart">
-      <h2>Your cart is empty.</h2>
-      <p>Find something you love and it can be here.</p>
-      <a class="button button-primary" href="shop.html">Browse the collection <span class="button-icon" aria-hidden="true">→</span></a>
-    </section>
+    <section class="empty-cart" id="empty-cart"><h2>Your cart is empty.</h2><p>Find something you love and it can be here.</p><a class="button button-primary" href="shop.html">Browse the collection <span class="button-icon" aria-hidden="true">→</span></a></section>
   </main>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/cart-store.js"></script>
