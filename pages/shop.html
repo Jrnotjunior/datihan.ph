@@ -1,58 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Shop curated pre-loved pieces from DATIHAN.PH.">
-  <title>Shop — DATIHAN.PH</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/global.css">
-  <link rel="stylesheet" href="../css/shop.css">
-</head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
-    <nav class="main-nav" aria-label="Main navigation">
-      <a href="shop.html">Shop</a><a href="pop-ups.html">Pop-ups</a><a href="about.html">About</a>
-    </nav>
-    <div class="header-actions">
-      <a href="../auth/login.html" class="icon-link" aria-label="Account"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg><span>Account</span></a>
-      <a href="cart.html" class="icon-link" aria-label="Shopping cart"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg><span>Cart <span class="cart-count">0</span></span></a>
-    </div>
-  </header>
-
-  <main class="shop-main">
-    <header class="shop-header">
-      <p class="eyebrow">SHOP</p>
-      <h1>Worn before. Worth now.</h1>
-      <p>Datihan sells and consigns pre-loved pants, shirts, and shoes — no storefront, just good pieces at pop-ups around the city and a shop that never really closes.</p>
-    </header>
-
-    <section class="shop-toolbar" aria-label="Product controls">
-      <label class="shop-search" for="shop-search">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
-        <input id="shop-search" type="search" placeholder="Search pieces" autocomplete="off">
-      </label>
-      <select id="shop-category" class="shop-select" aria-label="Filter by category">
-        <option value="all">All categories</option>
-      </select>
-      <select id="shop-sort" class="shop-select" aria-label="Sort products">
-        <option value="featured">Sort: Featured</option><option value="price-low">Price: Low to high</option><option value="price-high">Price: High to low</option>
-      </select>
-    </section>
-
-    <p class="shop-count" id="shop-count">Loading pieces…</p>
-    <section class="shop-product-grid" id="shop-product-grid" aria-label="Products"></section>
-
-    <section class="shop-empty" id="shop-empty" aria-live="polite" hidden><h2>No pieces found.</h2><p>Try a different search or category.</p></section>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js"></script>
-  <script src="../js/cart-store.js"></script>
-  <script src="../js/global.js" defer></script>
-  <script src="../js/shop.js" defer></script>
-</body>
-</html>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="Shop curated pre-loved pieces from DATIHAN.PH."><title>Shop — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/shop.css">
+</head><body>
+  <main class="shop-main"><header class="shop-header"><p class="eyebrow">SHOP</p><h1>Worn before. Worth now.</h1><p>Datihan sells and consigns pre-loved pants, shirts, and shoes — no storefront, just good pieces at pop-ups around the city and a shop that never really closes.</p></header>
+  <section class="shop-toolbar" aria-label="Product controls"><label class="shop-search" for="shop-search"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><input id="shop-search" type="search" placeholder="Search pieces" autocomplete="off"></label><select id="shop-category" class="shop-select" aria-label="Filter by category"><option value="all">All categories</option></select><select id="shop-sort" class="shop-select" aria-label="Sort products"><option value="featured">Sort: Featured</option><option value="price-low">Price: Low to high</option><option value="price-high">Price: High to low</option></select></section>
+  <p class="shop-count" id="shop-count">Loading pieces…</p><section class="shop-product-grid" id="shop-product-grid" aria-label="Products"></section><section class="shop-empty" id="shop-empty" aria-live="polite" hidden><h2>No pieces found.</h2><p>Try a different search or category.</p></section></main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/cart-store.js"></script><script src="../js/global.js" defer></script><script src="../js/shop.js" defer></script>
+</body></html>
