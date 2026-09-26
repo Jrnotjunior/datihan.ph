@@ -1,36 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1304 474" role="img" aria-labelledby="title desc">
   <title id="title">DATIHAN</title>
-  <desc id="desc">DATIHAN vintage nameplate logo with two rounded mounting slots.</desc>
-
-  <rect x="16" y="18" width="668" height="264" rx="34" fill="#F3E9DE" stroke="#281F17" stroke-width="12"/>
-  <rect x="28" y="30" width="644" height="240" rx="26" fill="none" stroke="#6B4E3D" stroke-width="3" opacity=".7"/>
-
-  <!-- exactly two rounded-rectangle holes -->
-  <rect x="145" y="43" width="72" height="31" rx="15.5" fill="#281F17"/>
-  <rect x="483" y="43" width="72" height="31" rx="15.5" fill="#281F17"/>
-  <rect x="154" y="50" width="54" height="17" rx="8.5" fill="#F3E9DE"/>
-  <rect x="492" y="50" width="54" height="17" rx="8.5" fill="#F3E9DE"/>
-
-  <!-- wordmark, split so the I can use the approved custom treatment -->
-  <text x="215" y="205" text-anchor="middle"
-        font-family="Rockwell, 'Roboto Slab', 'DejaVu Serif', Georgia, serif"
-        font-size="108" font-weight="900" letter-spacing="-5"
-        fill="#281F17">DAT</text>
-
-  <!-- I: short top line, tall stem, longer bottom line -->
-  <g fill="#281F17">
-    <rect x="339" y="107" width="24" height="91" rx="2"/>
-    <rect x="331" y="98" width="40" height="12" rx="2"/>
-    <rect x="325" y="193" width="52" height="15" rx="2"/>
-  </g>
-
-  <text x="490" y="205" text-anchor="middle"
-        font-family="Rockwell, 'Roboto Slab', 'DejaVu Serif', Georgia, serif"
-        font-size="108" font-weight="900" letter-spacing="-5"
-        fill="#281F17">HAN</text>
-
-  <!-- restrained vintage wear -->
-  <path d="M43 39h74M565 260h82M39 250h42M604 38h36" stroke="#6B4E3D" stroke-width="3" stroke-linecap="round" opacity=".45"/>
-  <circle cx="45" cy="83" r="3" fill="#6B4E3D" opacity=".35"/>
-  <circle cx="653" cy="218" r="3" fill="#6B4E3D" opacity=".35"/>
+  <desc id="desc">Approved DATIHAN vintage nameplate logo with two rounded rectangular mounting holes.</desc>
+  <image href="data:image/webp;base64,UklGRgAA..." x="0" y="0" width="1304" height="474" preserveAspectRatio="xMidYMid meet"/>
 </svg>
