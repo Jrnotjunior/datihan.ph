@@ -1,1 +1,113 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Account Information — DATIHAN.PH</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../css/global.css"><link rel="stylesheet" href="../css/page.css"><link rel="stylesheet" href="profile.css"></head><body><header class="site-header"><a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a><nav class="main-nav" aria-label="Main navigation"><a href="../pages/shop.html">Shop</a><a href="../pages/categories.html">Categories</a><a href="../pages/pop-ups.html">Pop-ups</a><a href="../pages/about.html">About</a></nav><div class="header-actions"><a href="profile.html" class="icon-link" aria-label="Account"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg></a><a href="../pages/cart.html" class="icon-link" aria-label="Shopping cart"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg><span class="cart-count">0</span></a></div></header><main class="account-main"><header class="account-header"><p class="eyebrow">MY ACCOUNT</p><h1>Your account.</h1><p class="account-intro">Manage your profile, shipping details, and DATIHAN.PH orders in one place.</p></header><div class="account-layout"><div><section class="account-section"><h2>Profile information</h2><div class="profile-grid"><div class="profile-field"><label for="first-name">First name</label><input id="first-name" type="text" autocomplete="given-name"></div><div class="profile-field"><label for="last-name">Last name</label><input id="last-name" type="text" autocomplete="family-name"></div><div class="profile-field"><label for="email">Email address</label><input id="email" data-auth-user-email type="email" autocomplete="email" readonly></div><div class="profile-field"><label for="phone">Contact number</label><input id="phone" type="tel" autocomplete="tel" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX" title="Enter an 11-digit Philippine mobile number starting with 09"></div></div><div class="account-actions"><button class="button button-primary" type="button" id="save-profile">Save changes</button></div><p class="form-status" id="profile-status" role="status" aria-live="polite"></p></section><section class="account-section"><h2>Change password</h2><p class="section-note">Leave these fields blank if you don't want to change your password.</p><div class="profile-grid"><div class="profile-field"><label for="new-password">New password</label><input id="new-password" type="password" minlength="8" autocomplete="new-password"></div><div class="profile-field"><label for="confirm-password">Confirm new password</label><input id="confirm-password" type="password" minlength="8" autocomplete="new-password"></div></div><div class="account-actions"><button class="button button-primary" type="button" id="save-password">Change password</button></div><p class="form-status" id="password-status" role="status" aria-live="polite"></p></section><section class="signout-card"><p class="eyebrow">ACCOUNT</p><h2>Sign out</h2><p class="signout-description">Sign out of your DATIHAN.PH account on this device.</p><div class="account-actions"><button class="button button-primary" type="button" id="logout">Log out</button></div></section></div></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../js/supabase-client.js"></script><script src="../js/auth-guard.js?v=3" defer></script><script src="../js/global.js?v=3" defer></script><script src="profile.js?v=4" defer></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Information — DATIHAN.PH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="DATIHAN.PH home">DATIHAN.PH</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../pages/shop.html">Shop</a>
+      <a href="../pages/categories.html">Categories</a>
+      <a href="../pages/pop-ups.html">Pop-ups</a>
+      <a href="../pages/about.html">About</a>
+    </nav>
+    <div class="header-actions">
+      <a href="profile.html" class="icon-link" aria-label="Account">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg>
+      </a>
+      <a href="../pages/cart.html" class="icon-link" aria-label="Shopping cart">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg>
+        <span class="cart-count">0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="account-main">
+    <header class="account-header">
+      <p class="eyebrow">MY ACCOUNT</p>
+      <h1>Your account.</h1>
+      <p class="account-intro">Manage your profile, shipping details, and DATIHAN.PH orders in one place.</p>
+    </header>
+
+    <div class="account-layout">
+      <div>
+        <section class="content-card account-section">
+          <p class="eyebrow">ACCOUNT INFORMATION</p>
+          <h2>Profile information</h2>
+          <div class="profile-grid">
+            <div class="profile-field">
+              <label for="first-name">First name</label>
+              <input id="first-name" type="text" autocomplete="given-name">
+            </div>
+            <div class="profile-field">
+              <label for="last-name">Last name</label>
+              <input id="last-name" type="text" autocomplete="family-name">
+            </div>
+            <div class="profile-field">
+              <label for="email">Email address</label>
+              <input id="email" data-auth-user-email type="email" autocomplete="email" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="phone">Contact number</label>
+              <input id="phone" type="tel" autocomplete="tel" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX" title="Enter an 11-digit Philippine mobile number starting with 09">
+            </div>
+          </div>
+          <div class="account-actions">
+            <button class="button button-primary" type="button" id="save-profile">Save changes</button>
+          </div>
+          <p class="form-status" id="profile-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="content-card account-section security-section">
+          <p class="eyebrow">SECURITY</p>
+          <h2>Change password</h2>
+          <p class="section-note">Update the password you use to sign in to your DATIHAN.PH account.</p>
+          <div class="profile-grid security-grid">
+            <div class="profile-field full">
+              <label for="current-password">Current password</label>
+              <input id="current-password" type="password" autocomplete="current-password" placeholder="Enter your current password">
+            </div>
+            <div class="profile-field full">
+              <label for="new-password">New password</label>
+              <input id="new-password" type="password" minlength="8" autocomplete="new-password" placeholder="Enter a new password">
+              <small>Use at least 8 characters.</small>
+            </div>
+            <div class="profile-field full">
+              <label for="confirm-password">Confirm new password</label>
+              <input id="confirm-password" type="password" minlength="8" autocomplete="new-password" placeholder="Re-enter your new password">
+            </div>
+          </div>
+          <div class="account-actions">
+            <button class="button button-primary" type="button" id="save-password">Change password</button>
+          </div>
+          <p class="form-status" id="password-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="content-card signout-card">
+          <p class="eyebrow">ACCOUNT</p>
+          <h2>Sign out</h2>
+          <p class="signout-description">Sign out of your DATIHAN.PH account on this device.</p>
+          <div class="account-actions">
+            <button class="button button-primary" type="button" id="logout">Log out</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/auth-guard.js?v=3" defer></script>
+  <script src="../js/global.js?v=3" defer></script>
+  <script src="profile.js?v=5" defer></script>
+</body>
+</html>
