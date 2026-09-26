@@ -59,10 +59,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const removeHeaderLabel = (link) => {
+    [...link.querySelectorAll("span:not(.cart-count)")].forEach((label) => label.remove());
+    [...link.childNodes].forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) node.remove();
+    });
+  };
+
   accountLinks.forEach((link) => {
     removeLegacyEmoji(link, '👤');
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", accountIcon);
     link.classList.add("icon-link");
+    removeHeaderLabel(link);
     const accountPath = window.location.pathname.includes("/pages/")
       ? "../account/profile.html"
       : window.location.pathname.includes("/account/")
@@ -84,10 +92,12 @@ document.addEventListener("DOMContentLoaded", () => {
       badge.setAttribute("aria-label", "Cart item count");
       link.appendChild(badge);
     }
+    badge.remove();
+    removeHeaderLabel(link);
     link.querySelectorAll(".cart-count").forEach((candidate) => {
       if (candidate !== badge) candidate.remove();
     });
-    if (badge.parentElement !== link) link.appendChild(badge);
+    link.appendChild(badge);
   });
 
   // Keep the cart on the left and the account icon on the right.
