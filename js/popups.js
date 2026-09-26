@@ -62,7 +62,6 @@
     if (event.event_date > now.date) return 'upcoming';
     if (event.event_date < now.date) return 'past';
 
-    // On the event date, use the scheduled times to determine the live state.
     const start = event.start_time ? event.start_time.slice(0, 8) : null;
     const end = event.end_time ? event.end_time.slice(0, 8) : null;
 
@@ -157,4 +156,5 @@
   }
 
   loadEvents();
+  window.setInterval(loadEvents, 60 * 1000);
 })();
