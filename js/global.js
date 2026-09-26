@@ -30,11 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", accountIcon);
     link.classList.add("icon-link");
 
+    // Account/profile.html lives at the repository root /account directory.
+    // Auth pages are one level below root, so they must also go up one level.
     const accountPath = window.location.pathname.includes("/pages/")
       ? "../account/profile.html"
       : window.location.pathname.includes("/account/")
         ? "profile.html"
-        : "account/profile.html";
+        : window.location.pathname.includes("/auth/")
+          ? "../account/profile.html"
+          : "account/profile.html";
     link.setAttribute("href", accountPath);
   });
 
