@@ -20,7 +20,6 @@
 .card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
 .placeholder-media{aspect-ratio:4/5;display:grid;place-items:center;border-radius:var(--radius);background:var(--light-beige);color:var(--brown);font-family:"Manrope",sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em}
 .form-grid{display:grid;gap:1rem;max-width:680px;margin-inline:auto}
-.page-main:has(.form-grid) .form-grid{margin-inline:0}
 .field{display:grid;gap:.45rem;text-align:left}
 .field label{font-size:14px;font-weight:600}
 .field input,.field textarea,.field select{width:100%;padding:.85rem 1rem;border:1px solid var(--light-beige);border-radius:12px;background:var(--off-white);color:var(--dark-brown);outline:none;text-align:left}
