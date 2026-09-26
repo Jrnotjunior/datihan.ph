@@ -14,6 +14,15 @@
         .replace(/\s+/g, ' ')
         .trim();
 
+    const normaliseCity = value => normalise(value)
+        .replace(/^city of\s+/, '')
+        .replace(/\s+city$/, '')
+        .trim();
+
+    const normaliseBarangay = value => normalise(value)
+        .replace(/^barangay\s+/, '')
+        .trim();
+
     const selectedText = select => select?.selectedOptions?.[0]?.textContent?.trim() || '';
 
     let postalLibraryPromise = null;
@@ -45,19 +54,23 @@
 
         try {
             const postalPH = await loadPostalLibrary();
-            const cityKey = normalise(cityName.replace(/^city of\s+/i, ''));
-            const barangayKey = normalise(barangayName);
+            const cityKey = normaliseCity(cityName);
+            const barangayKey = normaliseBarangay(barangayName);
 
+            // use-postal-ph stores the city/town in `location` and the
+            // postal area/neighborhood in `municipality`.
             const results = postalPH.fetchDataLists({
-                municipality: cityKey,
-                location: barangayKey
+                location: cityKey,
+                municipality: barangayKey
             });
 
             const candidates = Array.isArray(results) ? results : Array.isArray(results?.data) ? results.data : [];
             const match = candidates.find(item =>
-                normalise(item.location) === barangayKey &&
-                normalise(item.municipality).replace(/^city of\s+/, '') === cityKey
-            ) || candidates.find(item => normalise(item.location) === barangayKey);
+                normaliseCity(item.location) === cityKey &&
+                normaliseBarangay(item.municipality) === barangayKey
+            ) || candidates.find(item =>
+                normaliseBarangay(item.municipality) === barangayKey
+            );
 
             if (match?.post_code) {
                 postal.value = String(match.post_code).padStart(4, '0');
@@ -90,9 +103,14 @@
     const bind = () => {
         wrapAddressApi();
 
+        const postal = postalEl();
+        if (postal) {
+            postal.readOnly = true;
+            postal.setAttribute('aria-readonly', 'true');
+        }
+
         barangayEl()?.addEventListener('change', resolvePostalCode);
         cityEl()?.addEventListener('change', () => {
-            const postal = postalEl();
             if (postal) postal.value = '';
             resolvePostalCode();
         });
