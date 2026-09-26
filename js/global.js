@@ -1,8 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Prevent duplicate initialization if global.js is loaded more than once.
-  if (window.__datihanGlobalInitialized) return;
-  window.__datihanGlobalInitialized = true;
-
   const year = document.querySelector("#current-year");
   if (year) year.textContent = new Date().getFullYear();
 
@@ -182,10 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("pageshow", updateCartCount);
 
   // Render one shared buyer-facing footer on every storefront page.
-  // Use a dedicated id so this footer can never be inserted twice.
-  if (!document.querySelector("#datihan-global-footer")) {
+  if (!document.querySelector(".site-footer")) {
     const footer = document.createElement("footer");
-    footer.id = "datihan-global-footer";
     footer.className = "site-footer storefront-footer";
     footer.style.gridTemplateColumns = "minmax(320px, 1.4fr) minmax(170px, 0.75fr) minmax(170px, 0.75fr) minmax(220px, 1fr)";
     footer.innerHTML = `
@@ -215,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <h2>Follow along</h2>
         <div class="footer-social-icons" aria-label="DATIHAN social media">
           <a class="footer-social-icon" href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a>
-          <a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg></a>
+          <a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg></a>
           <a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61577434115016" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z"></path></svg></a>
         </div>
       </div>
