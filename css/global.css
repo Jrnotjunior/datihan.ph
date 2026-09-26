@@ -51,17 +51,18 @@ p { margin: 0; }
 }
 
 .brand {
-  width: auto;
-  height: auto;
+  width: 132px;
+  height: 60px;
   display: inline-flex;
   align-items: center;
   justify-self: start;
-  font-family: "Manrope", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  background-image: url("../assets/datihan-logo.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  font-size: 0;
   line-height: 1;
-  color: var(--off-white);
+  color: transparent;
 }
 .brand img { display: none !important; }
 
@@ -320,7 +321,7 @@ p { margin: 0; }
     gap: 0.5rem;
     border-radius: 0;
   }
-  .brand { font-size: 20px; }
+  .brand { width: 108px; height: 50px; }
   .main-nav {
     display: none;
     position: absolute;
@@ -377,7 +378,7 @@ p { margin: 0; }
 
 @media (max-width: 520px) {
   .site-header { width: 100%; }
-  .brand { font-size: 19px; }
+  .brand { width: 98px; height: 46px; }
   .site-footer {
     width: 100%;
     margin-bottom: 0;
