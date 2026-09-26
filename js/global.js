@@ -60,6 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (badge.parentElement !== link) link.appendChild(badge);
   });
 
+  // Keep the cart on the left and the account icon on the right.
+  const headerActions = document.querySelector(".header-actions");
+  if (headerActions) {
+    cartLinks.forEach((link) => headerActions.appendChild(link));
+    accountLinks.forEach((link) => headerActions.appendChild(link));
+  }
+
   // Responsive mobile navigation uses the existing main navigation links.
   const header = document.querySelector(".site-header");
   const mainNav = header?.querySelector(".main-nav");
