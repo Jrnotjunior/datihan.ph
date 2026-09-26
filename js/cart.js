@@ -36,6 +36,54 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const money = (value) => `₱${Number(value || 0).toLocaleString("en-PH")}`;
+  const escapeHtml = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  const productImages = (item) => {
+    if (Array.isArray(item.image_urls) && item.image_urls.length) return item.image_urls.filter(Boolean);
+    return item.image_url ? [item.image_url] : [];
+  };
+
+  // Older cart entries may have been saved before image URLs were added to the cart object.
+  // Hydrate those entries from the current product records so existing carts also get images.
+  const hydrateMissingImages = async (cart) => {
+    if (!window.datihanSupabase) return;
+
+    const missingIds = cart
+      .filter((item) => !productImages(item).length && item.id)
+      .map((item) => String(item.id));
+
+    if (!missingIds.length) return;
+
+    try {
+      const { data, error } = await window.datihanSupabase
+        .from("products")
+        .select("id, image_url, image_urls")
+        .in("id", missingIds);
+
+      if (error) throw error;
+
+      const productsById = new Map((data || []).map((product) => [String(product.id), product]));
+      let changed = false;
+
+      cart.forEach((item) => {
+        const product = productsById.get(String(item.id));
+        if (!product) return;
+
+        if (Array.isArray(product.image_urls) && product.image_urls.length) {
+          item.image_urls = product.image_urls.filter(Boolean);
+          item.image_url = item.image_urls[0] || null;
+          changed = true;
+        } else if (product.image_url) {
+          item.image_url = product.image_url;
+          item.image_urls = [product.image_url];
+          changed = true;
+        }
+      });
+
+      if (changed) localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    } catch (error) {
+      console.error("Hydrate cart product images error:", error);
+    }
+  };
 
   const getSelection = (cart) => {
     const ids = cart.map(item => String(item.id));
@@ -48,10 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Set(selected);
   };
 
-  const render = () => {
+  const render = async () => {
     const cart = readCart();
-    const hasItems = cart.length > 0;
-    const selected = getSelection(cart);
+    await hydrateMissingImages(cart);
+    const hydratedCart = readCart();
+    const hasItems = hydratedCart.length > 0;
+    const selected = getSelection(hydratedCart);
 
     if (content) content.style.display = hasItems ? "grid" : "none";
     if (empty) empty.style.display = hasItems ? "none" : "block";
@@ -69,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     itemsContainer.innerHTML = `
       <div class="cart-selection-bar">
         <label class="select-all-control">
-          <input type="checkbox" id="select-all-cart" ${selected.size === cart.length ? "checked" : ""}>
+          <input type="checkbox" id="select-all-cart" ${selected.size === hydratedCart.length ? "checked" : ""}>
           <span>Select all</span>
         </label>
         <span class="selected-count" id="selected-count"></span>
@@ -79,12 +129,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let subtotal = 0;
     let selectedCount = 0;
 
-    cart.forEach((item) => {
+    hydratedCart.forEach((item) => {
       const id = String(item.id);
       const isSelected = selected.has(id);
       const quantity = Math.max(1, Number(item.quantity || 1));
       const price = Number(item.price || 0);
       const itemTotal = price * quantity;
+      const images = productImages(item);
+      const imageMarkup = images[0]
+        ? `<img src="${escapeHtml(images[0])}" alt="${escapeHtml(item.name || "Product")}" loading="lazy">`
+        : `<span>PRODUCT IMAGE</span>`;
 
       if (isSelected) {
         subtotal += itemTotal;
@@ -95,11 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
       article.className = `cart-item${isSelected ? " selected" : ""}`;
       article.dataset.id = id;
       article.innerHTML = `
-        <label class="cart-select" aria-label="Select ${item.name || "product"} for checkout">
+        <label class="cart-select" aria-label="Select ${escapeHtml(item.name || "product")} for checkout">
           <input type="checkbox" class="item-select" ${isSelected ? "checked" : ""}>
           <span aria-hidden="true"></span>
         </label>
-        <div class="cart-image">PRODUCT IMAGE</div>
+        <div class="cart-image">${imageMarkup}</div>
         <div>
           <h2></h2>
           <p class="cart-meta"></p>
@@ -164,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     itemsContainer.querySelector("#select-all-cart")?.addEventListener("change", (event) => {
-      writeSelected(event.target.checked ? cart.map(item => String(item.id)) : []);
+      writeSelected(event.target.checked ? hydratedCart.map(item => String(item.id)) : []);
       render();
     });
 
