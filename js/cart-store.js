@@ -42,11 +42,13 @@
         if (error) throw error;
         userId = data.session?.user?.id || null;
         syncLegacyKeys();
+        window.dispatchEvent(new Event("datihan-cart-updated"));
         return userId;
       } catch (error) {
         console.error("Cart account setup error:", error);
         userId = null;
         syncLegacyKeys();
+        window.dispatchEvent(new Event("datihan-cart-updated"));
         return null;
       }
     })();
