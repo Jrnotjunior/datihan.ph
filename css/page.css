@@ -6,7 +6,9 @@
 .content-card h2{margin-bottom:1rem}
 .content-card p + p{margin-top:.75rem}
 
-/* Policy pages: keep each numbered section visually separated and readable. */
+/* Policy pages: keep the header and policy card aligned to the same left edge. */
+.page-main:has(.policy-content) .page-header{margin-left:0;margin-right:0}
+.page-main:has(.policy-content) .policy-content{max-width:700px;margin-left:0;margin-right:0}
 .policy-content h2{margin:1.5rem 0 .55rem}
 .policy-content h2:first-child{margin-top:0}
 .policy-content p{margin:0;line-height:1.65}
