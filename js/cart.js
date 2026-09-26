@@ -1,4 +1,29 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  const loadScript = (src) => new Promise((resolve, reject) => {
+    const existing = [...document.scripts].find((script) => script.src === new URL(src, window.location.href).href);
+    if (existing) {
+      if (existing.dataset.loaded === "true") resolve();
+      else {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+      }
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => { script.dataset.loaded = "true"; resolve(); };
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+
+  if (!window.datihanCartStore) {
+    if (!window.supabase) await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+    if (!window.datihanSupabase) await loadScript("../js/supabase-client.js");
+    await loadScript("../js/cart-store.js");
+  }
+
+  await window.datihanCartStore.ready();
+
   const content = document.querySelector("#cart-content");
   const itemsContainer = document.querySelector(".cart-items");
   const empty = document.querySelector("#empty-cart");
@@ -6,8 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const totalEl = document.querySelector("#total");
   const checkoutLink = document.querySelector('.summary a[href="checkout.html"]');
 
-  if (window.datihanCartStore) await window.datihanCartStore.ready();
-  if (!window.datihanCartStore?.isAuthenticated()) {
+  if (!window.datihanCartStore.isAuthenticated()) {
     const redirect = encodeURIComponent("../pages/cart.html");
     window.location.replace(`../auth/login.html?redirect=${redirect}`);
     return;
