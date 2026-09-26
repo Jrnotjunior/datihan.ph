@@ -135,13 +135,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    const allSelected = selected.size === hydratedCart.length;
+
     itemsContainer.innerHTML = `
       <div class="cart-selection-bar">
         <label class="select-all-control">
-          <input type="checkbox" id="select-all-cart" ${selected.size === hydratedCart.length ? "checked" : ""}>
+          <input type="checkbox" id="select-all-cart" ${allSelected ? "checked" : ""}>
           <span>Select all</span>
         </label>
-        <span class="selected-count" id="selected-count"></span>
+        <div class="cart-selection-actions">
+          <span class="selected-count" id="selected-count"></span>
+          <button type="button" class="delete-selected" id="delete-selected" ${allSelected ? "" : "hidden"}>Delete selected</button>
+        </div>
       </div>
     `;
 
@@ -247,6 +252,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     itemsContainer.querySelector("#select-all-cart")?.addEventListener("change", (event) => {
       writeSelected(event.target.checked ? hydratedCart.map((item) => String(item.id)) : []);
+      render();
+    });
+
+    itemsContainer.querySelector("#delete-selected")?.addEventListener("click", () => {
+      const selectedIds = new Set(readSelected() || []);
+      if (!selectedIds.size) return;
+
+      const confirmed = window.confirm(
+        selectedIds.size === 1
+          ? "Remove the selected item from your cart?"
+          : `Remove all ${selectedIds.size} selected items from your cart?`
+      );
+      if (!confirmed) return;
+
+      const next = readCart().filter((item) => !selectedIds.has(String(item.id)));
+      writeSelected([]);
+      writeCart(next);
       render();
     });
 
