@@ -36,28 +36,29 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const money = (value) => `₱${Number(value || 0).toLocaleString("en-PH")}`;
-  const escapeHtml = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  const escapeHtml = (value) => String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
   const productImages = (item) => {
     if (Array.isArray(item.image_urls) && item.image_urls.length) return item.image_urls.filter(Boolean);
     return item.image_url ? [item.image_url] : [];
   };
 
-  // Older cart entries may have been saved before image URLs were added to the cart object.
-  // Hydrate those entries from the current product records so existing carts also get images.
-  const hydrateMissingImages = async (cart) => {
-    if (!window.datihanSupabase) return;
+  const hydrateCartProductData = async (cart) => {
+    if (!window.datihanSupabase || !cart.length) return;
 
-    const missingIds = cart
-      .filter((item) => !productImages(item).length && item.id)
-      .map((item) => String(item.id));
-
-    if (!missingIds.length) return;
+    const ids = [...new Set(cart.filter((item) => item.id).map((item) => String(item.id)))];
+    if (!ids.length) return;
 
     try {
       const { data, error } = await window.datihanSupabase
         .from("products")
-        .select("id, image_url, image_urls")
-        .in("id", missingIds);
+        .select("id, stock, image_url, image_urls")
+        .in("id", ids);
 
       if (error) throw error;
 
@@ -68,11 +69,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const product = productsById.get(String(item.id));
         if (!product) return;
 
-        if (Array.isArray(product.image_urls) && product.image_urls.length) {
-          item.image_urls = product.image_urls.filter(Boolean);
-          item.image_url = item.image_urls[0] || null;
+        const stock = Math.max(0, Number(product.stock || 0));
+        if (Number(item.stock) !== stock) {
+          item.stock = stock;
           changed = true;
-        } else if (product.image_url) {
+        }
+
+        if (stock > 0 && Number(item.quantity || 1) > stock) {
+          item.quantity = stock;
+          changed = true;
+        }
+
+        if (Array.isArray(product.image_urls) && product.image_urls.length) {
+          const imageUrls = product.image_urls.filter(Boolean);
+          if (JSON.stringify(item.image_urls || []) !== JSON.stringify(imageUrls)) {
+            item.image_urls = imageUrls;
+            item.image_url = imageUrls[0] || null;
+            changed = true;
+          }
+        } else if (product.image_url && item.image_url !== product.image_url) {
           item.image_url = product.image_url;
           item.image_urls = [product.image_url];
           changed = true;
@@ -81,24 +96,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (changed) localStorage.setItem(CART_KEY, JSON.stringify(cart));
     } catch (error) {
-      console.error("Hydrate cart product images error:", error);
+      console.error("Hydrate cart product data error:", error);
     }
   };
 
   const getSelection = (cart) => {
-    const ids = cart.map(item => String(item.id));
+    const ids = cart.map((item) => String(item.id));
     const saved = readSelected();
 
-    // First visit: select every cart item so the existing checkout flow stays intact.
-    // Afterwards, keep only selections that still exist in the cart.
-    const selected = saved === null ? ids : saved.filter(id => ids.includes(id));
+    const selected = saved === null ? ids : saved.filter((id) => ids.includes(id));
     writeSelected(selected);
     return new Set(selected);
   };
 
   const render = async () => {
     const cart = readCart();
-    await hydrateMissingImages(cart);
+    await hydrateCartProductData(cart);
     const hydratedCart = readCart();
     const hasItems = hydratedCart.length > 0;
     const selected = getSelection(hydratedCart);
@@ -133,12 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const id = String(item.id);
       const isSelected = selected.has(id);
       const quantity = Math.max(1, Number(item.quantity || 1));
+      const stock = Math.max(0, Number(item.stock || 0));
+      const hasStockLimit = Number.isFinite(Number(item.stock));
       const price = Number(item.price || 0);
       const itemTotal = price * quantity;
       const images = productImages(item);
       const imageMarkup = images[0]
         ? `<img src="${escapeHtml(images[0])}" alt="${escapeHtml(item.name || "Product")}" loading="lazy">`
         : `<span>PRODUCT IMAGE</span>`;
+      const atStockLimit = hasStockLimit && (stock <= 0 || quantity >= stock);
 
       if (isSelected) {
         subtotal += itemTotal;
@@ -161,8 +177,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="quantity-control" aria-label="Quantity">
             <button type="button" class="quantity-minus" aria-label="Decrease quantity">−</button>
             <span class="quantity"></span>
-            <button type="button" class="quantity-plus" aria-label="Increase quantity">+</button>
+            <button type="button" class="quantity-plus" aria-label="Increase quantity" ${atStockLimit ? "disabled" : ""}>+</button>
           </div>
+          ${hasStockLimit ? `<p class="cart-stock">${stock > 0 ? `${stock} available` : "No longer available"}</p>` : ""}
           <button type="button" class="remove-item">Remove</button>
         </div>
         <p class="cart-item-total"></p>
@@ -195,14 +212,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const next = readCart();
         const target = next.find((entry) => String(entry.id) === id);
         if (!target) return;
-        target.quantity = Number(target.quantity || 1) + 1;
+
+        const targetStock = Number(target.stock);
+        const currentQuantity = Number(target.quantity || 0);
+        if (Number.isFinite(targetStock) && currentQuantity >= targetStock) return;
+
+        target.quantity = currentQuantity + 1;
         writeCart(next);
         render();
       });
 
       article.querySelector(".remove-item").addEventListener("click", () => {
         const next = readCart().filter((entry) => String(entry.id) !== id);
-        writeSelected((readSelected() || []).filter(selectedId => selectedId !== id));
+        writeSelected((readSelected() || []).filter((selectedId) => selectedId !== id));
         writeCart(next);
         render();
       });
@@ -218,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     itemsContainer.querySelector("#select-all-cart")?.addEventListener("change", (event) => {
-      writeSelected(event.target.checked ? hydratedCart.map(item => String(item.id)) : []);
+      writeSelected(event.target.checked ? hydratedCart.map((item) => String(item.id)) : []);
       render();
     });
 
@@ -236,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
   checkoutLink?.addEventListener("click", (event) => {
     const cart = readCart();
     const selected = readSelected() || [];
-    if (!cart.length || !selected.some(id => cart.some(item => String(item.id) === id))) {
+    if (!cart.length || !selected.some((id) => cart.some((item) => String(item.id) === id))) {
       event.preventDefault();
       render();
     }
