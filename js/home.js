@@ -86,29 +86,30 @@
       return;
     }
 
-    eventsList.innerHTML = events.slice(0, 3).map(event => {
-      const status = event.realtimeStatus === 'happening' ? 'Happening' : 'Upcoming';
-      const statusClass = event.realtimeStatus === 'happening' ? ' is-happening' : '';
-      const time = event.start_time
-        ? `${formatTime(event.start_time)}${event.end_time ? ` – ${formatTime(event.end_time)}` : ''}`
-        : '';
-      const eventDate = formatEventDate(event.event_date);
+    // Show only the nearest active event. Once it ends, loadEvents() runs
+    // again and the next eligible event automatically becomes the banner event.
+    const event = events[0];
+    const status = event.realtimeStatus === 'happening' ? 'Happening' : 'Upcoming';
+    const statusClass = event.realtimeStatus === 'happening' ? ' is-happening' : '';
+    const time = event.start_time
+      ? `${formatTime(event.start_time)}${event.end_time ? ` – ${formatTime(event.end_time)}` : ''}`
+      : '';
+    const eventDate = formatEventDate(event.event_date);
 
-      return `
-        <article class="hero-event">
-          <div class="hero-event-date" aria-label="${escapeHtml(eventDate.month)} ${escapeHtml(eventDate.day)}">
-            <span class="hero-event-month">${escapeHtml(eventDate.month)}</span>
-            <span class="hero-event-day">${escapeHtml(eventDate.day)}</span>
-          </div>
-          <div class="hero-event-body">
-            <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
-            <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
-            ${event.location ? `<p class="hero-event-meta">${escapeHtml(event.location)}</p>` : ''}
-            ${time ? `<p class="hero-event-meta">${escapeHtml(time)}</p>` : ''}
-          </div>
-        </article>
-      `;
-    }).join('');
+    eventsList.innerHTML = `
+      <article class="hero-event">
+        <div class="hero-event-date" aria-label="${escapeHtml(eventDate.month)} ${escapeHtml(eventDate.day)}">
+          <span class="hero-event-month">${escapeHtml(eventDate.month)}</span>
+          <span class="hero-event-day">${escapeHtml(eventDate.day)}</span>
+        </div>
+        <div class="hero-event-body">
+          <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
+          <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
+          ${event.location ? `<p class="hero-event-meta">${escapeHtml(event.location)}</p>` : ''}
+          ${time ? `<p class="hero-event-meta">${escapeHtml(time)}</p>` : ''}
+        </div>
+      </article>
+    `;
   }
 
   async function loadEvents() {
