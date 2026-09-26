@@ -1,42 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 324" role="img" aria-labelledby="title desc">
   <title id="title">DATIHAN</title>
-  <desc id="desc">Vintage industrial DATIHAN nameplate logo</desc>
-  <defs>
-    <filter id="rough" x="-5%" y="-8%" width="110%" height="116%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="8" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8"/>
-    </filter>
-    <filter id="textRough" x="-3%" y="-5%" width="106%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="11" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.9"/>
-    </filter>
-    <clipPath id="plateClip">
-      <rect x="38" y="58" width="624" height="208" rx="25"/>
-    </clipPath>
-  </defs>
-
-  <g filter="url(#rough)">
-    <rect x="31" y="51" width="638" height="222" rx="32" fill="#281F17"/>
-    <rect x="39" y="59" width="622" height="206" rx="25" fill="#F2EAE1" stroke="#281F17" stroke-width="5"/>
-    <rect x="49" y="69" width="602" height="186" rx="18" fill="none" stroke="#8A7869" stroke-opacity=".38" stroke-width="2"/>
-  </g>
-
-  <!-- two rounded rectangular mounting holes -->
-  <g fill="#281F17">
-    <rect x="83" y="80" width="78" height="30" rx="15"/>
-    <rect x="539" y="80" width="78" height="30" rx="15"/>
-  </g>
-  <g fill="#F2EAE1">
-    <rect x="91" y="87" width="62" height="16" rx="8"/>
-    <rect x="547" y="87" width="62" height="16" rx="8"/>
-  </g>
-
-  <text x="350" y="205" text-anchor="middle" fill="#281F17" font-family="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" font-size="122" font-weight="900" letter-spacing="2" filter="url(#textRough)">DATIHAN</text>
-
-  <!-- subtle distressed marks -->
-  <g clip-path="url(#plateClip)" fill="#6B4E3D" opacity=".22">
-    <rect x="55" y="61" width="9" height="3" rx="1.5"/><rect x="188" y="248" width="17" height="3" rx="1.5"/>
-    <rect x="303" y="72" width="8" height="2" rx="1"/><rect x="462" y="246" width="13" height="3" rx="1.5"/>
-    <circle cx="230" cy="78" r="2"/><circle cx="506" cy="238" r="2"/><circle cx="643" cy="130" r="2"/>
-  </g>
+  <desc id="desc">DATIHAN nameplate logo</desc>
+  <image href="data:image/webp;base64,UklGRv...REDACTED...</image>
 </svg>
