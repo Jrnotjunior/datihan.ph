@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!document.querySelector(".site-footer")) {
     const footer = document.createElement("footer");
     footer.className = "site-footer storefront-footer";
-    footer.style.gridTemplateColumns = "minmax(320px, 1.4fr) minmax(170px, 0.75fr) minmax(220px, 1fr)";
+    footer.style.gridTemplateColumns = "minmax(320px, 1.4fr) minmax(170px, 0.75fr) minmax(170px, 0.75fr) minmax(220px, 1fr)";
     footer.innerHTML = `
       <div class="footer-column footer-about">
         <a class="footer-brand" href="${window.location.pathname.includes("/pages/") ? "../index.html" : "index.html"}">DATIHAN</a>
@@ -182,6 +182,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="${window.location.pathname.includes("/pages/") ? "pop-ups.html" : "pages/pop-ups.html"}">Pop-ups</a>
           <a href="${window.location.pathname.includes("/pages/") ? "contact.html" : "pages/contact.html"}">Contact</a>
           <a href="${window.location.pathname.includes("/pages/") ? "about.html" : "pages/about.html"}">About</a>
+        </nav>
+      </div>
+      <div class="footer-column footer-explore footer-legal">
+        <h2>Policies</h2>
+        <nav class="footer-links" aria-label="Footer policy navigation">
+          <a href="${window.location.pathname.includes("/pages/") ? "refund-policy.html" : "pages/refund-policy.html"}">Refund Policy</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "terms-of-service.html" : "pages/terms-of-service.html"}">Terms of Service</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "privacy-policy.html" : "pages/privacy-policy.html"}">Privacy Policy</a>
+          <a href="${window.location.pathname.includes("/pages/") ? "consignment-policy.html" : "pages/consignment-policy.html"}">Consignment Policy</a>
         </nav>
       </div>
       <div class="footer-column footer-follow">
