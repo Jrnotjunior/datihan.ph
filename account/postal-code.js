@@ -52,7 +52,6 @@
     const postalEl = () => document.getElementById('address-postal-code');
     const cityEl = () => document.getElementById('address-city');
     const barangayEl = () => document.getElementById('address-barangay');
-    const provinceEl = () => document.getElementById('address-province');
 
     const selectedText = select => select?.selectedOptions?.[0]?.textContent?.trim() || '';
 
@@ -106,10 +105,13 @@
         }
     };
 
-    const addPostalToPayload = payload => ({
-        ...payload,
-        postal_code: postalEl()?.value.trim() || ''
-    });
+    const addPostalToPayload = payload => {
+        const postalCode = postalEl()?.value.trim() || '';
+        if (!/^\d{4}$/.test(postalCode)) {
+            throw new Error('Please enter a valid 4-digit postal code.');
+        }
+        return { ...payload, postal_code: postalCode };
+    };
 
     const wrapAddressApi = () => {
         if (!API || API.__postalCodeWrapped) return;
