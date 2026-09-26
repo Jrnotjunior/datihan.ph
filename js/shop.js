@@ -5,22 +5,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const grid = document.querySelector("#shop-product-grid");
   const count = document.querySelector("#shop-count");
   const empty = document.querySelector("#shop-empty");
-  const CART_KEY = "datihan_cart";
   let products = [];
 
-  const readCart = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-      return Array.isArray(cart) ? cart : [];
-    } catch (_) {
-      return [];
-    }
-  };
+  if (window.datihanCartStore) await window.datihanCartStore.ready();
 
-  const writeCart = (cart) => {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    window.dispatchEvent(new Event("datihan-cart-updated"));
-  };
+  const isSignedIn = () => Boolean(window.datihanCartStore?.isAuthenticated());
+  const loginUrl = () => `../auth/login.html?redirect=${encodeURIComponent("../pages/shop.html")}`;
+  const readCart = () => window.datihanCartStore?.read() || [];
+  const writeCart = (cart) => window.datihanCartStore?.write(cart);
 
   const escapeHtml = (value) => String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -45,10 +37,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const updateCartButton = (button, product) => {
+    if (!isSignedIn()) {
+      button.textContent = "Sign in to add to cart";
+      button.setAttribute("aria-label", `Sign in to add ${product.name} to cart`);
+      return;
+    }
+
     const stock = Math.max(0, Number(product.stock || 0));
     const quantityInCart = getCartQuantity(product.id);
     const limitReached = quantityInCart >= stock;
-
     button.textContent = limitReached ? "Already added on cart" : "Add to cart";
     button.setAttribute("aria-label", limitReached
       ? `${product.name} is already added to cart up to the available quantity`
@@ -83,9 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!lightboxImages.length) return;
     lightboxImage.src = lightboxImages[lightboxIndex];
     lightboxImage.alt = lightboxAlt || "Product image";
-    lightboxCount.textContent = lightboxImages.length > 1
-      ? `${lightboxIndex + 1} / ${lightboxImages.length}`
-      : "";
+    lightboxCount.textContent = lightboxImages.length > 1 ? `${lightboxIndex + 1} / ${lightboxImages.length}` : "";
     const multi = lightboxImages.length > 1;
     prevButton.hidden = !multi;
     nextButton.hidden = !multi;
@@ -113,17 +108,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
     renderLightbox();
   });
-
   nextButton.addEventListener("click", () => {
     if (!lightboxImages.length) return;
     lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
     renderLightbox();
   });
-
   imageLightbox.addEventListener("click", (event) => {
     if (event.target.closest("[data-lightbox-close]")) closeLightbox();
   });
-
   document.addEventListener("keydown", (event) => {
     if (imageLightbox.hidden) return;
     if (event.key === "Escape") closeLightbox();
@@ -180,6 +172,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateCartButton(cartButton, product);
 
     cartButton.addEventListener("click", () => {
+      if (!isSignedIn()) {
+        window.location.href = loginUrl();
+        return;
+      }
+
       const cart = readCart();
       const existing = cart.find((item) => String(item.id) === String(product.id));
       const currentQuantity = existing ? Number(existing.quantity || 0) : 0;
@@ -226,8 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let visible = products.filter((product) => {
       const name = String(product.name || "").toLowerCase();
       const productCategory = product.category || "";
-      return (!query || name.includes(query))
-        && (selectedCategory === "all" || productCategory === selectedCategory);
+      return (!query || name.includes(query)) && (selectedCategory === "all" || productCategory === selectedCategory);
     });
 
     if (sort.value === "price-low") visible.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
@@ -241,7 +237,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const loadProducts = async () => {
     count.textContent = "Loading pieces…";
     empty.hidden = true;
-
     try {
       const { data, error } = await window.datihanSupabase
         .from("products")
@@ -249,7 +244,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         .eq("is_active", true)
         .gt("stock", 0)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       products = data || [];
       renderCategoryOptions();
