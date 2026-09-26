@@ -30,8 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!link.querySelector(".icon")) link.insertAdjacentHTML("afterbegin", accountIcon);
     link.classList.add("icon-link");
 
-    // Account/profile.html lives at the repository root /account directory.
-    // Auth pages are one level below root, so they must also go up one level.
     const accountPath = window.location.pathname.includes("/pages/")
       ? "../account/profile.html"
       : window.location.pathname.includes("/account/")
@@ -105,17 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const updateCartCount = () => {
-    let count = 0;
-    try {
-      const cart = JSON.parse(localStorage.getItem("datihan_cart") || "[]");
-      count = Array.isArray(cart)
-        ? cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
-        : 0;
-    } catch (_) {
-      count = 0;
-    }
-
+  const renderCartCount = (count) => {
     document.querySelectorAll(".header-actions .cart-count").forEach((el) => {
       el.textContent = String(count);
       el.hidden = count === 0;
@@ -123,6 +111,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  // Cart state is account-scoped. Never show a previous user's badge after logout.
+  const updateCartCount = async () => {
+    try {
+      if (window.datihanCartStore?.ready) {
+        await window.datihanCartStore.ready();
+        if (!window.datihanCartStore.isAuthenticated()) {
+          renderCartCount(0);
+          return;
+        }
+
+        const cart = window.datihanCartStore.read();
+        const count = Array.isArray(cart)
+          ? cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+          : 0;
+        renderCartCount(count);
+        return;
+      }
+
+      // Safe fallback for pages where the cart store script is unavailable.
+      renderCartCount(0);
+    } catch (_) {
+      renderCartCount(0);
+    }
+  };
+
+  // Start at zero so stale localStorage never flashes a previous account's count.
+  renderCartCount(0);
   updateCartCount();
   window.addEventListener("storage", updateCartCount);
   window.addEventListener("datihan-cart-updated", updateCartCount);
@@ -132,8 +147,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!document.querySelector(".site-footer")) {
     const footer = document.createElement("footer");
     footer.className = "site-footer storefront-footer";
-    // The footer now has three desktop columns: About, Explore, and Follow Along.
-    // This keeps the existing global footer styling while removing the unused More column.
     footer.style.gridTemplateColumns = "minmax(320px, 1.4fr) minmax(170px, 0.75fr) minmax(220px, 1fr)";
     footer.innerHTML = `
       <div class="footer-column footer-about">
