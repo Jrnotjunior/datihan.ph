@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
   <style>
+    body:has(#popup-events){min-height:100vh;display:flex;flex-direction:column}
+    body:has(#popup-events) .page-main{flex:1 0 auto}
     .popup-group{display:grid;gap:1rem}
     .popup-group + .popup-group{margin-top:2.5rem}
     .popup-group-heading{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
