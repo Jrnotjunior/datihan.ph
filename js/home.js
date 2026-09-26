@@ -1,9 +1,7 @@
 (() => {
-  const announcement = document.querySelector('.hero-announcement');
-  const label = document.querySelector('.hero-announcement-label');
-  const text = document.querySelector('.hero-announcement-text');
+  const eventsList = document.querySelector('#hero-events-list');
 
-  if (!announcement || !label || !text || !window.datihanSupabase) return;
+  if (!eventsList || !window.datihanSupabase) return;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -12,17 +10,6 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
-  }
-
-  function formatDate(value) {
-    if (!value) return '';
-
-    return new Intl.DateTimeFormat('en-PH', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: 'Asia/Manila'
-    }).format(new Date(`${value}T00:00:00+08:00`));
   }
 
   function getManilaNow() {
@@ -61,11 +48,73 @@
 
   function getEventPriority(event) {
     if (event.realtimeStatus === 'happening') return 0;
-    if (event.realtimeStatus === 'upcoming') return 1;
-    return 2;
+    return 1;
   }
 
-  async function loadFeaturedEvent() {
+  function formatDateParts(value) {
+    if (!value) return { month: '', day: '' };
+
+    const date = new Date(`${value}T00:00:00+08:00`);
+    const month = new Intl.DateTimeFormat('en-PH', {
+      month: 'short',
+      timeZone: 'Asia/Manila'
+    }).format(date);
+
+    return {
+      month: month.toUpperCase(),
+      day: new Intl.DateTimeFormat('en-PH', {
+        day: '2-digit',
+        timeZone: 'Asia/Manila'
+      }).format(date)
+    };
+  }
+
+  function formatTime(value) {
+    if (!value) return '';
+
+    const [hours, minutes] = value.slice(0, 5).split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
+    return new Intl.DateTimeFormat('en-PH', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
+  }
+
+  function renderEvents(events) {
+    if (!events.length) {
+      eventsList.innerHTML = '<div class="hero-events-empty">No upcoming pop-up events at the moment.<br>Check back soon for the next DATIHAN.PH meet-up.</div>';
+      return;
+    }
+
+    eventsList.innerHTML = events.slice(0, 3).map(event => {
+      const date = formatDateParts(event.event_date);
+      const status = event.realtimeStatus === 'happening' ? 'Happening now' : 'Upcoming';
+      const statusClass = event.realtimeStatus === 'happening' ? ' is-happening' : '';
+      const time = event.start_time
+        ? `${formatTime(event.start_time)}${event.end_time ? ` – ${formatTime(event.end_time)}` : ''}`
+        : '';
+      const meta = [event.location, time].filter(Boolean).join(' · ');
+
+      return `
+        <article class="hero-event">
+          <div class="hero-event-date" aria-label="${escapeHtml(date.month)} ${escapeHtml(date.day)}">
+            <span class="hero-event-month">${escapeHtml(date.month)}</span>
+            <span class="hero-event-day">${escapeHtml(date.day)}</span>
+          </div>
+          <div class="hero-event-body">
+            <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
+            <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
+            ${meta ? `<p class="hero-event-meta">${escapeHtml(meta)}</p>` : ''}
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  async function loadEvents() {
     try {
       const { data, error } = await window.datihanSupabase
         .from('pop_up_events')
@@ -78,46 +127,21 @@
       const now = getManilaNow();
       const events = (data || [])
         .filter(event => String(event.status ?? '').toLowerCase() !== 'cancelled')
-        .map(event => ({
-          ...event,
-          realtimeStatus: getRealtimeStatus(event, now)
-        }))
+        .map(event => ({ ...event, realtimeStatus: getRealtimeStatus(event, now) }))
         .filter(event => event.realtimeStatus !== 'past')
         .sort((a, b) => {
           const priorityDifference = getEventPriority(a) - getEventPriority(b);
           if (priorityDifference !== 0) return priorityDifference;
-
-          return `${a.event_date} ${a.start_time || ''}`.localeCompare(
-            `${b.event_date} ${b.start_time || ''}`
-          );
+          return `${a.event_date} ${a.start_time || ''}`.localeCompare(`${b.event_date} ${b.start_time || ''}`);
         });
 
-      if (!events.length) {
-        label.textContent = 'POP-UP EVENT';
-        text.textContent = 'See where DATIHAN.PH is popping up next.';
-        announcement.setAttribute('aria-label', 'See upcoming DATIHAN.PH pop-up events');
-        return;
-      }
-
-      const event = events[0];
-      const statusText = event.realtimeStatus === 'happening' ? 'Happening now' : 'Upcoming';
-      const dateText = formatDate(event.event_date);
-      const locationText = event.location ? ` · ${event.location}` : '';
-
-      label.textContent = statusText.toUpperCase();
-      text.innerHTML = `${escapeHtml(event.title)} · ${escapeHtml(dateText)}${escapeHtml(locationText)}`;
-      announcement.setAttribute(
-        'aria-label',
-        `${statusText}: ${event.title}${event.location ? ` at ${event.location}` : ''} on ${dateText}`
-      );
+      renderEvents(events);
     } catch (error) {
-      console.error('Load homepage pop-up event error:', error);
-      label.textContent = 'POP-UP EVENT';
-      text.textContent = 'See where DATIHAN.PH is popping up next.';
-      announcement.setAttribute('aria-label', 'See upcoming DATIHAN.PH pop-up events');
+      console.error('Load homepage pop-up events error:', error);
+      eventsList.innerHTML = '<div class="hero-events-empty">Pop-up events are temporarily unavailable.<br>Please check the Pop-ups page.</div>';
     }
   }
 
-  loadFeaturedEvent();
-  window.setInterval(loadFeaturedEvent, 60 * 1000);
+  loadEvents();
+  window.setInterval(loadEvents, 60 * 1000);
 })();
