@@ -98,6 +98,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (candidate !== badge) candidate.remove();
     });
     link.appendChild(badge);
+
+    // Cart is available only to authenticated buyers. Keep it hidden while
+    // the session is being checked so guests never get a usable cart button.
+    link.hidden = true;
+    link.setAttribute("aria-hidden", "true");
   });
 
   // Keep the cart on the left and the account icon on the right.
@@ -135,31 +140,38 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", () => { if (window.innerWidth > 900) setMenuState(false); });
   }
 
-  const renderCartCount = (count) => {
+  const renderCartCount = (count, authenticated = false) => {
+    cartLinks.forEach((link) => {
+      link.hidden = !authenticated;
+      link.setAttribute("aria-hidden", String(!authenticated));
+    });
+
     document.querySelectorAll(".header-actions .cart-count").forEach((el) => {
       el.textContent = String(count);
-      el.hidden = count === 0;
+      el.hidden = count === 0 || !authenticated;
       el.setAttribute("aria-label", `${count} ${count === 1 ? "item" : "items"} in cart`);
     });
   };
 
-  // Cart state is account-scoped. Never show a previous user's badge after logout.
+  // Cart state is account-scoped. Guests do not have a cart and the header
+  // cart button remains hidden until an authenticated buyer session exists.
   const updateCartCount = async () => {
     try {
       await ensureCartStore();
-      if (!window.datihanCartStore?.isAuthenticated?.()) {
-        renderCartCount(0);
+      const authenticated = Boolean(window.datihanCartStore?.isAuthenticated?.());
+      if (!authenticated) {
+        renderCartCount(0, false);
         return;
       }
       const cart = window.datihanCartStore.read();
       const count = Array.isArray(cart) ? cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
-      renderCartCount(count);
+      renderCartCount(count, true);
     } catch (_) {
-      renderCartCount(0);
+      renderCartCount(0, false);
     }
   };
 
-  renderCartCount(0);
+  renderCartCount(0, false);
   updateCartCount();
   window.addEventListener("storage", updateCartCount);
   window.addEventListener("datihan-cart-updated", updateCartCount);
