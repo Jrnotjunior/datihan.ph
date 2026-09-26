@@ -10,6 +10,11 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
   <style>
+    .popup-group{display:grid;gap:1rem}
+    .popup-group + .popup-group{margin-top:2.5rem}
+    .popup-group-heading{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+    .popup-group-heading h2{font-size:1.25rem}
+    .popup-group-heading > span{color:var(--brown);font-size:12px}
     .popup-list{display:grid;gap:1rem}
     .popup-event{padding:1.5rem;border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white)}
     .popup-event-header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
@@ -17,8 +22,10 @@
     .popup-meta{display:grid;gap:.35rem;margin-top:1rem;color:var(--brown);font-size:14px}
     .popup-description{margin-top:1rem;color:var(--brown);max-width:720px}
     .status-badge{display:inline-flex;border:1px solid var(--light-beige);border-radius:999px;padding:.3rem .65rem;font-size:12px;font-weight:700;text-transform:capitalize;white-space:nowrap}
+    .status-happening{background:var(--brown);color:var(--off-white);border-color:var(--brown)}
+    .status-past{opacity:.7}
     .popup-empty{padding:2.5rem 1.25rem;text-align:center;border:1px dashed var(--light-beige);border-radius:var(--radius);color:var(--brown)}
-    @media(max-width:650px){.popup-event-header{flex-direction:column}}
+    @media(max-width:650px){.popup-event-header,.popup-group-heading{flex-direction:column;align-items:flex-start}}
   </style>
 </head>
 <body>
