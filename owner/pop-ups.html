@@ -29,6 +29,7 @@
     .modal-close{border:0;background:transparent;color:var(--brown);font-size:1.5rem;line-height:1;cursor:pointer;padding:.25rem}
     .modal-form{display:grid;gap:1rem}
     .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .status-help{margin-top:.4rem;color:var(--brown);font-size:12px;line-height:1.4}
     .modal-actions{display:flex;justify-content:flex-end;gap:.65rem;margin-top:.5rem}
     .confirm-modal[hidden]{display:none}
     .confirm-modal{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:1rem}
@@ -84,7 +85,15 @@
         <div class="field"><label for="event-title">Event name</label><input id="event-title" type="text" required maxlength="120" placeholder="DATIHAN.PH Weekend Pop-up"></div>
         <div class="modal-grid">
           <div class="field"><label for="event-date">Date</label><input id="event-date" type="date" required></div>
-          <div class="field"><label for="event-status">Status</label><select id="event-status"><option value="upcoming">Upcoming</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+          <div class="field">
+            <label for="event-status">Status</label>
+            <select id="event-status" disabled aria-describedby="event-status-help">
+              <option value="upcoming">Upcoming</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+            </select>
+            <p class="status-help" id="event-status-help">Automatically calculated from the event date and time.</p>
+          </div>
         </div>
         <div class="modal-grid">
           <div class="field"><label for="event-start">Start time</label><input id="event-start" type="time"></div>
