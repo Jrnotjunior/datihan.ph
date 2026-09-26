@@ -7,9 +7,9 @@
 .content-card p + p{margin-top:.75rem}
 
 /* Formal policy document layout. */
-.page-main:has(.policy-content) .page-header{max-width:900px;margin-left:0;margin-right:0;margin-bottom:2.75rem}
+.page-main:has(.policy-content) .page-header{width:min(100%,1100px);max-width:none;margin:0 auto 2.75rem}
 .page-main:has(.policy-content) .page-header p:not(.eyebrow){max-width:760px}
-.page-main:has(.policy-content) .policy-content{max-width:900px;margin-left:0;margin-right:0;padding:clamp(2rem,4vw,3rem);border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white)}
+.page-main:has(.policy-content) .policy-content{width:min(100%,1100px);max-width:none;margin-left:auto;margin-right:auto;padding:clamp(2rem,4vw,3rem);border:1px solid var(--light-beige);border-radius:var(--radius);background:var(--off-white)}
 .policy-content h2{margin:2rem 0 .65rem;font-size:1.25rem;line-height:1.35;font-weight:700;letter-spacing:-.015em}
 .policy-content h2:first-child{margin-top:0}
 .policy-content p{margin:0;color:var(--dark-brown);font-size:16px;line-height:1.75}
@@ -45,5 +45,5 @@
 .owner-nav-links a:hover{background:var(--light-beige);text-decoration:none}
 .owner-nav-links a.is-active{background:var(--dark-brown);color:var(--off-white)}
 
-@media(max-width:800px){.card-grid{grid-template-columns:1fr}.page-main:has(.policy-content) .policy-content{max-width:100%}}
+@media(max-width:800px){.card-grid{grid-template-columns:1fr}.page-main:has(.policy-content) .page-header,.page-main:has(.policy-content) .policy-content{width:100%}}
 @media(max-width:600px){.owner-nav{align-items:flex-start;flex-direction:column}.owner-nav-links{justify-content:flex-start;width:100%}.owner-nav-links a{padding:.4rem .55rem}.faq-item summary{padding:1rem 0;font-size:15px}.faq-item p{font-size:15px}.page-main:has(.policy-content) .page-header{margin-bottom:2rem}.page-main:has(.policy-content) .policy-content{padding:1.5rem}.policy-content h2{margin-top:1.5rem;font-size:1.15rem}.policy-content p{font-size:15px;line-height:1.7}}
