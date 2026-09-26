@@ -55,6 +55,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     return item.image_url ? [item.image_url] : [];
   };
 
+  const confirmCartDeletion = (count) => new Promise((resolve) => {
+    const existing = document.querySelector(".cart-confirm-modal");
+    existing?.remove();
+
+    const modal = document.createElement("div");
+    modal.className = "cart-confirm-modal";
+    modal.innerHTML = `
+      <div class="cart-confirm-backdrop" data-confirm-cancel></div>
+      <section class="cart-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cart-confirm-title">
+        <p class="cart-confirm-label">CART</p>
+        <h2 id="cart-confirm-title">Remove selected items?</h2>
+        <p class="cart-confirm-message">Are you sure you want to remove ${count === 1 ? "the selected item" : `all ${count} selected items`} from your cart? This action cannot be undone.</p>
+        <div class="cart-confirm-actions">
+          <button type="button" class="cart-confirm-cancel" data-confirm-cancel>Cancel</button>
+          <button type="button" class="cart-confirm-remove" data-confirm-remove>Remove</button>
+        </div>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.classList.add("cart-confirm-open");
+
+    const close = (result) => {
+      modal.remove();
+      document.body.classList.remove("cart-confirm-open");
+      document.removeEventListener("keydown", onKeyDown);
+      resolve(result);
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") close(false);
+    };
+
+    modal.querySelectorAll("[data-confirm-cancel]").forEach((element) => {
+      element.addEventListener("click", () => close(false));
+    });
+    modal.querySelector("[data-confirm-remove]")?.addEventListener("click", () => close(true));
+    document.addEventListener("keydown", onKeyDown);
+    modal.querySelector("[data-confirm-cancel]")?.focus();
+  });
+
   const hydrateCartProductData = async (cart) => {
     if (!window.datihanSupabase || !cart.length) return;
 
@@ -255,15 +296,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       render();
     });
 
-    itemsContainer.querySelector("#delete-selected")?.addEventListener("click", () => {
+    itemsContainer.querySelector("#delete-selected")?.addEventListener("click", async () => {
       const selectedIds = new Set(readSelected() || []);
       if (!selectedIds.size) return;
 
-      const confirmed = window.confirm(
-        selectedIds.size === 1
-          ? "Remove the selected item from your cart?"
-          : `Remove all ${selectedIds.size} selected items from your cart?`
-      );
+      const confirmed = await confirmCartDeletion(selectedIds.size);
       if (!confirmed) return;
 
       const next = readCart().filter((item) => !selectedIds.has(String(item.id)));
