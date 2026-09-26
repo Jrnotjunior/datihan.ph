@@ -51,24 +51,6 @@
     return 1;
   }
 
-  function formatDateParts(value) {
-    if (!value) return { month: '', day: '' };
-
-    const date = new Date(`${value}T00:00:00+08:00`);
-    const month = new Intl.DateTimeFormat('en-PH', {
-      month: 'short',
-      timeZone: 'Asia/Manila'
-    }).format(date);
-
-    return {
-      month: month.toUpperCase(),
-      day: new Intl.DateTimeFormat('en-PH', {
-        day: '2-digit',
-        timeZone: 'Asia/Manila'
-      }).format(date)
-    };
-  }
-
   function formatTime(value) {
     if (!value) return '';
 
@@ -90,25 +72,18 @@
     }
 
     eventsList.innerHTML = events.slice(0, 3).map(event => {
-      const date = formatDateParts(event.event_date);
-      const status = event.realtimeStatus === 'happening' ? 'Happening now' : 'Upcoming';
+      const status = event.realtimeStatus === 'happening' ? 'Happening' : 'Upcoming';
       const statusClass = event.realtimeStatus === 'happening' ? ' is-happening' : '';
       const time = event.start_time
         ? `${formatTime(event.start_time)}${event.end_time ? ` – ${formatTime(event.end_time)}` : ''}`
         : '';
-      const meta = [event.location, time].filter(Boolean).join(' · ');
 
       return `
         <article class="hero-event">
-          <div class="hero-event-date" aria-label="${escapeHtml(date.month)} ${escapeHtml(date.day)}">
-            <span class="hero-event-month">${escapeHtml(date.month)}</span>
-            <span class="hero-event-day">${escapeHtml(date.day)}</span>
-          </div>
-          <div class="hero-event-body">
-            <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
-            <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
-            ${meta ? `<p class="hero-event-meta">${escapeHtml(meta)}</p>` : ''}
-          </div>
+          <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
+          <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
+          ${event.location ? `<p class="hero-event-location">${escapeHtml(event.location)}</p>` : ''}
+          ${time ? `<p class="hero-event-time">${escapeHtml(time)}</p>` : ''}
         </article>
       `;
     }).join('');
