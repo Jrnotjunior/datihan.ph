@@ -57,26 +57,24 @@
             const cityKey = normaliseCity(cityName);
             const barangayKey = normaliseBarangay(barangayName);
 
-            // use-postal-ph stores the city/town in `location` and the
-            // postal area/neighborhood in `municipality`.
-            const results = postalPH.fetchDataLists({
-                location: cityKey,
-                municipality: barangayKey
+            // use-postal-ph stores the city/municipality in `location` and
+            // postal delivery areas in `municipality`. A delivery-area name
+            // may contain the selected barangay, e.g. "Valenzuela CPO - Malinta".
+            const results = postalPH.fetchDataLists({ location: cityKey });
+            const candidates = Array.isArray(results?.data) ? results.data : [];
+
+            const match = candidates.find(item => {
+                const locationKey = normaliseCity(item.location);
+                const municipalityKey = normalise(item.municipality);
+                return locationKey === cityKey && (
+                    municipalityKey === barangayKey ||
+                    municipalityKey.includes(barangayKey)
+                );
             });
 
-            const candidates = Array.isArray(results) ? results : Array.isArray(results?.data) ? results.data : [];
-            const match = candidates.find(item =>
-                normaliseCity(item.location) === cityKey &&
-                normaliseBarangay(item.municipality) === barangayKey
-            ) || candidates.find(item =>
-                normaliseBarangay(item.municipality) === barangayKey
-            );
-
-            if (match?.post_code) {
-                postal.value = String(match.post_code).padStart(4, '0');
-            } else {
-                postal.value = '';
-            }
+            postal.value = match?.post_code
+                ? String(match.post_code).padStart(4, '0')
+                : '';
         } catch (error) {
             postal.value = '';
             console.warn('Postal code lookup unavailable:', error);
