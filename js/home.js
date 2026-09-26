@@ -65,6 +65,21 @@
     }).format(date);
   }
 
+  function formatEventDate(value) {
+    if (!value) return { month: '', day: '' };
+
+    const date = new Date(`${value}T00:00:00`);
+
+    return {
+      month: new Intl.DateTimeFormat('en-US', {
+        month: 'short'
+      }).format(date),
+      day: new Intl.DateTimeFormat('en-US', {
+        day: '2-digit'
+      }).format(date)
+    };
+  }
+
   function renderEvents(events) {
     if (!events.length) {
       eventsList.innerHTML = '<div class="hero-events-empty">No upcoming pop-up events at the moment.<br>Check back soon for the next DATIHAN.PH meet-up.</div>';
@@ -77,13 +92,20 @@
       const time = event.start_time
         ? `${formatTime(event.start_time)}${event.end_time ? ` – ${formatTime(event.end_time)}` : ''}`
         : '';
+      const eventDate = formatEventDate(event.event_date);
 
       return `
         <article class="hero-event">
-          <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
-          <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
-          ${event.location ? `<p class="hero-event-location">${escapeHtml(event.location)}</p>` : ''}
-          ${time ? `<p class="hero-event-time">${escapeHtml(time)}</p>` : ''}
+          <div class="hero-event-date" aria-label="${escapeHtml(eventDate.month)} ${escapeHtml(eventDate.day)}">
+            <span class="hero-event-month">${escapeHtml(eventDate.month)}</span>
+            <span class="hero-event-day">${escapeHtml(eventDate.day)}</span>
+          </div>
+          <div class="hero-event-body">
+            <span class="hero-event-status${statusClass}">${escapeHtml(status)}</span>
+            <h3 class="hero-event-title">${escapeHtml(event.title)}</h3>
+            ${event.location ? `<p class="hero-event-meta">${escapeHtml(event.location)}</p>` : ''}
+            ${time ? `<p class="hero-event-meta">${escapeHtml(time)}</p>` : ''}
+          </div>
         </article>
       `;
     }).join('');
