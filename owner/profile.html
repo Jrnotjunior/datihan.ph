@@ -31,7 +31,7 @@
     </header>
 
     <section class="profile-layout">
-      <div>
+      <div class="profile-main-column">
         <section class="content-card profile-section">
           <p class="eyebrow">ACCOUNT INFORMATION</p>
           <h2>Profile information</h2>
@@ -58,33 +58,6 @@
             <button class="button button-primary" type="button" id="save-profile">Save changes</button>
           </div>
           <p class="form-status" id="profile-status" role="status" aria-live="polite"></p>
-        </section>
-
-        <section class="content-card profile-section payment-settings-section">
-          <p class="eyebrow">PAYMENT SETTINGS</p>
-          <h2>GCash payment QR</h2>
-          <p class="section-note">Customers will see your active QR code when they choose GCash at checkout. Replace it anytime your receiving account changes or reaches its limit.</p>
-
-          <div class="payment-qr-layout">
-            <div class="payment-qr-preview-wrap">
-              <div class="payment-qr-empty" id="payment-qr-empty">No active QR yet.</div>
-              <img id="payment-qr-preview" class="payment-qr-preview" alt="Active DATIHAN.PH GCash payment QR" hidden>
-              <span class="payment-active-badge" id="payment-active-badge" hidden>ACTIVE</span>
-            </div>
-            <div class="payment-qr-controls">
-              <label class="button button-secondary payment-upload-button" for="payment-qr-file">Upload / Replace QR</label>
-              <input id="payment-qr-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-              <p class="payment-file-name" id="payment-qr-file-name">PNG, JPG, or WEBP · recommended square image</p>
-              <button class="button button-primary" type="button" id="save-payment-qr" disabled>Save &amp; Activate</button>
-              <p class="form-status" id="payment-status" role="status" aria-live="polite"></p>
-            </div>
-          </div>
-
-          <div class="payment-qr-history" id="payment-qr-history" hidden>
-            <h3>Payment QR history</h3>
-            <p class="section-note">Older QR codes stay in the history for reference. Only the current active QR is shown to customers.</p>
-            <div id="payment-qr-history-list"></div>
-          </div>
         </section>
 
         <section class="content-card profile-section">
@@ -123,6 +96,35 @@
           </div>
         </section>
       </div>
+
+      <aside class="profile-payment-column">
+        <section class="content-card profile-section payment-settings-section">
+          <p class="eyebrow">PAYMENT SETTINGS</p>
+          <h2>GCash payment QR</h2>
+          <p class="section-note">Customers will see your active QR code when they choose GCash at checkout. Replace it anytime your receiving account changes or reaches its limit.</p>
+
+          <div class="payment-qr-layout">
+            <div class="payment-qr-preview-wrap">
+              <div class="payment-qr-empty" id="payment-qr-empty">No active QR yet.</div>
+              <img id="payment-qr-preview" class="payment-qr-preview" alt="Active DATIHAN.PH GCash payment QR" hidden>
+              <span class="payment-active-badge" id="payment-active-badge" hidden>ACTIVE</span>
+            </div>
+            <div class="payment-qr-controls">
+              <label class="button button-secondary payment-upload-button" for="payment-qr-file">Upload / Replace QR</label>
+              <input id="payment-qr-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+              <p class="payment-file-name" id="payment-qr-file-name">PNG, JPG, or WEBP · recommended square image</p>
+              <button class="button button-primary" type="button" id="save-payment-qr" disabled>Save &amp; Activate</button>
+              <p class="form-status" id="payment-status" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <div class="payment-qr-history" id="payment-qr-history" hidden>
+            <h3>Payment QR history</h3>
+            <p class="section-note">Older QR codes stay in the history for reference. Only the current active QR is shown to customers.</p>
+            <div id="payment-qr-history-list"></div>
+          </div>
+        </section>
+      </aside>
     </section>
   </main>
 
