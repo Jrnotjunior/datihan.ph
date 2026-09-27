@@ -64,8 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <a href="${publicPath("about.html")}">About</a>
     </nav>
     <div class="header-actions">
-      <a href="${accountPath()}" class="icon-link" aria-label="Account">${accountIcon}</a>
       <a href="${cartPath()}" class="icon-link" data-global-cart-link aria-label="Shopping cart" hidden aria-hidden="true">${cartIcon}</a>
+      <a href="${accountPath()}" class="icon-link" aria-label="Account">${accountIcon}</a>
     </div>`;
   document.body.insertBefore(header, document.body.firstChild);
 
