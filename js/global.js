@@ -2,6 +2,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.__datihanGlobalInitialized) return;
   window.__datihanGlobalInitialized = true;
 
+  const faviconHref = new URL("../assets/datihan-logo.svg", document.currentScript?.src || `${window.location.origin}/datihan.ph/js/global.js`).href;
+  if (!document.querySelector('link[rel="icon"][data-datihan-favicon]')) {
+    const favicon = document.createElement("link");
+    favicon.rel = "icon";
+    favicon.type = "image/svg+xml";
+    favicon.href = faviconHref;
+    favicon.dataset.datihanFavicon = "true";
+    document.head.appendChild(favicon);
+  }
+
   const path = window.location.pathname;
   const inPages = path.includes("/pages/");
   const inAccount = path.includes("/account/");
