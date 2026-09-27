@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
           flex-direction: row;
           align-items: center;
           justify-content: center;
-          gap: 0.6rem;
+          gap: 1.1rem;
           background: transparent;
           border-radius: 0;
           box-shadow: none;
@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
           overflow: visible;
         }
         body .site-header .main-nav a {
-          font-size: 11px;
+          font-size: 25px;
           line-height: 1;
         }
         body .site-header .header-actions {
@@ -127,10 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
           padding-right: 0.7rem;
         }
         body .site-header .main-nav {
-          gap: 0.45rem;
+          gap: 1.1rem;
         }
         body .site-header .main-nav a {
-          font-size: 10px;
+          font-size: 25px;
         }
         body .site-header .header-actions .icon-link {
           width: 30px;
