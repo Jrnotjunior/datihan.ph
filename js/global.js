@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.__datihanGlobalInitialized) return;
   window.__datihanGlobalInitialized = true;
 
+  // Keep the browser tab title consistent across DATIHAN.PH pages.
+  document.title = "Datihan.ph";
+
   const path = window.location.pathname;
   const inPages = path.includes("/pages/");
   const inAccount = path.includes("/account/");
