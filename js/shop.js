@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const count = document.querySelector("#shop-count");
   const empty = document.querySelector("#shop-empty");
   let products = [];
+  let promotions = [];
 
   if (window.datihanCartStore) await window.datihanCartStore.ready();
 
@@ -34,6 +35,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   const getCartQuantity = (productId) => {
     const item = readCart().find((entry) => String(entry.id) === String(productId));
     return item ? Math.max(0, Number(item.quantity || 0)) : 0;
+  };
+
+  const getActivePromotion = (productId) => {
+    const now = new Date();
+    return promotions.find((promotion) => {
+      if (!promotion.is_active) return false;
+
+      const start = promotion.start_date ? new Date(`${promotion.start_date}T00:00:00`) : null;
+      const end = promotion.end_date ? new Date(`${promotion.end_date}T23:59:59`) : null;
+      if (start && now < start) return false;
+      if (end && now > end) return false;
+
+      const productIds = Array.isArray(promotion.product_ids) ? promotion.product_ids : [];
+      return productIds.length === 0 || productIds.some((id) => String(id) === String(productId));
+    });
+  };
+
+  const promotionLabel = (promotion) => {
+    if (!promotion) return "";
+    if (promotion.discount_type === "free_shipping") return "FREE SHIPPING";
+    if (promotion.discount_type === "percentage") return `${Number(promotion.discount_value || 0)}% OFF`;
+    return `${peso(promotion.discount_value)} OFF`;
   };
 
   const updateCartButton = (button, product) => {
@@ -142,6 +165,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     card.dataset.price = Number(product.price || 0);
 
     const images = productImages(product);
+    const promotion = getActivePromotion(product.id);
+    const promotionBadge = promotion
+      ? `<span class="shop-promotion-badge" title="${escapeHtml(promotion.title || "Active promotion")}">${escapeHtml(promotionLabel(promotion))}</span>`
+      : "";
     const image = images[0]
       ? `<button class="shop-product-image-button" type="button" aria-label="View ${escapeHtml(product.name)} images">
           <img src="${escapeHtml(images[0])}" alt="${escapeHtml(product.name)}" loading="lazy">
@@ -152,6 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     card.innerHTML = `
       <div class="shop-product-media">
         ${image}
+        ${promotionBadge}
         <button class="wishlist-button" type="button" aria-label="Add ${escapeHtml(product.name)} to wishlist" aria-pressed="false">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"></path></svg>
         </button>
@@ -246,16 +274,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         .order("created_at", { ascending: false });
       if (error) throw error;
       products = data || [];
+
+      const { data: promotionData, error: promotionError } = await window.datihanSupabase
+        .from("promotions")
+        .select("id, title, discount_type, discount_value, product_ids, start_date, end_date, is_active")
+        .eq("is_active", true);
+      if (promotionError) throw promotionError;
+      promotions = promotionData || [];
+
       renderCategoryOptions();
       renderProducts();
     } catch (error) {
       console.error("Load shop products error:", error);
       products = [];
+      promotions = [];
       grid.replaceChildren();
       count.textContent = "Unable to load pieces";
       empty.hidden = false;
       empty.querySelector("h2").textContent = "We could not load the shop.";
-      empty.querySelector("p").textContent = "Please check the Supabase products read policy and refresh the page.";
+      empty.querySelector("p").textContent = "Please check the Supabase products and promotions read policies, then refresh the page.";
     }
   };
 
