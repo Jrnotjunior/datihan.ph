@@ -34,10 +34,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     return overlay;
   };
 
+  const createRemoveModal = () => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-backdrop confirm-backdrop';
+    overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = `
+      <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="remove-modal-title">
+        <div class="confirm-icon remove-icon" aria-hidden="true">×</div>
+        <p class="eyebrow">REMOVE ORDER</p>
+        <h2 id="remove-modal-title">Remove this order?</h2>
+        <p id="remove-modal-message" class="confirm-message"></p>
+        <div class="confirm-actions">
+          <button class="button button-secondary" id="remove-modal-cancel" type="button">Keep Order</button>
+          <button class="button" id="remove-modal-confirm" type="button">Remove Order</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    return overlay;
+  };
+
   const cancelModal = createCancelModal();
+  const removeModal = createRemoveModal();
+
   const keepButton = cancelModal.querySelector('#cancel-modal-cancel');
   const confirmButton = cancelModal.querySelector('#cancel-modal-confirm');
   const confirmMessage = cancelModal.querySelector('#cancel-modal-message');
+
+  const removeKeepButton = removeModal.querySelector('#remove-modal-cancel');
+  const removeConfirmButton = removeModal.querySelector('#remove-modal-confirm');
+  const removeMessage = removeModal.querySelector('#remove-modal-message');
+
   let activeOrder = null;
   let activeCard = null;
 
@@ -49,12 +77,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     activeCard = null;
   };
 
+  const closeRemoveModal = () => {
+    removeModal.hidden = true;
+    removeModal.classList.remove('is-open');
+    removeModal.setAttribute('aria-hidden', 'true');
+    activeOrder = null;
+    activeCard = null;
+  };
+
   keepButton.addEventListener('click', closeCancelModal);
   cancelModal.addEventListener('click', event => {
     if (event.target === cancelModal) closeCancelModal();
   });
+
+  removeKeepButton.addEventListener('click', closeRemoveModal);
+  removeModal.addEventListener('click', event => {
+    if (event.target === removeModal) closeRemoveModal();
+  });
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !cancelModal.hidden) closeCancelModal();
+    if (event.key === 'Escape') {
+      if (!cancelModal.hidden) closeCancelModal();
+      if (!removeModal.hidden) closeRemoveModal();
+    }
   });
 
   if (!supabase) {
@@ -151,6 +196,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cancelButton = activeCard.querySelector('.cancel-order');
         if (cancelButton) cancelButton.remove();
 
+        addRemoveButton(activeOrder, activeCard);
+
         const cancelledOrderNumber = activeOrder.order_number;
         closeCancelModal();
         if (note) note.textContent = `Order #${cancelledOrderNumber} has been cancelled. The purchased quantity has been returned to stock.`;
@@ -161,6 +208,69 @@ document.addEventListener('DOMContentLoaded', async () => {
         confirmButton.textContent = 'Confirm Cancelled';
       }
     });
+
+    removeConfirmButton.addEventListener('click', async () => {
+      if (!activeOrder || !activeCard) return;
+
+      removeConfirmButton.disabled = true;
+      removeConfirmButton.textContent = 'Removing…';
+
+      try {
+        const { data: deletedOrders, error: deleteError } = await supabase
+          .from('orders')
+          .delete()
+          .eq('id', activeOrder.id)
+          .eq('user_id', currentUserId)
+          .select('id');
+
+        if (deleteError) throw deleteError;
+        if (!deletedOrders?.length) {
+          throw new Error('This order could not be removed. Please make sure your account has permission to delete completed or cancelled orders.');
+        }
+
+        const removedOrderNumber = activeOrder.order_number;
+        activeCard.remove();
+        closeRemoveModal();
+
+        if (!list?.querySelector('.order-card')) {
+          if (list) list.innerHTML = '';
+          if (empty) empty.hidden = false;
+        }
+
+        if (note) note.textContent = `Order #${removedOrderNumber} has been removed from your order history.`;
+      } catch (error) {
+        console.error('Order removal error:', error);
+        if (note) note.textContent = `Unable to remove the order: ${error.message || error}`;
+        removeConfirmButton.disabled = false;
+        removeConfirmButton.textContent = 'Remove Order';
+      }
+    });
+
+    const addRemoveButton = (order, card) => {
+      const isRemovable = order.status === 'cancelled' || order.status === 'delivered';
+      if (!isRemovable || card.querySelector('.remove-order')) return;
+
+      const actions = card.querySelector('.order-actions');
+      if (!actions) return;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'remove-order';
+      button.textContent = 'Remove Order';
+      button.addEventListener('click', () => {
+        activeOrder = order;
+        activeCard = card;
+        removeConfirmButton.disabled = false;
+        removeConfirmButton.textContent = 'Remove Order';
+        removeMessage.textContent = `Remove order ${order.order_number || ''} from your order history? This cannot be undone.`;
+        removeModal.hidden = false;
+        removeModal.classList.add('is-open');
+        removeModal.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => removeKeepButton.focus());
+      });
+
+      actions.appendChild(button);
+    };
 
     for (const order of orders) {
       const orderItems = itemsByOrder.get(String(order.id)) || [];
@@ -245,6 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         itemsEl.appendChild(row);
       });
 
+      addRemoveButton(order, card);
       list?.appendChild(card);
     }
   } catch (error) {
