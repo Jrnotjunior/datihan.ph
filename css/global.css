@@ -487,7 +487,7 @@ body .site-header .header-actions {
     justify-self:auto;
   }
   body .site-header .main-nav a{
-    font-size:12px;
+    font-size:13px;
     white-space:nowrap;
   }
   body .site-header .header-actions{
@@ -501,6 +501,6 @@ body .site-header .header-actions {
 
 @media(max-width:520px){
   body .site-header .main-nav{gap:.5rem}
-  body .site-header .main-nav a{font-size:11px}
+  body .site-header .main-nav a{font-size:13px}
   body .site-header .header-actions .icon-link{width:34px;height:34px;flex-basis:34px}
 }
