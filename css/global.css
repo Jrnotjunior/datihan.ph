@@ -453,3 +453,54 @@ body .site-header .header-actions {
     grid-row: 1;
   }
 }
+
+/* Mobile storefront header: use the same centered 3-column structure as shop.css. */
+@media(max-width:900px){
+  body .site-header{
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    gap:.35rem;
+  }
+  body .site-header .brand{
+    grid-column:1;
+    grid-row:1;
+    justify-self:start;
+  }
+  body .site-header .main-nav{
+    display:flex;
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    grid-column:auto;
+    grid-row:auto;
+    width:max-content;
+    max-width:calc(100vw - 190px);
+    padding:0;
+    margin:0;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:.65rem;
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
+    justify-self:auto;
+  }
+  body .site-header .main-nav a{
+    font-size:12px;
+    white-space:nowrap;
+  }
+  body .site-header .header-actions{
+    grid-column:3;
+    grid-row:1;
+    justify-self:end;
+    width:auto;
+  }
+  body .site-header .mobile-menu-toggle{display:none!important}
+}
+
+@media(max-width:520px){
+  body .site-header .main-nav{gap:.5rem}
+  body .site-header .main-nav a{font-size:11px}
+  body .site-header .header-actions .icon-link{width:34px;height:34px;flex-basis:34px}
+}
