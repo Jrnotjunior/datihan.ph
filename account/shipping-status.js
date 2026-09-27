@@ -4,6 +4,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!supabase || !list) return;
 
   let loaded = false;
+  const statusSteps = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered'];
+  const statusLabels = {
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    preparing: 'Preparing',
+    shipped: 'Shipped',
+    delivered: 'Delivered'
+  };
 
   const decorate = async () => {
     if (loaded || !list.querySelector('.order-card')) return;
@@ -18,46 +26,79 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { data: orders, error } = await supabase
         .from('orders')
         .select('order_number, status, delivery_method, tracking_number')
-        .eq('user_id', userId)
-        .in('status', ['shipped', 'delivered']);
+        .eq('user_id', userId);
 
       if (error) throw error;
 
       (orders || []).forEach(order => {
-        if (!order.delivery_method && !order.tracking_number) return;
-
         const card = [...list.querySelectorAll('.order-card')].find(item =>
           item.querySelector('.order-number')?.textContent?.includes(`Order #${order.order_number}`)
         );
-        if (!card || card.querySelector('.shipping-status-box')) return;
+        if (!card || card.querySelector('.order-progress')) return;
 
-        const box = document.createElement('div');
-        box.className = 'shipping-status-box';
+        const currentIndex = statusSteps.indexOf(order.status);
+        const progress = document.createElement('div');
+        progress.className = 'order-progress';
 
         const title = document.createElement('p');
-        title.className = 'shipping-status-title';
-        title.textContent = order.status === 'delivered' ? 'Delivery details' : 'Shipping details';
-        box.appendChild(title);
+        title.className = 'order-progress-title';
+        title.textContent = 'Order progress';
+        progress.appendChild(title);
+
+        const track = document.createElement('div');
+        track.className = 'order-progress-track';
+        track.setAttribute('aria-label', `Order status: ${statusLabels[order.status] || order.status}`);
+
+        statusSteps.forEach((step, index) => {
+          const item = document.createElement('div');
+          item.className = 'order-progress-step';
+          if (index < currentIndex) item.classList.add('is-complete');
+          if (index === currentIndex) item.classList.add('is-current');
+
+          const dot = document.createElement('span');
+          dot.className = 'order-progress-dot';
+          dot.setAttribute('aria-hidden', 'true');
+
+          const label = document.createElement('span');
+          label.className = 'order-progress-label';
+          label.textContent = statusLabels[step];
+
+          item.append(dot, label);
+          track.appendChild(item);
+        });
+
+        progress.appendChild(track);
+
+        const shippingBox = document.createElement('div');
+        shippingBox.className = 'shipping-status-box';
+
+        const shippingTitle = document.createElement('p');
+        shippingTitle.className = 'shipping-status-title';
+        shippingTitle.textContent = order.status === 'delivered' ? 'Delivery details' : 'Shipping details';
+        shippingBox.appendChild(shippingTitle);
 
         if (order.delivery_method) {
           const method = document.createElement('p');
-          method.innerHTML = `<span>Delivery method</span><strong></strong>`;
+          method.innerHTML = '<span>Delivery method</span><strong></strong>';
           method.querySelector('strong').textContent = order.delivery_method;
-          box.appendChild(method);
+          shippingBox.appendChild(method);
         }
 
         if (order.tracking_number) {
           const tracking = document.createElement('p');
-          tracking.innerHTML = `<span>Tracking / Reference</span><strong></strong>`;
+          tracking.innerHTML = '<span>Tracking / Reference</span><strong></strong>';
           tracking.querySelector('strong').textContent = order.tracking_number;
-          box.appendChild(tracking);
+          shippingBox.appendChild(tracking);
         }
 
         const items = card.querySelector('.order-items');
-        if (items) items.before(box);
+        if (items) {
+          items.before(progress);
+          if (order.delivery_method || order.tracking_number) items.before(shippingBox);
+        }
       });
     } catch (error) {
-      console.error('Shipping status display error:', error);
+      console.error('Order progress display error:', error);
     }
   };
 
