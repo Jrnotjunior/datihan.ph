@@ -35,8 +35,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function statusLabel(value) {
-    const labels = { pending: 'Pending', confirmed: 'Confirmed', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled', returned_refunded: 'Returned / Refunded' };
+    const labels = {
+      pending: 'Pending — Payment to verify',
+      confirmed: 'Confirmed — Payment verified',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      returned_refunded: 'Returned / Refunded'
+    };
     return labels[String(value || 'pending')] || String(value || 'pending').replaceAll('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  function paymentState(order) {
+    const status = String(order.status || 'pending');
+    if (status === 'pending') return { label: 'Awaiting payment verification', className: 'payment-pending', help: 'Customer says the GCash payment was sent. Verify your GCash account before accepting the order.' };
+    if (['confirmed', 'shipped', 'delivered'].includes(status)) return { label: 'Payment verified', className: 'payment-confirmed', help: 'Payment was manually verified before fulfillment.' };
+    if (status === 'cancelled') return { label: 'Payment not accepted', className: 'payment-cancelled', help: 'This order is cancelled and will not be fulfilled.' };
+    return { label: 'Payment status follows order', className: 'payment-pending', help: 'Review the order before continuing.' };
   }
 
   function getShipping(order) {
@@ -44,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstName = address.first_name || address.firstName || '';
     const lastName = address.last_name || address.lastName || '';
     const phone = address.phone || address.contact_number || address.contactNumber || 'No phone number';
-    const line = [address.address_line || address.address || address.street || address.street_address, address.city, address.province || address.state, address.postal_code || address.postalCode || address.zip].filter(Boolean).join(', ');
+    const line = [address.address_line || address.address || address.street || address.street_address, address.barangay, address.city, address.province || address.state, address.postal_code || address.postalCode || address.zip].filter(Boolean).join(', ');
     return { name: `${firstName} ${lastName}`.trim() || address.name || 'Customer', phone, line: line || 'No shipping address' };
   }
 
@@ -69,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalItems = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
       const total = Number(order.total ?? order.subtotal ?? 0);
       const status = String(order.status || 'pending');
-      return `<article class="order-card"><div class="order-card-top"><div><p class="eyebrow">${escapeHtml(formatDate(order.created_at))}</p><h2>${escapeHtml(order.order_number || `Order ${order.id}`)}</h2></div><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(statusLabel(status))}</span></div><div class="order-summary-row"><div><span class="muted-label">Customer</span><strong>${escapeHtml(shipping.name)}</strong></div><div><span class="muted-label">Items</span><strong>${totalItems}</strong></div><div><span class="muted-label">Total</span><strong>${money(total)}</strong></div></div><div class="order-actions"><button class="button button-secondary button-small" type="button" data-action="view" data-id="${escapeHtml(order.id)}">View details</button><label class="status-control"><span>Update status</span><select data-action="status" data-id="${escapeHtml(order.id)}" aria-label="Update order status">${statuses.map(option => `<option value="${option}" ${option === status ? 'selected' : ''}>${statusLabel(option)}</option>`).join('')}</select></label></div></article>`;
+      const payment = paymentState(order);
+      return `<article class="order-card"><div class="order-card-top"><div><p class="eyebrow">${escapeHtml(formatDate(order.created_at))}</p><h2>${escapeHtml(order.order_number || `Order ${order.id}`)}</h2></div><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(statusLabel(status))}</span></div><div class="payment-summary ${payment.className}"><div><span class="muted-label">Payment</span><strong>${escapeHtml(payment.label)}</strong></div><p>${escapeHtml(payment.help)}</p></div><div class="order-summary-row"><div><span class="muted-label">Customer</span><strong>${escapeHtml(shipping.name)}</strong></div><div><span class="muted-label">Items</span><strong>${totalItems}</strong></div><div><span class="muted-label">Total</span><strong>${money(total)}</strong></div></div><div class="order-actions"><button class="button button-secondary button-small" type="button" data-action="view" data-id="${escapeHtml(order.id)}">View details</button><label class="status-control"><span>Next step</span><select data-action="status" data-id="${escapeHtml(order.id)}" aria-label="Update order status">${statuses.map(option => `<option value="${option}" ${option === status ? 'selected' : ''}>${statusLabel(option)}</option>`).join('')}</select></label></div></article>`;
     }).join('');
   }
 
@@ -85,8 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const shippingFee = Number(order.shipping_fee || 0);
     const total = Number(order.total ?? subtotal + shippingFee);
     const status = String(order.status || 'pending');
+    const payment = paymentState(order);
 
-    detailContent.innerHTML = `<div class="modal-header"><div><p class="eyebrow">ORDER DETAILS</p><h2>${escapeHtml(order.order_number || `Order ${order.id}`)}</h2><p class="modal-date">${escapeHtml(formatDate(order.created_at))}</p></div><button class="modal-close" id="close-order-modal-inner" type="button" aria-label="Close">×</button></div><div class="modal-status-row"><div><span class="muted-label">Order status</span><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(statusLabel(status))}</span></div><label class="modal-status-control"><span>Change status</span><select id="modal-status-select">${statuses.map(option => `<option value="${option}" ${option === status ? 'selected' : ''}>${statusLabel(option)}</option>`).join('')}</select></label></div><div class="detail-grid"><div><span class="muted-label">Customer</span><strong>${escapeHtml(shipping.name)}</strong></div><div><span class="muted-label">Contact number</span><strong>${escapeHtml(shipping.phone)}</strong></div><div class="detail-full"><span class="muted-label">Delivery address</span><strong>${escapeHtml(shipping.line)}</strong></div></div><div class="detail-section"><div class="detail-section-heading"><h3>Order items</h3><span>${items.length} product${items.length === 1 ? '' : 's'}</span></div>${items.length ? items.map(item => { const quantity = Number(item.quantity || 1); const price = Number(item.price || 0); const itemSubtotal = Number(item.subtotal ?? price * quantity); return `<div class="detail-item"><div><strong>${escapeHtml(item.product_name || 'Product')}</strong><span>₱${price.toLocaleString('en-PH')} × ${quantity}</span></div><strong>${money(itemSubtotal)}</strong></div>`; }).join('') : '<p class="muted-text">No order items found.</p>'}</div><div class="detail-totals"><div><span>Subtotal</span><strong>${money(subtotal)}</strong></div><div><span>Shipping</span><strong>${shippingFee ? money(shippingFee) : 'To be calculated'}</strong></div><div class="detail-grand-total"><span>Total</span><strong>${money(total)}</strong></div></div>`;
+    detailContent.innerHTML = `<div class="modal-header"><div><p class="eyebrow">ORDER DETAILS</p><h2>${escapeHtml(order.order_number || `Order ${order.id}`)}</h2><p class="modal-date">${escapeHtml(formatDate(order.created_at))}</p></div><button class="modal-close" id="close-order-modal-inner" type="button" aria-label="Close">×</button></div><div class="payment-verification ${payment.className}"><div class="payment-verification-heading"><div><span class="muted-label">Payment</span><strong>${escapeHtml(payment.label)}</strong></div><span class="payment-checkmark" aria-hidden="true">${status === 'pending' ? '!' : '✓'}</span></div><p>${escapeHtml(payment.help)}</p>${status === 'pending' ? '<p class="payment-action-note"><strong>Before confirming:</strong> Open your GCash account and verify that the exact order total has been received. Do not confirm based only on the customer\'s checkbox.</p>' : ''}</div><div class="modal-status-row"><div><span class="muted-label">Order status</span><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(statusLabel(status))}</span></div><label class="modal-status-control"><span>Next step</span><select id="modal-status-select">${statuses.map(option => `<option value="${option}" ${option === status ? 'selected' : ''}>${statusLabel(option)}</option>`).join('')}</select></label></div><div class="detail-grid"><div><span class="muted-label">Customer</span><strong>${escapeHtml(shipping.name)}</strong></div><div><span class="muted-label">Contact number</span><strong>${escapeHtml(shipping.phone)}</strong></div><div class="detail-full"><span class="muted-label">Delivery address</span><strong>${escapeHtml(shipping.line)}</strong></div></div><div class="detail-section"><div class="detail-section-heading"><h3>Order items</h3><span>${items.length} product${items.length === 1 ? '' : 's'}</span></div>${items.length ? items.map(item => { const quantity = Number(item.quantity || 1); const price = Number(item.price || 0); const itemSubtotal = Number(item.subtotal ?? price * quantity); return `<div class="detail-item"><div><strong>${escapeHtml(item.product_name || 'Product')}</strong><span>₱${price.toLocaleString('en-PH')} × ${quantity}</span></div><strong>${money(itemSubtotal)}</strong></div>`; }).join('') : '<p class="muted-text">No order items found.</p>'}</div><div class="detail-totals"><div><span>Subtotal</span><strong>${money(subtotal)}</strong></div><div><span>Shipping</span><strong>${shippingFee ? money(shippingFee) : 'To be calculated'}</strong></div><div class="detail-grand-total"><span>Total</span><strong>${money(total)}</strong></div></div>`;
 
     detailModal.classList.add('is-open');
     detailModal.setAttribute('aria-hidden', 'false');
@@ -96,12 +113,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openStatusConfirmation(order, nextStatus, select, fromModal) {
     const label = statusLabel(nextStatus);
-    const message = nextStatus === 'cancelled'
-      ? `Are you sure you want to cancel order ${order.order_number || ''}? This changes the order status.`
-      : `Are you sure you want to mark order ${order.order_number || ''} as Returned / Refunded? This changes the order status.`;
+    let message;
+    if (nextStatus === 'confirmed') {
+      message = `Verify that ${order.order_number || 'this order'} has been paid in GCash before confirming it. Confirming means payment has been received and the shop can begin fulfillment.`;
+    } else if (nextStatus === 'cancelled') {
+      message = `Are you sure you want to cancel order ${order.order_number || ''}? This stops the order from being fulfilled.`;
+    } else if (nextStatus === 'returned_refunded') {
+      message = `Are you sure you want to mark order ${order.order_number || ''} as Returned / Refunded? This changes the order status.`;
+    } else {
+      message = `Are you sure you want to change order ${order.order_number || ''} to ${label}?`;
+    }
     pendingConfirmation = { orderId: order.id, nextStatus, select, fromModal };
     if (confirmMessage) confirmMessage.textContent = message;
-    if (confirmApprove) confirmApprove.textContent = `Confirm ${label}`;
+    if (confirmApprove) confirmApprove.textContent = nextStatus === 'confirmed' ? 'Confirm Payment & Order' : `Confirm ${label}`;
     confirmModal?.classList.add('is-open');
     confirmModal?.setAttribute('aria-hidden', 'false');
     confirmApprove?.focus();
@@ -156,6 +180,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function isValidTransition(currentStatus, nextStatus) {
+    if (currentStatus === nextStatus) return true;
+    const allowed = {
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['shipped', 'cancelled'],
+      shipped: ['delivered', 'returned_refunded'],
+      delivered: ['returned_refunded'],
+      cancelled: [],
+      returned_refunded: []
+    };
+    return (allowed[currentStatus] || []).includes(nextStatus);
+  }
+
   async function saveStatus(orderId, nextStatus, select, fromModal = false) {
     const order = state.orders.find(item => String(item.id) === String(orderId));
     if (!order || order.status === nextStatus) return;
@@ -166,7 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error) throw error;
       if (!data) throw new Error('The order status could not be saved. Your owner account may not have permission to update orders yet.');
       order.status = data.status || nextStatus;
-      showToast(`Order ${order.order_number || ''} updated to ${statusLabel(order.status)}.`);
+      showToast(nextStatus === 'confirmed'
+        ? `Payment verified and order ${order.order_number || ''} is now confirmed.`
+        : `Order ${order.order_number || ''} updated to ${statusLabel(order.status)}.`);
       if (fromModal) openOrder(order); else render();
     } catch (error) {
       console.error('Update order status error:', error);
@@ -178,8 +217,14 @@ document.addEventListener('DOMContentLoaded', () => {
   async function updateStatus(orderId, nextStatus, select, fromModal = false) {
     const order = state.orders.find(item => String(item.id) === String(orderId));
     if (!order || order.status === nextStatus) return;
-    const isTerminalAction = nextStatus === 'cancelled' || nextStatus === 'returned_refunded';
-    if (isTerminalAction) {
+    const currentStatus = String(order.status || 'pending');
+    if (!isValidTransition(currentStatus, nextStatus)) {
+      select.value = currentStatus;
+      showToast(`You cannot move this order directly from ${statusLabel(currentStatus)} to ${statusLabel(nextStatus)}.`, true);
+      return;
+    }
+    const needsConfirmation = nextStatus === 'confirmed' || nextStatus === 'cancelled' || nextStatus === 'returned_refunded';
+    if (needsConfirmation) {
       openStatusConfirmation(order, nextStatus, select, fromModal);
       return;
     }
