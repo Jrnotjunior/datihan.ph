@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const previousStatus = new WeakMap();
   let shippingModal = null;
+  let activeOrderId = null;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -128,6 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
     methodInput.focus();
   }
 
+  document.addEventListener('click', event => {
+    const viewButton = event.target.closest('[data-action="view"]');
+    if (viewButton?.dataset.id) activeOrderId = viewButton.dataset.id;
+  }, true);
+
   document.addEventListener('change', async event => {
     const select = event.target.closest('select[data-action="status"], #modal-status-select');
     if (!select || select.value !== 'shipped') return;
@@ -135,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    const orderId = select.dataset.id;
+    const orderId = select.dataset.id || activeOrderId;
     if (!orderId) {
       select.value = 'preparing';
       return;
