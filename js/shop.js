@@ -41,12 +41,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const now = new Date();
     return promotions.find((promotion) => {
       if (!promotion.is_active) return false;
-
       const start = promotion.start_date ? new Date(`${promotion.start_date}T00:00:00`) : null;
       const end = promotion.end_date ? new Date(`${promotion.end_date}T23:59:59`) : null;
       if (start && now < start) return false;
       if (end && now > end) return false;
-
       const productIds = Array.isArray(promotion.product_ids) ? promotion.product_ids : [];
       return productIds.length === 0 || productIds.some((id) => String(id) === String(productId));
     });
@@ -65,7 +63,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       button.setAttribute("aria-label", `Sign in to add ${product.name} to cart`);
       return;
     }
-
     const stock = Math.max(0, Number(product.stock || 0));
     const quantityInCart = getCartQuantity(product.id);
     const limitReached = quantityInCart >= stock;
@@ -80,14 +77,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   imageLightbox.hidden = true;
   imageLightbox.innerHTML = `
     <div class="shop-image-lightbox-backdrop" data-lightbox-close></div>
-    <div class="shop-image-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Product images">
-      <button class="shop-image-lightbox-close" type="button" aria-label="Close image" data-lightbox-close>
+    <div class="shop-image-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Product details">
+      <button class="shop-image-lightbox-close" type="button" aria-label="Close product details" data-lightbox-close>
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
       </button>
-      <button class="shop-image-lightbox-nav shop-image-lightbox-prev" type="button" aria-label="Previous photo">‹</button>
-      <img class="shop-image-lightbox-image" alt="">
-      <button class="shop-image-lightbox-nav shop-image-lightbox-next" type="button" aria-label="Next photo">›</button>
-      <p class="shop-image-lightbox-count" aria-live="polite"></p>
+      <div class="shop-image-lightbox-media">
+        <button class="shop-image-lightbox-nav shop-image-lightbox-prev" type="button" aria-label="Previous photo">‹</button>
+        <img class="shop-image-lightbox-image" alt="">
+        <button class="shop-image-lightbox-nav shop-image-lightbox-next" type="button" aria-label="Next photo">›</button>
+        <p class="shop-image-lightbox-count" aria-live="polite"></p>
+      </div>
+      <div class="shop-image-lightbox-details">
+        <p class="shop-image-lightbox-eyebrow">PRODUCT DETAILS</p>
+        <h2 class="shop-image-lightbox-title"></h2>
+        <div class="shop-image-lightbox-meta">
+          <span class="shop-image-lightbox-condition"></span>
+          <span class="shop-image-lightbox-price"></span>
+        </div>
+        <div class="shop-image-lightbox-description-wrap">
+          <h3>Description</h3>
+          <p class="shop-image-lightbox-description"></p>
+        </div>
+      </div>
     </div>`;
   document.body.appendChild(imageLightbox);
 
@@ -95,9 +106,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const prevButton = imageLightbox.querySelector(".shop-image-lightbox-prev");
   const nextButton = imageLightbox.querySelector(".shop-image-lightbox-next");
   const lightboxCount = imageLightbox.querySelector(".shop-image-lightbox-count");
+  const lightboxTitle = imageLightbox.querySelector(".shop-image-lightbox-title");
+  const lightboxCondition = imageLightbox.querySelector(".shop-image-lightbox-condition");
+  const lightboxPrice = imageLightbox.querySelector(".shop-image-lightbox-price");
+  const lightboxDescription = imageLightbox.querySelector(".shop-image-lightbox-description");
   let lightboxImages = [];
   let lightboxIndex = 0;
   let lightboxAlt = "";
+  let lightboxProduct = null;
 
   const renderLightbox = () => {
     if (!lightboxImages.length) return;
@@ -107,6 +123,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const multi = lightboxImages.length > 1;
     prevButton.hidden = !multi;
     nextButton.hidden = !multi;
+
+    if (lightboxProduct) {
+      lightboxTitle.textContent = lightboxProduct.name || "Product";
+      lightboxCondition.textContent = lightboxProduct.condition || "Good condition";
+      lightboxPrice.textContent = peso(lightboxProduct.price);
+      lightboxDescription.textContent = lightboxProduct.description?.trim() || "No description provided for this item.";
+    }
   };
 
   const closeLightbox = () => {
@@ -114,13 +137,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.classList.remove("shop-lightbox-open");
     lightboxImage.removeAttribute("src");
     lightboxImages = [];
+    lightboxProduct = null;
   };
 
-  const openLightbox = (images, alt) => {
+  const openLightbox = (product) => {
+    const images = productImages(product);
     if (!images.length) return;
     lightboxImages = images;
     lightboxIndex = 0;
-    lightboxAlt = alt || "Product image";
+    lightboxAlt = product.name || "Product image";
+    lightboxProduct = product;
     renderLightbox();
     imageLightbox.hidden = false;
     document.body.classList.add("shop-lightbox-open");
@@ -170,7 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? `<span class="shop-promotion-badge" title="${escapeHtml(promotion.title || "Active promotion")}">${escapeHtml(promotionLabel(promotion))}</span>`
       : "";
     const image = images[0]
-      ? `<button class="shop-product-image-button" type="button" aria-label="View ${escapeHtml(product.name)} images">
+      ? `<button class="shop-product-image-button" type="button" aria-label="View ${escapeHtml(product.name)} details and images">
           <img src="${escapeHtml(images[0])}" alt="${escapeHtml(product.name)}" loading="lazy">
           ${images.length > 1 ? `<span class="shop-product-photo-count">${images.length}</span>` : ""}
         </button>`
@@ -194,7 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>`;
 
     const imageButton = card.querySelector(".shop-product-image-button");
-    if (imageButton) imageButton.addEventListener("click", () => openLightbox(images, product.name));
+    if (imageButton) imageButton.addEventListener("click", () => openLightbox(product));
 
     const cartButton = card.querySelector(".add-to-cart");
     updateCartButton(cartButton, product);
