@@ -15,17 +15,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const createCancelModal = () => {
     const overlay = document.createElement('div');
-    overlay.className = 'cancel-modal-overlay';
+    overlay.className = 'modal-backdrop confirm-backdrop';
     overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
     overlay.innerHTML = `
-      <div class="cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
-        <div class="cancel-modal-icon" aria-hidden="true">!</div>
-        <h2 id="cancel-modal-title">Cancel this order?</h2>
-        <p class="cancel-modal-message">This order has not been confirmed by the shop yet. Are you sure you want to cancel it?</p>
-        <p class="cancel-modal-warning">Frequent order cancellations may affect your ability to place future orders with some shops.</p>
-        <div class="cancel-modal-actions">
-          <button type="button" class="cancel-modal-keep">Keep Order</button>
-          <button type="button" class="cancel-modal-confirm">Cancel Order</button>
+      <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+        <div class="confirm-icon" aria-hidden="true">!</div>
+        <p class="eyebrow">CONFIRM STATUS CHANGE</p>
+        <h2 id="cancel-modal-title">Change order status?</h2>
+        <p id="cancel-modal-message" class="confirm-message"></p>
+        <div class="confirm-actions">
+          <button class="button button-secondary" id="cancel-modal-cancel" type="button">Cancel</button>
+          <button class="button" id="cancel-modal-confirm" type="button">Confirm Cancelled</button>
         </div>
       </div>
     `;
@@ -34,13 +35,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const cancelModal = createCancelModal();
-  const keepButton = cancelModal.querySelector('.cancel-modal-keep');
-  const confirmButton = cancelModal.querySelector('.cancel-modal-confirm');
+  const keepButton = cancelModal.querySelector('#cancel-modal-cancel');
+  const confirmButton = cancelModal.querySelector('#cancel-modal-confirm');
+  const confirmMessage = cancelModal.querySelector('#cancel-modal-message');
   let activeOrder = null;
   let activeCard = null;
 
   const closeCancelModal = () => {
     cancelModal.hidden = true;
+    cancelModal.classList.remove('is-open');
+    cancelModal.setAttribute('aria-hidden', 'true');
     activeOrder = null;
     activeCard = null;
   };
@@ -154,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Order cancellation error:', error);
         if (note) note.textContent = `Unable to cancel the order: ${error.message || error}`;
         confirmButton.disabled = false;
-        confirmButton.textContent = 'Cancel Order';
+        confirmButton.textContent = 'Confirm Cancelled';
       }
     });
 
@@ -194,8 +198,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           activeOrder = order;
           activeCard = card;
           confirmButton.disabled = false;
-          confirmButton.textContent = 'Cancel Order';
+          confirmButton.textContent = 'Confirm Cancelled';
+          confirmMessage.textContent = `Are you sure you want to cancel order ${order.order_number || ''}? This changes the order status.`;
           cancelModal.hidden = false;
+          cancelModal.classList.add('is-open');
+          cancelModal.setAttribute('aria-hidden', 'false');
           requestAnimationFrame(() => keepButton.focus());
         });
       }
