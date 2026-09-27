@@ -18,19 +18,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   summary.id = 'orders-progress-summary';
   summary.className = 'orders-progress-summary';
   summary.setAttribute('aria-label','Order progress summary');
-  summary.innerHTML = `
-    <div class="orders-progress-heading">
-      <div><p class="eyebrow">ORDER PROGRESS</p><p class="orders-progress-subtitle">Select a status to view those orders.</p></div>
-      <label class="orders-progress-all"><input type="checkbox" id="orders-progress-all-checkbox"><span>View all orders</span></label>
-    </div>
-    <div class="orders-progress-track" role="list"></div>`;
+  summary.innerHTML = `<div class="orders-progress-heading"><div><p class="eyebrow">ORDER PROGRESS</p><p class="orders-progress-subtitle">Select a status to view those orders.</p></div><label class="orders-progress-all"><input type="checkbox" id="orders-progress-all-checkbox"><span>View all orders</span></label></div><div class="orders-progress-track" role="list"></div>`;
   main.querySelector('.orders-header')?.after(summary);
 
   const filterOrders = status => {
     const cards = list.querySelectorAll('.order-card');
     let visible = 0;
     cards.forEach(card => {
-      const show = !status || card.dataset.orderStatus === status;
+      const cardStatus = card.dataset.orderStatus || card.querySelector('.order-status')?.textContent?.trim().toLowerCase();
+      const show = !status || cardStatus === status;
       card.hidden = !show;
       if (show) visible++;
     });
@@ -68,28 +64,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sessionError) throw sessionError;
     const userId = sessionData.session?.user?.id;
     if (!userId) return;
-
     const { data: orders, error } = await supabase.from('orders').select('order_number,status,delivery_method,tracking_number').eq('user_id',userId);
     if (error) throw error;
 
     const counts = Object.fromEntries(steps.map(s => [s,0]));
     (orders || []).forEach(order => { if (Object.hasOwn(counts,order.status)) counts[order.status]++; });
-    summary.querySelector('.orders-progress-track').innerHTML = steps.map(status => `
-      <button type="button" class="orders-progress-step" data-status="${status}" aria-label="${labels[status]}: ${counts[status]} order${counts[status]===1?'':'s'}">
-        <span class="orders-progress-icon">${icons[status]}${counts[status] ? `<span class="orders-progress-badge">${counts[status]>99?'99+':counts[status]}</span>` : ''}</span>
-        <span class="orders-progress-label">${labels[status]}</span>
-      </button>`).join('');
-
+    summary.querySelector('.orders-progress-track').innerHTML = steps.map(status => `<button type="button" class="orders-progress-step" data-status="${status}" aria-label="${labels[status]}: ${counts[status]} order${counts[status]===1?'':'s'}"><span class="orders-progress-icon">${icons[status]}${counts[status] ? `<span class="orders-progress-badge">${counts[status]>99?'99+':counts[status]}</span>` : ''}</span><span class="orders-progress-label">${labels[status]}</span></button>`).join('');
     summary.querySelectorAll('.orders-progress-step').forEach(btn => btn.addEventListener('click', () => filterOrders(btn.dataset.status)));
-    summary.querySelector('#orders-progress-all-checkbox')?.addEventListener('change', event => {
-      filterOrders(event.target.checked ? null : (steps.find(s => counts[s] > 0) || null));
-    });
+    summary.querySelector('#orders-progress-all-checkbox')?.addEventListener('change', event => filterOrders(event.target.checked ? null : (steps.find(s => counts[s] > 0) || null)));
 
     const observer = new MutationObserver(() => addShippingDetails(orders || []));
     observer.observe(list,{childList:true,subtree:true});
     addShippingDetails(orders || []);
-    const firstActive = steps.find(s => counts[s] > 0);
-    filterOrders(firstActive || null);
+    filterOrders(steps.find(s => counts[s] > 0) || null);
   } catch (error) {
     console.error('Order progress summary error:',error);
   }
