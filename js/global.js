@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
           overflow: visible;
         }
         body .site-header .main-nav a {
-          font-size: 25px;
+          font-size: 15px;
           line-height: 1;
         }
         body .site-header .header-actions {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
           gap: 1.1rem;
         }
         body .site-header .main-nav a {
-          font-size: 25px;
+          font-size: 15px;
         }
         body .site-header .header-actions .icon-link {
           width: 30px;
