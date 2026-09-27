@@ -133,9 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
     savePaymentQr.textContent = 'Uploading…';
     showStatus(paymentStatus, 'Uploading your new GCash QR…');
 
+    let uploadedPath = null;
+    let previousActiveId = null;
+
     try {
       const extension = selectedQrFile.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
       const path = `${currentUser.id}/gcash-${Date.now()}.${extension}`;
+      uploadedPath = path;
 
       const { error: uploadError } = await supabase.storage
         .from('payment-qr')
@@ -146,11 +150,39 @@ document.addEventListener('DOMContentLoaded', () => {
       const publicUrl = publicData?.publicUrl;
       if (!publicUrl) throw new Error('Unable to create the public QR image URL.');
 
+      // The database allows only one active QR per owner, so deactivate
+      // the current QR before inserting the replacement.
+      const { data: previousActive, error: previousActiveError } = await supabase
+        .from('payment_qr_codes')
+        .select('id')
+        .eq('owner_id', currentUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (previousActiveError) throw previousActiveError;
+
+      previousActiveId = previousActive?.id || null;
+
+      if (previousActiveId) {
+        const { error: deactivateError } = await supabase
+          .from('payment_qr_codes')
+          .update({ is_active: false, deactivated_at: new Date().toISOString() })
+          .eq('id', previousActiveId)
+          .eq('owner_id', currentUser.id);
+        if (deactivateError) throw deactivateError;
+      }
+
       const { error: insertError } = await supabase
         .from('payment_qr_codes')
         .insert({ owner_id: currentUser.id, storage_path: path, public_url: publicUrl, is_active: true });
       if (insertError) {
-        await supabase.storage.from('payment-qr').remove([path]);
+        // Restore the previous QR if the replacement record could not be created.
+        if (previousActiveId) {
+          await supabase
+            .from('payment_qr_codes')
+            .update({ is_active: true, deactivated_at: null })
+            .eq('id', previousActiveId)
+            .eq('owner_id', currentUser.id);
+        }
         throw insertError;
       }
 
@@ -160,6 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showStatus(paymentStatus, 'GCash QR uploaded and activated successfully.');
       await loadPaymentQr(currentUser);
     } catch (error) {
+      if (uploadedPath) {
+        await supabase.storage.from('payment-qr').remove([uploadedPath]);
+      }
       console.error('Unable to save payment QR:', error);
       showStatus(paymentStatus, error.message || 'Unable to save the GCash QR. Please try again.', true);
     } finally {
