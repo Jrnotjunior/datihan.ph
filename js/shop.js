@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const updateCartButton = (button, product) => {
+    if (!button) return;
     if (!isSignedIn()) {
       button.textContent = "Sign in to add to cart";
       button.setAttribute("aria-label", `Sign in to add ${product.name} to cart`);
@@ -70,6 +71,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     button.setAttribute("aria-label", limitReached
       ? `${product.name} is already added to cart up to the available quantity`
       : `Add ${product.name} to cart`);
+  };
+
+  const addProductToCart = (product, button) => {
+    if (!isSignedIn()) {
+      window.location.href = loginUrl();
+      return;
+    }
+
+    const images = productImages(product);
+    const cart = readCart();
+    const existing = cart.find((item) => String(item.id) === String(product.id));
+    const currentQuantity = existing ? Number(existing.quantity || 0) : 0;
+    const stock = Math.max(0, Number(product.stock || 0));
+
+    if (currentQuantity >= stock) {
+      if (button) button.textContent = "Already added on cart";
+      return;
+    }
+
+    if (existing) {
+      existing.quantity = currentQuantity + 1;
+      existing.stock = stock;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: Number(product.price || 0),
+        condition: product.condition || "Good condition",
+        quantity: 1,
+        stock,
+        image_url: images[0] || null,
+        image_urls: images
+      });
+    }
+
+    writeCart(cart);
+    updateCartButton(button, product);
   };
 
   const imageLightbox = document.createElement("div");
@@ -98,6 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <h3>Description</h3>
           <p class="shop-image-lightbox-description"></p>
         </div>
+        <button class="button button-primary shop-image-lightbox-cart" type="button">Add to cart</button>
       </div>
     </div>`;
   document.body.appendChild(imageLightbox);
@@ -110,6 +150,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const lightboxCondition = imageLightbox.querySelector(".shop-image-lightbox-condition");
   const lightboxPrice = imageLightbox.querySelector(".shop-image-lightbox-price");
   const lightboxDescription = imageLightbox.querySelector(".shop-image-lightbox-description");
+  const lightboxCartButton = imageLightbox.querySelector(".shop-image-lightbox-cart");
   let lightboxImages = [];
   let lightboxIndex = 0;
   let lightboxAlt = "";
@@ -129,6 +170,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       lightboxCondition.textContent = lightboxProduct.condition || "Good condition";
       lightboxPrice.textContent = peso(lightboxProduct.price);
       lightboxDescription.textContent = lightboxProduct.description?.trim() || "No description provided for this item.";
+      updateCartButton(lightboxCartButton, lightboxProduct);
     }
   };
 
@@ -161,6 +203,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!lightboxImages.length) return;
     lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
     renderLightbox();
+  });
+  lightboxCartButton.addEventListener("click", () => {
+    if (!lightboxProduct) return;
+    addProductToCart(lightboxProduct, lightboxCartButton);
   });
   imageLightbox.addEventListener("click", (event) => {
     if (event.target.closest("[data-lightbox-close]")) closeLightbox();
@@ -224,43 +270,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const cartButton = card.querySelector(".add-to-cart");
     updateCartButton(cartButton, product);
-
-    cartButton.addEventListener("click", () => {
-      if (!isSignedIn()) {
-        window.location.href = loginUrl();
-        return;
-      }
-
-      const cart = readCart();
-      const existing = cart.find((item) => String(item.id) === String(product.id));
-      const currentQuantity = existing ? Number(existing.quantity || 0) : 0;
-      const stock = Math.max(0, Number(product.stock || 0));
-
-      if (currentQuantity >= stock) {
-        cartButton.textContent = "Already added on cart";
-        return;
-      }
-
-      if (existing) {
-        existing.quantity = currentQuantity + 1;
-        existing.stock = stock;
-      } else {
-        cart.push({
-          id: product.id,
-          name: product.name,
-          category: product.category,
-          price: Number(product.price || 0),
-          condition: product.condition || "Good condition",
-          quantity: 1,
-          stock,
-          image_url: images[0] || null,
-          image_urls: images
-        });
-      }
-
-      writeCart(cart);
-      updateCartButton(cartButton, product);
-    });
+    cartButton.addEventListener("click", () => addProductToCart(product, cartButton));
 
     card.querySelector(".wishlist-button").addEventListener("click", (event) => {
       const button = event.currentTarget;
@@ -332,6 +342,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const product = products.find((item) => String(item.id) === String(card.dataset.id));
       if (product) updateCartButton(card.querySelector(".add-to-cart"), product);
     });
+    if (lightboxProduct) updateCartButton(lightboxCartButton, lightboxProduct);
   });
 
   await loadProducts();
