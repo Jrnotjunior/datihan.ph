@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>`;
   const closeIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>`;
 
-  // Remove any page-authored public header and create one shared header.
   document.querySelectorAll(".site-header").forEach((el) => el.remove());
   const header = document.createElement("header");
   header.className = "site-header";
@@ -107,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("datihan-cart-updated", updateCartCount);
   window.addEventListener("pageshow", updateCartCount);
 
-  // Remove any page-authored public footer and create exactly one shared footer.
   document.querySelectorAll(".site-footer").forEach((el) => el.remove());
   const footer = document.createElement("footer");
   footer.className = "site-footer storefront-footer";
@@ -118,20 +116,20 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="footer-column footer-follow"><h2>Follow along</h2><div class="footer-social-icons" aria-label="DATIHAN social media"><a class="footer-social-icon" href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a><a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg></a><a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61577434115016" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z"></path></svg></a></div></div>
     <div class="footer-bottom">
       <p>© <span class="footer-current-year">${new Date().getFullYear()}</span> DATIHAN.PH. All items sold as-is unless noted.</p>
-      <p class="footer-developer-credit">Designed &amp; Developed by <img src="${assetPrefix}jrlogo.jpg" alt="Jorel logo" class="footer-developer-logo"></p>
+      <p class="footer-developer-credit">Designed &amp; Developed by <a class="footer-developer-logo-link" href="https://jrnotjunior.github.io/Jorel-Jr-Somoza---Resume/" target="_blank" rel="noopener noreferrer" aria-label="Jorel Jr Somoza resume"><img src="${assetPrefix}jrlogo.jpg" alt="Jorel logo" class="footer-developer-logo"></a></p>
       <p class="footer-social-note">Pop-ups posted on Instagram, TikTok &amp; Facebook</p>
     </div>`;
   document.body.appendChild(footer);
 
-  // Keep the developer credit centered between the existing footer notes on desktop.
-  // On smaller screens, let the existing mobile footer layout stack the three items.
   if (!document.querySelector("#datihan-footer-credit-style")) {
     const style = document.createElement("style");
     style.id = "datihan-footer-credit-style";
     style.textContent = `
       .footer-bottom { position: relative; }
       .footer-developer-credit { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; display: inline-flex; align-items: center; gap: 0.45rem; }
-      .footer-developer-logo { width: 30px; height: 30px; object-fit: contain; border-radius: 50%; vertical-align: middle; }
+      .footer-developer-logo-link { display: inline-flex; align-items: center; border-radius: 50%; line-height: 0; }
+      .footer-developer-logo { width: 30px; height: 30px; object-fit: contain; border-radius: 50%; vertical-align: middle; transition: opacity .2s ease, transform .2s ease; }
+      .footer-developer-logo-link:hover .footer-developer-logo { opacity: .8; transform: scale(1.06); }
       @media (max-width: 520px) {
         .footer-developer-credit { position: static; transform: none; white-space: normal; justify-content: center; }
       }
