@@ -19,8 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const accountIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.2 3.1-5 7-5s6.3 1.8 7 5"></path></svg>`;
   const cartIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.5 10h9.8L20 8H7"></path><circle cx="9" cy="19" r="1"></circle><circle cx="17" cy="19" r="1"></circle></svg>`;
-  const menuIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>`;
-  const closeIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>`;
 
   document.querySelectorAll(".site-header").forEach((el) => el.remove());
   const header = document.createElement("header");
@@ -37,79 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <a href="${cartPath()}" class="icon-link" data-global-cart-link aria-label="Shopping cart" hidden aria-hidden="true">${cartIcon}</a>
     </div>`;
   document.body.insertBefore(header, document.body.firstChild);
-
-  const mainNav = header.querySelector(".main-nav");
-  const headerActions = header.querySelector(".header-actions");
-  const menuToggle = document.createElement("button");
-  menuToggle.type = "button";
-  menuToggle.className = "mobile-menu-toggle";
-  menuToggle.setAttribute("aria-label", "Open navigation menu");
-  menuToggle.setAttribute("aria-expanded", "false");
-  menuToggle.innerHTML = menuIcon;
-  headerActions.insertBefore(menuToggle, headerActions.querySelector("[data-global-cart-link]"));
-
-  const setMenuState = (open) => {
-    header.classList.toggle("menu-open", open);
-    menuToggle.setAttribute("aria-expanded", String(open));
-    menuToggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
-    menuToggle.innerHTML = open ? closeIcon : menuIcon;
-  };
-  menuToggle.addEventListener("click", () => setMenuState(!header.classList.contains("menu-open")));
-  mainNav.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setMenuState(false)));
-  window.addEventListener("resize", () => { if (window.innerWidth > 900) setMenuState(false); });
-
-  if (!document.querySelector("#datihan-mobile-header-fix-style")) {
-    const style = document.createElement("style");
-    style.id = "datihan-mobile-header-fix-style";
-    style.textContent = `
-      @media (max-width: 900px) {
-        body .site-header .header-actions {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 0.2rem;
-        }
-        body .site-header .header-actions .icon-link:first-child {
-          order: 1;
-        }
-        body .site-header .header-actions [data-global-cart-link] {
-          order: 3;
-        }
-        body .site-header .mobile-menu-toggle {
-          position: static;
-          top: auto;
-          right: auto;
-          order: 2;
-          width: 36px;
-          height: 36px;
-          flex: 0 0 36px;
-          margin: 0;
-          padding: 0;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 0;
-          border-radius: 9px;
-          background: transparent;
-          color: var(--off-white);
-          cursor: pointer;
-        }
-        body .site-header .mobile-menu-toggle:hover {
-          background: rgba(251, 246, 243, 0.08);
-        }
-        body .site-header .mobile-menu-toggle svg {
-          width: 21px;
-          height: 21px;
-        }
-      }
-      @media (min-width: 901px) {
-        body .site-header .mobile-menu-toggle {
-          display: none !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   const loadScript = (src, test) => {
     if (test?.()) return Promise.resolve();
