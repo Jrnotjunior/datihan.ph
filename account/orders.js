@@ -5,6 +5,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const note = document.querySelector('#orders-note');
   const money = value => `₱${Number(value || 0).toLocaleString('en-PH')}`;
 
+  const productImages = product => {
+    if (!product) return [];
+    if (Array.isArray(product.image_urls) && product.image_urls.length) {
+      return product.image_urls.filter(Boolean);
+    }
+    return product.image_url ? [product.image_url] : [];
+  };
+
   if (!supabase) {
     if (list) list.innerHTML = '<p class="orders-loading">Unable to connect to your orders right now.</p>';
     return;
@@ -35,15 +43,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (empty) empty.hidden = true;
     if (list) list.innerHTML = '';
 
+    const orderIds = orders.map(order => order.id);
+    const { data: items, error: itemsError } = await supabase
+      .from('order_items')
+      .select('id, order_id, product_id, product_name, price, quantity, subtotal, created_at')
+      .in('order_id', orderIds)
+      .order('created_at', { ascending: true });
+
+    if (itemsError) throw itemsError;
+
+    const productIds = [...new Set((items || [])
+      .map(item => item.product_id)
+      .filter(Boolean)
+      .map(String))];
+
+    const productsById = new Map();
+    if (productIds.length) {
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('id, image_url, image_urls')
+        .in('id', productIds);
+
+      if (productsError) throw productsError;
+      (products || []).forEach(product => {
+        productsById.set(String(product.id), product);
+      });
+    }
+
+    const itemsByOrder = new Map();
+    (items || []).forEach(item => {
+      const key = String(item.order_id);
+      if (!itemsByOrder.has(key)) itemsByOrder.set(key, []);
+      itemsByOrder.get(key).push(item);
+    });
+
     for (const order of orders) {
-      const { data: items, error: itemsError } = await supabase
-        .from('order_items')
-        .select('product_name, price, quantity, subtotal')
-        .eq('order_id', order.id)
-        .order('created_at', { ascending: true });
-
-      if (itemsError) throw itemsError;
-
+      const orderItems = itemsByOrder.get(String(order.id)) || [];
       const card = document.createElement('article');
       card.className = 'order-card';
       const date = new Date(order.created_at).toLocaleDateString('en-PH', {
@@ -70,13 +105,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       card.querySelector('.view-order').href = `../pages/order-confirmation.html?order=${encodeURIComponent(order.order_number)}`;
 
       const itemsEl = card.querySelector('.order-items');
-      (items || []).forEach(item => {
+      orderItems.forEach(item => {
         const row = document.createElement('div');
         row.className = 'order-item';
-        row.innerHTML = '<div class="order-image">PRODUCT</div><div><p class="order-item-name"></p><p class="order-item-meta"></p></div><p class="order-item-price"></p>';
-        row.querySelector('.order-item-name').textContent = item.product_name;
-        row.querySelector('.order-item-meta').textContent = `Qty ${item.quantity}`;
-        row.querySelector('.order-item-price').textContent = money(item.subtotal);
+
+        const product = productsById.get(String(item.product_id));
+        const images = productImages(product);
+        const imageEl = document.createElement('div');
+        imageEl.className = 'order-image';
+
+        if (images[0]) {
+          const image = document.createElement('img');
+          image.src = images[0];
+          image.alt = item.product_name || 'Product image';
+          image.loading = 'lazy';
+          image.decoding = 'async';
+          imageEl.appendChild(image);
+        } else {
+          imageEl.textContent = 'PRODUCT';
+        }
+
+        const details = document.createElement('div');
+        const name = document.createElement('p');
+        name.className = 'order-item-name';
+        name.textContent = item.product_name;
+        const meta = document.createElement('p');
+        meta.className = 'order-item-meta';
+        meta.textContent = `Qty ${item.quantity}`;
+        details.append(name, meta);
+
+        const price = document.createElement('p');
+        price.className = 'order-item-price';
+        price.textContent = money(item.subtotal);
+
+        row.append(imageEl, details, price);
         itemsEl.appendChild(row);
       });
 
