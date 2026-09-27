@@ -27,10 +27,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!imageUrl) return;
 
       imageEl.textContent = '';
+      imageEl.style.overflow = 'hidden';
       const img = document.createElement('img');
       img.src = imageUrl;
       img.alt = item?.name || 'Product image';
       img.loading = 'lazy';
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.display = 'block';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '8px';
       img.addEventListener('error', () => {
         imageEl.textContent = 'PRODUCT';
         imageEl.dataset.imageRendered = 'true';
