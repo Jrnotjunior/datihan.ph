@@ -1,3 +1,6 @@
+// Keep the browser tab title consistent across DATIHAN.PH protected pages.
+document.title = 'Datihan.ph';
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // DATIHAN browser-tab icon. Use the SVG wrapper so the rectangular logo keeps its aspect ratio instead of being squeezed into a square favicon.
