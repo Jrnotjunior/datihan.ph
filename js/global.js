@@ -1,9 +1,28 @@
+const DATIHAN_TAB_TITLE = "Datihan.ph";
+
+// Keep the browser tab title permanently hardcoded to DATIHAN.PH.
+// This runs before the shared DOMContentLoaded setup and also prevents
+// individual pages or scripts from changing the title later.
+document.title = DATIHAN_TAB_TITLE;
+const lockDatihanTabTitle = () => {
+  if (document.title !== DATIHAN_TAB_TITLE) document.title = DATIHAN_TAB_TITLE;
+};
+lockDatihanTabTitle();
+if (document.head) {
+  new MutationObserver(lockDatihanTabTitle).observe(document.head, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   if (window.__datihanGlobalInitialized) return;
   window.__datihanGlobalInitialized = true;
 
   // Keep the browser tab title consistent across DATIHAN.PH pages.
-  document.title = "Datihan.ph";
+  lockDatihanTabTitle();
 
   const path = window.location.pathname;
   const inPages = path.includes("/pages/");
@@ -180,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="footer-column footer-about"><a class="footer-brand" href="${homePath()}">DATIHAN</a><p>Pre-loved pants, shirts, and shoes — sold and consigned at pop-ups around the city, no storefront required.</p></div>
     <div class="footer-column footer-explore"><h2>Explore</h2><nav class="footer-links" aria-label="Footer explore navigation"><a href="${publicPath("shop.html")}">Shop</a><a href="${publicPath("pop-ups.html")}">Pop-ups</a><a href="${publicPath("contact.html")}">Contact</a><a href="${publicPath("about.html")}">About</a></nav></div>
     <div class="footer-column footer-explore footer-legal"><h2>Policies</h2><nav class="footer-links" aria-label="Footer policy navigation"><a href="${publicPath("refund-policy.html")}">Refund Policy</a><a href="${publicPath("terms-of-service.html")}">Terms of Service</a><a href="${publicPath("privacy-policy.html")}">Privacy Policy</a><a href="${publicPath("consignment-policy.html")}">Consignment Policy</a></nav></div>
-    <div class="footer-column footer-follow"><h2>Follow along</h2><div class="footer-social-icons" aria-label="DATIHAN social media"><a class="footer-social-icon" href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a><a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg></a><a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61577434115016" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z"></path></svg></a></div></div>
+    <div class="footer-column footer-follow"><h2>Follow along</h2><div class="footer-social-icons" aria-label="DATIHAN social media"><a class="footer-social-icon" href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a><a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg></a><a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61577434115016" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z"></path></svg></a></div></div>
     <div class="footer-bottom">
       <p>© <span class="footer-current-year">${new Date().getFullYear()}</span> DATIHAN.PH. All items sold as-is unless noted.</p>
       <p class="footer-developer-credit">Designed &amp; Developed by <a class="footer-developer-logo-link" href="https://jrnotjunior.github.io/Jorel-Jr-Somoza---Resume/" target="_blank" rel="noopener noreferrer" aria-label="Jorel Jr Somoza resume"><img src="${assetPrefix}jrlogo.jpg" alt="Jorel logo" class="footer-developer-logo"></a></p>
