@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const CART_KEY = 'datihan_cart';
-  const SELECTED_KEY = 'datihan_selected_cart_items';
+  const cartStore = window.datihanCartStore;
   const supabase = window.datihanSupabase;
   const money = value => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+
+  if (!cartStore) {
+    console.error('DATIHAN cart store is not available.');
+    return;
+  }
+  await cartStore.ready();
 
   const status = document.querySelector('#checkout-status');
   const itemsEl = document.querySelector('#checkout-items');
@@ -55,17 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     removeTimer = setTimeout(removeToast, 6000);
   };
 
-  const readJson = (key, fallback) => {
-    try {
-      const value = JSON.parse(localStorage.getItem(key) || 'null');
-      return value ?? fallback;
-    } catch (_) {
-      return fallback;
-    }
-  };
-
-  const allCart = Array.isArray(readJson(CART_KEY, [])) ? readJson(CART_KEY, []) : [];
-  const savedSelection = readJson(SELECTED_KEY, null);
+  const allCart = Array.isArray(cartStore.read()) ? cartStore.read() : [];
+  const savedSelection = cartStore.readSelected();
   const selectedIds = savedSelection === null
     ? new Set(allCart.map(item => String(item.id)))
     : new Set(Array.isArray(savedSelection) ? savedSelection.map(String) : []);
@@ -336,9 +332,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw itemsError;
       }
 
-      const remainingCart = allCart.filter(item => !new Set(cart.map(cartItem => String(cartItem.id))).has(String(item.id)));
-      localStorage.setItem(CART_KEY, JSON.stringify(remainingCart));
-      localStorage.setItem(SELECTED_KEY, JSON.stringify(remainingCart.map(item => String(item.id))));
+      // Keep the account-scoped cart store in sync. Previously checkout only
+      // updated the legacy localStorage keys, so cart-store could restore the
+      // checked-out items when the cart page loaded again.
+      const checkedOutIds = new Set(cart.map(cartItem => String(cartItem.id)));
+      const remainingCart = allCart.filter(item => !checkedOutIds.has(String(item.id)));
+      cartStore.write(remainingCart);
+      cartStore.writeSelected(remainingCart.map(item => String(item.id)));
       window.dispatchEvent(new Event('datihan-cart-updated'));
       window.location.href = `order-confirmation.html?order=${encodeURIComponent(order.order_number)}`;
     } catch (error) {
