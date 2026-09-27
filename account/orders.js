@@ -13,6 +13,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     return product.image_url ? [product.image_url] : [];
   };
 
+  const createCancelModal = () => {
+    const overlay = document.createElement('div');
+    overlay.className = 'cancel-modal-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = `
+      <div class="cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+        <div class="cancel-modal-icon" aria-hidden="true">!</div>
+        <h2 id="cancel-modal-title">Cancel this order?</h2>
+        <p class="cancel-modal-message">This order has not been confirmed by the shop yet. Are you sure you want to cancel it?</p>
+        <p class="cancel-modal-warning">Frequent order cancellations may affect your ability to place future orders with some shops.</p>
+        <div class="cancel-modal-actions">
+          <button type="button" class="cancel-modal-keep">Keep Order</button>
+          <button type="button" class="cancel-modal-confirm">Cancel Order</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    return overlay;
+  };
+
+  const cancelModal = createCancelModal();
+  const keepButton = cancelModal.querySelector('.cancel-modal-keep');
+  const confirmButton = cancelModal.querySelector('.cancel-modal-confirm');
+  let activeOrder = null;
+  let activeCard = null;
+
+  const closeCancelModal = () => {
+    cancelModal.hidden = true;
+    activeOrder = null;
+    activeCard = null;
+  };
+
+  keepButton.addEventListener('click', closeCancelModal);
+  cancelModal.addEventListener('click', event => {
+    if (event.target === cancelModal) closeCancelModal();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !cancelModal.hidden) closeCancelModal();
+  });
+
   if (!supabase) {
     if (list) list.innerHTML = '<p class="orders-loading">Unable to connect to your orders right now.</p>';
     return;
@@ -26,10 +66,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const currentUserId = sessionData.session.user.id;
+
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('id, order_number, subtotal, shipping_fee, total, status, created_at')
-      .eq('user_id', sessionData.session.user.id)
+      .eq('user_id', currentUserId)
       .order('created_at', { ascending: false });
 
     if (ordersError) throw ordersError;
@@ -77,6 +119,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       itemsByOrder.get(key).push(item);
     });
 
+    confirmButton.addEventListener('click', async () => {
+      if (!activeOrder || !activeCard) return;
+
+      confirmButton.disabled = true;
+      confirmButton.textContent = 'Cancelling…';
+
+      try {
+        const { data: updatedOrders, error: cancelError } = await supabase
+          .from('orders')
+          .update({ status: 'cancelled' })
+          .eq('id', activeOrder.id)
+          .eq('user_id', currentUserId)
+          .eq('status', 'pending')
+          .select('id, status');
+
+        if (cancelError) throw cancelError;
+
+        if (!updatedOrders?.length) {
+          throw new Error('This order can no longer be cancelled because its status has changed.');
+        }
+
+        activeOrder.status = 'cancelled';
+        const statusEl = activeCard.querySelector('.order-status');
+        if (statusEl) statusEl.textContent = 'Cancelled';
+
+        const cancelButton = activeCard.querySelector('.cancel-order');
+        if (cancelButton) cancelButton.remove();
+
+        const cancelledOrderNumber = activeOrder.order_number;
+        closeCancelModal();
+        if (note) note.textContent = `Order #${cancelledOrderNumber} has been cancelled.`;
+      } catch (error) {
+        console.error('Order cancellation error:', error);
+        if (note) note.textContent = `Unable to cancel the order: ${error.message || error}`;
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Cancel Order';
+      }
+    });
+
     for (const order of orders) {
       const orderItems = itemsByOrder.get(String(order.id)) || [];
       const card = document.createElement('article');
@@ -94,7 +175,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="order-items"></div>
         <div class="order-card-footer">
           <p class="order-total">Total <strong></strong></p>
-          <a class="view-order">View order →</a>
+          <div class="order-actions">
+            <a class="view-order">View order →</a>
+            ${order.status === 'pending' ? '<button type="button" class="cancel-order">Cancel Order</button>' : ''}
+          </div>
         </div>
       `;
 
@@ -103,6 +187,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       card.querySelector('.order-status').textContent = statusText;
       card.querySelector('.order-total strong').textContent = money(order.total);
       card.querySelector('.view-order').href = `../pages/order-confirmation.html?order=${encodeURIComponent(order.order_number)}`;
+
+      const cancelButton = card.querySelector('.cancel-order');
+      if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+          activeOrder = order;
+          activeCard = card;
+          confirmButton.disabled = false;
+          confirmButton.textContent = 'Cancel Order';
+          cancelModal.hidden = false;
+          requestAnimationFrame(() => keepButton.focus());
+        });
+      }
 
       const itemsEl = card.querySelector('.order-items');
       orderItems.forEach(item => {
