@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/page.css">
+  <link rel="stylesheet" href="dashboard.css">
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
@@ -38,9 +39,44 @@
       <p class="account-intro">Manage your profile, shipping details, and DATIHAN.PH orders in one place.</p>
     </header>
 
+    <section class="dashboard-grid" aria-label="Account overview">
+      <a class="dashboard-card" href="orders.html">
+        <div>
+          <span class="card-label">ORDERS</span>
+          <h2>My Orders</h2>
+          <p>View your order history and current order status.</p>
+        </div>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="dashboard-card" href="#profile-information">
+        <div>
+          <span class="card-label">PROFILE</span>
+          <h2>Profile information</h2>
+          <p>Update your name, email, and contact details.</p>
+        </div>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="dashboard-card" href="addresses.html">
+        <div>
+          <span class="card-label">SHIPPING</span>
+          <h2>Shipping address</h2>
+          <p>Manage the address used for your future orders.</p>
+        </div>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="dashboard-card" href="../pages/cart.html">
+        <div>
+          <span class="card-label">SHOPPING</span>
+          <h2>My Cart</h2>
+          <p>Review the items you've selected before checkout.</p>
+        </div>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </a>
+    </section>
+
     <div class="account-layout">
       <div>
-        <section class="content-card account-section">
+        <section class="content-card account-section" id="profile-information">
           <p class="eyebrow">ACCOUNT INFORMATION</p>
           <h2>Profile information</h2>
           <div class="profile-grid">
