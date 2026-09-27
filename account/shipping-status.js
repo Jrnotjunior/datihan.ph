@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const card = [...list.querySelectorAll('.order-card')].find(item =>
           item.querySelector('.order-number')?.textContent?.includes(`Order #${order.order_number}`)
         );
-        if (!card || card.querySelector('.order-progress')) return;
+        if (!card || card.querySelector('.order-progress') || !statusSteps.includes(order.status)) return;
 
         const currentIndex = statusSteps.indexOf(order.status);
         const progress = document.createElement('div');
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const track = document.createElement('div');
         track.className = 'order-progress-track';
-        track.setAttribute('aria-label', `Order status: ${statusLabels[order.status] || order.status}`);
+        track.setAttribute('aria-label', `Order status: ${statusLabels[order.status]}`);
 
         statusSteps.forEach((step, index) => {
           const item = document.createElement('div');
