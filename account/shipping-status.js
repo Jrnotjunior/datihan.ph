@@ -21,27 +21,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   summary.innerHTML = `<div class="orders-progress-heading"><div><p class="eyebrow">ORDER PROGRESS</p><p class="orders-progress-subtitle">Select a status to view those orders.</p></div><label class="orders-progress-all"><input type="checkbox" id="orders-progress-all-checkbox"><span>View all orders</span></label></div><div class="orders-progress-track" role="list"></div>`;
   main.querySelector('.orders-header')?.after(summary);
 
+  // Nothing is selected when the page first opens. Orders remain hidden until
+  // the customer chooses a progress step or checks "View all orders".
   let selectedStatus = null;
-  const filterOrders = status => {
+  let showingAll = false;
+
+  const filterOrders = (status = null, showAll = false) => {
     selectedStatus = status;
+    showingAll = showAll;
+
     const cards = list.querySelectorAll('.order-card');
     let visible = 0;
+
     cards.forEach(card => {
       const cardStatus = card.dataset.orderStatus || card.querySelector('.order-status')?.textContent?.trim().toLowerCase();
-      const show = !status || cardStatus === status;
+      const show = showAll || (!!status && cardStatus === status);
       card.hidden = !show;
       if (show) visible++;
     });
-    summary.classList.toggle('has-filter', !!status);
-    summary.querySelectorAll('.orders-progress-step').forEach(btn => btn.classList.toggle('is-selected', btn.dataset.status === status));
+
+    summary.classList.toggle('has-filter', !!status || showAll);
+    summary.querySelectorAll('.orders-progress-step').forEach(btn => {
+      btn.classList.toggle('is-selected', btn.dataset.status === status);
+    });
+
     const checkbox = summary.querySelector('#orders-progress-all-checkbox');
-    if (checkbox) checkbox.checked = !status;
+    if (checkbox) checkbox.checked = showAll;
+
     let empty = list.querySelector('.orders-filter-empty');
     if (status && cards.length && !visible) {
-      if (!empty) { empty = document.createElement('p'); empty.className = 'orders-filter-empty'; list.appendChild(empty); }
+      if (!empty) {
+        empty = document.createElement('p');
+        empty.className = 'orders-filter-empty';
+        list.appendChild(empty);
+      }
       empty.textContent = `No ${labels[status].toLowerCase()} orders right now.`;
       empty.hidden = false;
-    } else if (empty) empty.hidden = true;
+    } else if (empty) {
+      empty.hidden = true;
+    }
   };
 
   const addShippingDetails = orders => {
@@ -72,27 +90,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const counts = Object.fromEntries(steps.map(s => [s,0]));
     (orders || []).forEach(order => { if (Object.hasOwn(counts,order.status)) counts[order.status]++; });
     summary.querySelector('.orders-progress-track').innerHTML = steps.map(status => `<button type="button" class="orders-progress-step" data-status="${status}" aria-label="${labels[status]}: ${counts[status]} order${counts[status]===1?'':'s'}"><span class="orders-progress-icon">${icons[status]}${counts[status] ? `<span class="orders-progress-badge">${counts[status]>99?'99+':counts[status]}</span>` : ''}</span><span class="orders-progress-label">${labels[status]}</span></button>`).join('');
-    summary.querySelectorAll('.orders-progress-step').forEach(btn => btn.addEventListener('click', () => filterOrders(btn.dataset.status)));
-    summary.querySelector('#orders-progress-all-checkbox')?.addEventListener('change', event => filterOrders(event.target.checked ? null : (steps.find(s => counts[s] > 0) || null)));
 
-    const firstActive = steps.find(s => counts[s] > 0) || null;
-    selectedStatus = firstActive;
+    summary.querySelectorAll('.orders-progress-step').forEach(btn => {
+      btn.addEventListener('click', () => filterOrders(btn.dataset.status, false));
+    });
+
+    summary.querySelector('#orders-progress-all-checkbox')?.addEventListener('change', event => {
+      filterOrders(null, event.target.checked);
+    });
 
     // Observe only direct changes to the order list. Do not observe the
     // entire subtree, because adding shipping details would retrigger this observer.
     const observer = new MutationObserver(mutations => {
       if (!mutations.some(mutation => mutation.type === 'childList' && mutation.target === list)) return;
       addShippingDetails(orders || []);
-      if (selectedStatus) filterOrders(selectedStatus);
+      filterOrders(selectedStatus, showingAll);
     });
     observer.observe(list,{childList:true});
 
     addShippingDetails(orders || []);
-    filterOrders(firstActive);
-    requestAnimationFrame(() => {
-      addShippingDetails(orders || []);
-      if (selectedStatus) filterOrders(selectedStatus);
-    });
+
+    // Initial state: show the progress selector only. Do not display orders
+    // until the user chooses a status or enables "View all orders".
+    filterOrders(null, false);
   } catch (error) {
     console.error('Order progress summary error:',error);
   }
