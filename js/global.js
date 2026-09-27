@@ -42,22 +42,25 @@ document.addEventListener("DOMContentLoaded", () => {
     style.textContent = `
       @media (max-width: 900px) {
         body .site-header {
-          grid-template-columns: minmax(0, 1fr) auto auto;
+          position: relative;
+          grid-template-columns: minmax(0, 1fr) auto;
           grid-template-rows: 1fr;
-          gap: 0.45rem;
+          gap: 0;
         }
         body .site-header .main-nav {
           display: flex !important;
-          position: static;
-          grid-column: 2;
-          grid-row: 1;
-          width: auto;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 2;
+          width: max-content;
           min-width: 0;
           padding: 0;
           margin: 0;
           flex-direction: row;
           align-items: center;
-          justify-content: flex-end;
+          justify-content: center;
           gap: 0.6rem;
           background: transparent;
           border-radius: 0;
@@ -70,12 +73,13 @@ document.addEventListener("DOMContentLoaded", () => {
           line-height: 1;
         }
         body .site-header .header-actions {
-          grid-column: 3;
+          grid-column: 2;
           grid-row: 1;
           display: flex;
           align-items: center;
           justify-content: flex-end;
           gap: 0.15rem;
+          z-index: 3;
         }
         body .site-header .header-actions .icon-link {
           width: 32px;
@@ -85,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       @media (max-width: 520px) {
         body .site-header {
-          gap: 0.3rem;
+          gap: 0;
           padding-left: 0.7rem;
           padding-right: 0.7rem;
         }
