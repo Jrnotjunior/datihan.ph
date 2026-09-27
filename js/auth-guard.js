@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // DATIHAN browser-tab icon. The repository logo is datihanlogo1.jpg at the project root.
-    const faviconHref = new URL('../datihanlogo1.jpg', window.location.href).href;
+    // DATIHAN browser-tab icon. Use the SVG wrapper so the rectangular logo keeps its aspect ratio instead of being squeezed into a square favicon.
+    const faviconHref = new URL('../datihan-favicon.svg', window.location.href).href;
     if (!document.querySelector('link[rel="icon"][data-datihan-favicon]')) {
       const favicon = document.createElement('link');
       favicon.rel = 'icon';
+      favicon.type = 'image/svg+xml';
       favicon.href = faviconHref;
       favicon.dataset.datihanFavicon = 'true';
       document.head.appendChild(favicon);
