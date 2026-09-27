@@ -77,13 +77,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const firstActive = steps.find(s => counts[s] > 0) || null;
     selectedStatus = firstActive;
-    const observer = new MutationObserver(() => {
+
+    // Observe only direct changes to the order list. Do not observe the
+    // entire subtree, because adding shipping details would retrigger this observer.
+    const observer = new MutationObserver(mutations => {
+      if (!mutations.some(mutation => mutation.type === 'childList' && mutation.target === list)) return;
       addShippingDetails(orders || []);
       if (selectedStatus) filterOrders(selectedStatus);
     });
-    observer.observe(list,{childList:true,subtree:true});
+    observer.observe(list,{childList:true});
+
     addShippingDetails(orders || []);
     filterOrders(firstActive);
+    requestAnimationFrame(() => {
+      addShippingDetails(orders || []);
+      if (selectedStatus) filterOrders(selectedStatus);
+    });
   } catch (error) {
     console.error('Order progress summary error:',error);
   }
