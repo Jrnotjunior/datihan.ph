@@ -2,8 +2,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.__datihanGlobalInitialized) return;
   window.__datihanGlobalInitialized = true;
 
+  const path = window.location.pathname;
+  const inPages = path.includes("/pages/");
+  const inAccount = path.includes("/account/");
+  const inAuth = path.includes("/auth/");
+  const assetPrefix = inPages || inAccount || inAuth ? "../" : "";
+
   // DATIHAN browser-tab icon. The repository logo is datihanlogo1.jpg at the project root.
-  const faviconHref = new URL(`${assetPrefix || ""}datihanlogo1.jpg`, window.location.href).href;
+  const faviconHref = new URL(`${assetPrefix}datihanlogo1.jpg`, window.location.href).href;
   if (!document.querySelector('link[rel="icon"][data-datihan-favicon]')) {
     const favicon = document.createElement("link");
     favicon.rel = "icon";
@@ -11,12 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     favicon.dataset.datihanFavicon = "true";
     document.head.appendChild(favicon);
   }
-
-  const path = window.location.pathname;
-  const inPages = path.includes("/pages/");
-  const inAccount = path.includes("/account/");
-  const inAuth = path.includes("/auth/");
-  const assetPrefix = inPages || inAccount || inAuth ? "../" : "";
 
   const publicPath = (page) => {
     if (inPages) return page;
