@@ -4,118 +4,62 @@ document.addEventListener('DOMContentLoaded', async () => {
   const main = document.querySelector('.orders-main');
   if (!supabase || !list || !main) return;
 
-  const statusSteps = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered'];
-  const statusLabels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    preparing: 'Preparing',
-    shipped: 'Shipped',
-    delivered: 'Delivered'
-  };
-
+  const steps = ['pending','confirmed','preparing','shipped','delivered'];
+  const labels = {pending:'Pending',confirmed:'Confirmed',preparing:'Preparing',shipped:'Shipped',delivered:'Delivered'};
   const icons = {
-    pending: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5l3 2"></path></svg>',
-    confirmed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"></path></svg>',
-    preparing: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4-8-4Z"></path><path d="m4 8 8 4 8-4v8l-8 4-8-4V8Z"></path><path d="M12 12v8"></path></svg>',
-    shipped: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3z"></path><path d="M14 10h4l3 3v3h-7z"></path><circle cx="7" cy="18" r="1.7"></circle><circle cx="18" cy="18" r="1.7"></circle></svg>',
-    delivered: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5.5 9.5V21h13V9.5"></path><path d="M9.5 21v-6h5v6"></path></svg>'
+    pending:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5l3 2"></path></svg>',
+    confirmed:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"></path></svg>',
+    preparing:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4-8-4Z"></path><path d="m4 8 8 4 8-4v8l-8 4-8-4V8Z"></path><path d="M12 12v8"></path></svg>',
+    shipped:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3z"></path><path d="M14 10h4l3 3v3h-7z"></path><circle cx="7" cy="18" r="1.7"></circle><circle cx="18" cy="18" r="1.7"></circle></svg>',
+    delivered:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5.5 9.5V21h13V9.5"></path><path d="M9.5 21v-6h5v6"></path></svg>'
   };
 
-  const ensureSummary = () => {
-    let summary = document.querySelector('#orders-progress-summary');
-    if (summary) return summary;
+  const summary = document.createElement('section');
+  summary.id = 'orders-progress-summary';
+  summary.className = 'orders-progress-summary';
+  summary.setAttribute('aria-label','Order progress summary');
+  summary.innerHTML = `
+    <div class="orders-progress-heading">
+      <div><p class="eyebrow">ORDER PROGRESS</p><p class="orders-progress-subtitle">Select a status to view those orders.</p></div>
+      <label class="orders-progress-all"><input type="checkbox" id="orders-progress-all-checkbox"><span>View all orders</span></label>
+    </div>
+    <div class="orders-progress-track" role="list"></div>`;
+  main.querySelector('.orders-header')?.after(summary);
 
-    summary = document.createElement('section');
-    summary.id = 'orders-progress-summary';
-    summary.className = 'orders-progress-summary';
-    summary.setAttribute('aria-label', 'Order progress summary');
-    summary.innerHTML = `
-      <div class="orders-progress-heading">
-        <div>
-          <p class="eyebrow">ORDER PROGRESS</p>
-          <p class="orders-progress-subtitle">Your current orders by status.</p>
-        </div>
-        <button type="button" class="orders-progress-reset" id="orders-progress-reset">All orders</button>
-      </div>
-      <div class="orders-progress-track" role="list"></div>
-    `;
-
-    const header = main.querySelector('.orders-header');
-    header?.after(summary);
-    return summary;
+  const filterOrders = status => {
+    const cards = list.querySelectorAll('.order-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const show = !status || card.dataset.orderStatus === status;
+      card.hidden = !show;
+      if (show) visible++;
+    });
+    summary.classList.toggle('has-filter', !!status);
+    summary.querySelectorAll('.orders-progress-step').forEach(btn => btn.classList.toggle('is-selected', btn.dataset.status === status));
+    const checkbox = summary.querySelector('#orders-progress-all-checkbox');
+    if (checkbox) checkbox.checked = !status;
+    let empty = list.querySelector('.orders-filter-empty');
+    if (status && !visible) {
+      if (!empty) { empty = document.createElement('p'); empty.className = 'orders-filter-empty'; list.appendChild(empty); }
+      empty.textContent = `No ${labels[status].toLowerCase()} orders right now.`;
+      empty.hidden = false;
+    } else if (empty) empty.hidden = true;
   };
 
-  const updateSummary = orders => {
-    const summary = ensureSummary();
-    const track = summary.querySelector('.orders-progress-track');
-    if (!track) return;
-
-    const counts = Object.fromEntries(statusSteps.map(status => [status, 0]));
-    (orders || []).forEach(order => {
-      if (Object.prototype.hasOwnProperty.call(counts, order.status)) counts[order.status] += 1;
-    });
-
-    track.innerHTML = statusSteps.map(status => `
-      <button type="button" class="orders-progress-step" data-status="${status}" aria-label="${statusLabels[status]}: ${counts[status]} order${counts[status] === 1 ? '' : 's'}">
-        <span class="orders-progress-icon">${icons[status]}${counts[status] > 0 ? `<span class="orders-progress-badge">${counts[status] > 99 ? '99+' : counts[status]}</span>` : ''}</span>
-        <span class="orders-progress-label">${statusLabels[status]}</span>
-      </button>
-    `).join('');
-
-    track.querySelectorAll('.orders-progress-step').forEach(button => {
-      button.addEventListener('click', () => {
-        const status = button.dataset.status;
-        const cards = list.querySelectorAll('.order-card');
-        cards.forEach(card => {
-          const statusText = card.querySelector('.order-status')?.textContent?.trim().toLowerCase();
-          card.hidden = statusText !== status;
-        });
-        summary.classList.add('has-filter');
-        summary.querySelectorAll('.orders-progress-step').forEach(item => item.classList.toggle('is-selected', item === button));
-        const reset = summary.querySelector('#orders-progress-reset');
-        if (reset) reset.textContent = `Show all (${orders.length})`;
-      });
-    });
-
-    const reset = summary.querySelector('#orders-progress-reset');
-    reset?.addEventListener('click', () => {
-      list.querySelectorAll('.order-card').forEach(card => { card.hidden = false; });
-      summary.classList.remove('has-filter');
-      summary.querySelectorAll('.orders-progress-step').forEach(item => item.classList.remove('is-selected'));
-      reset.textContent = 'All orders';
-    });
-  };
-
-  const addShippingDetails = (orders) => {
+  const addShippingDetails = orders => {
     (orders || []).forEach(order => {
       if (!order.delivery_method && !order.tracking_number) return;
-      const card = [...list.querySelectorAll('.order-card')].find(item =>
-        item.querySelector('.order-number')?.textContent?.includes(`Order #${order.order_number}`)
-      );
+      const card = [...list.querySelectorAll('.order-card')].find(item => item.querySelector('.order-number')?.textContent?.includes(`Order #${order.order_number}`));
       if (!card || card.querySelector('.shipping-status-box')) return;
-
-      const shippingBox = document.createElement('div');
-      shippingBox.className = 'shipping-status-box';
+      const box = document.createElement('div');
+      box.className = 'shipping-status-box';
       const title = document.createElement('p');
       title.className = 'shipping-status-title';
       title.textContent = order.status === 'delivered' ? 'Delivery details' : 'Shipping details';
-      shippingBox.appendChild(title);
-
-      if (order.delivery_method) {
-        const method = document.createElement('p');
-        method.innerHTML = '<span>Delivery method</span><strong></strong>';
-        method.querySelector('strong').textContent = order.delivery_method;
-        shippingBox.appendChild(method);
-      }
-      if (order.tracking_number) {
-        const tracking = document.createElement('p');
-        tracking.innerHTML = '<span>Tracking / Reference</span><strong></strong>';
-        tracking.querySelector('strong').textContent = order.tracking_number;
-        shippingBox.appendChild(tracking);
-      }
-
-      const items = card.querySelector('.order-items');
-      if (items) items.before(shippingBox);
+      box.appendChild(title);
+      if (order.delivery_method) { const p=document.createElement('p'); p.innerHTML='<span>Delivery method</span><strong></strong>'; p.querySelector('strong').textContent=order.delivery_method; box.appendChild(p); }
+      if (order.tracking_number) { const p=document.createElement('p'); p.innerHTML='<span>Tracking / Reference</span><strong></strong>'; p.querySelector('strong').textContent=order.tracking_number; box.appendChild(p); }
+      card.querySelector('.order-items')?.before(box);
     });
   };
 
@@ -125,18 +69,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userId = sessionData.session?.user?.id;
     if (!userId) return;
 
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select('order_number, status, delivery_method, tracking_number')
-      .eq('user_id', userId);
+    const { data: orders, error } = await supabase.from('orders').select('order_number,status,delivery_method,tracking_number').eq('user_id',userId);
     if (error) throw error;
 
-    updateSummary(orders || []);
+    const counts = Object.fromEntries(steps.map(s => [s,0]));
+    (orders || []).forEach(order => { if (Object.hasOwn(counts,order.status)) counts[order.status]++; });
+    summary.querySelector('.orders-progress-track').innerHTML = steps.map(status => `
+      <button type="button" class="orders-progress-step" data-status="${status}" aria-label="${labels[status]}: ${counts[status]} order${counts[status]===1?'':'s'}">
+        <span class="orders-progress-icon">${icons[status]}${counts[status] ? `<span class="orders-progress-badge">${counts[status]>99?'99+':counts[status]}</span>` : ''}</span>
+        <span class="orders-progress-label">${labels[status]}</span>
+      </button>`).join('');
+
+    summary.querySelectorAll('.orders-progress-step').forEach(btn => btn.addEventListener('click', () => filterOrders(btn.dataset.status)));
+    summary.querySelector('#orders-progress-all-checkbox')?.addEventListener('change', event => {
+      filterOrders(event.target.checked ? null : (steps.find(s => counts[s] > 0) || null));
+    });
 
     const observer = new MutationObserver(() => addShippingDetails(orders || []));
-    observer.observe(list, { childList: true, subtree: true });
+    observer.observe(list,{childList:true,subtree:true});
     addShippingDetails(orders || []);
+    const firstActive = steps.find(s => counts[s] > 0);
+    filterOrders(firstActive || null);
   } catch (error) {
-    console.error('Order progress summary error:', error);
+    console.error('Order progress summary error:',error);
   }
 });
