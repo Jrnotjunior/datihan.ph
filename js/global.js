@@ -36,6 +36,75 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>`;
   document.body.insertBefore(header, document.body.firstChild);
 
+  if (!document.querySelector("#datihan-mobile-header-nav-style")) {
+    const style = document.createElement("style");
+    style.id = "datihan-mobile-header-nav-style";
+    style.textContent = `
+      @media (max-width: 900px) {
+        body .site-header {
+          grid-template-columns: minmax(0, 1fr) auto auto;
+          grid-template-rows: 1fr;
+          gap: 0.45rem;
+        }
+        body .site-header .main-nav {
+          display: flex !important;
+          position: static;
+          grid-column: 2;
+          grid-row: 1;
+          width: auto;
+          min-width: 0;
+          padding: 0;
+          margin: 0;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 0.6rem;
+          background: transparent;
+          border-radius: 0;
+          box-shadow: none;
+          white-space: nowrap;
+          overflow: visible;
+        }
+        body .site-header .main-nav a {
+          font-size: 11px;
+          line-height: 1;
+        }
+        body .site-header .header-actions {
+          grid-column: 3;
+          grid-row: 1;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 0.15rem;
+        }
+        body .site-header .header-actions .icon-link {
+          width: 32px;
+          height: 32px;
+          flex-basis: 32px;
+        }
+      }
+      @media (max-width: 520px) {
+        body .site-header {
+          gap: 0.3rem;
+          padding-left: 0.7rem;
+          padding-right: 0.7rem;
+        }
+        body .site-header .main-nav {
+          gap: 0.45rem;
+        }
+        body .site-header .main-nav a {
+          font-size: 10px;
+        }
+        body .site-header .header-actions .icon-link {
+          width: 30px;
+          height: 30px;
+          flex-basis: 30px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   const loadScript = (src, test) => {
     if (test?.()) return Promise.resolve();
     return new Promise((resolve, reject) => {
