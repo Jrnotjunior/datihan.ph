@@ -116,6 +116,25 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="footer-column footer-explore"><h2>Explore</h2><nav class="footer-links" aria-label="Footer explore navigation"><a href="${publicPath("shop.html")}">Shop</a><a href="${publicPath("pop-ups.html")}">Pop-ups</a><a href="${publicPath("contact.html")}">Contact</a><a href="${publicPath("about.html")}">About</a></nav></div>
     <div class="footer-column footer-explore footer-legal"><h2>Policies</h2><nav class="footer-links" aria-label="Footer policy navigation"><a href="${publicPath("refund-policy.html")}">Refund Policy</a><a href="${publicPath("terms-of-service.html")}">Terms of Service</a><a href="${publicPath("privacy-policy.html")}">Privacy Policy</a><a href="${publicPath("consignment-policy.html")}">Consignment Policy</a></nav></div>
     <div class="footer-column footer-follow"><h2>Follow along</h2><div class="footer-social-icons" aria-label="DATIHAN social media"><a class="footer-social-icon" href="https://www.instagram.com/datihan.ph/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a><a class="footer-social-icon" href="https://www.tiktok.com/@datihan.ph" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4v10.2a4.8 4.8 0 1 1-4-4.73"></path><path d="M15 4c.7 2.2 2.1 3.5 4.5 3.8"></path></svg></a><a class="footer-social-icon" href="https://www.facebook.com/profile.php?id=61577434115016" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.7.3-1 1-1Z"></path></svg></a></div></div>
-    <div class="footer-bottom"><p>© <span class="footer-current-year">${new Date().getFullYear()}</span> DATIHAN.PH. All items sold as-is unless noted.</p><p>Pop-ups posted on Instagram, TikTok &amp; Facebook</p></div>`;
+    <div class="footer-bottom">
+      <p>© <span class="footer-current-year">${new Date().getFullYear()}</span> DATIHAN.PH. All items sold as-is unless noted.</p>
+      <p class="footer-developer-credit">Developed by Jorel Somoza</p>
+      <p class="footer-social-note">Pop-ups posted on Instagram, TikTok &amp; Facebook</p>
+    </div>`;
   document.body.appendChild(footer);
+
+  // Keep the developer credit centered between the existing footer notes on desktop.
+  // On smaller screens, let the existing mobile footer layout stack the three items.
+  if (!document.querySelector("#datihan-footer-credit-style")) {
+    const style = document.createElement("style");
+    style.id = "datihan-footer-credit-style";
+    style.textContent = `
+      .footer-bottom { position: relative; }
+      .footer-developer-credit { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+      @media (max-width: 520px) {
+        .footer-developer-credit { position: static; transform: none; white-space: normal; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 });
