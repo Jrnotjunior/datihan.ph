@@ -6,7 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const phone = document.getElementById('phone');
   const profileStatus = document.getElementById('profile-status');
   const passwordStatus = document.getElementById('password-status');
+  const paymentStatus = document.getElementById('payment-status');
   const logoutButton = document.getElementById('logout');
+  const paymentQrFile = document.getElementById('payment-qr-file');
+  const paymentQrFileName = document.getElementById('payment-qr-file-name');
+  const savePaymentQr = document.getElementById('save-payment-qr');
+  const paymentQrPreview = document.getElementById('payment-qr-preview');
+  const paymentQrEmpty = document.getElementById('payment-qr-empty');
+  const paymentActiveBadge = document.getElementById('payment-active-badge');
+  const paymentQrHistory = document.getElementById('payment-qr-history');
+  const paymentQrHistoryList = document.getElementById('payment-qr-history-list');
+
+  let currentUser = null;
+  let selectedQrFile = null;
 
   function showStatus(element, message, isError = false) {
     if (!element) return;
@@ -23,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.replace('../auth/login.html');
       return null;
     }
+    currentUser = user;
     return user;
   }
 
@@ -35,11 +48,125 @@ document.addEventListener('DOMContentLoaded', () => {
       lastName.value = metadata.last_name || '';
       phone.value = metadata.phone || '';
       email.value = user.email || '';
+      await loadPaymentQr(user);
     } catch (error) {
       console.error('Unable to load owner profile:', error);
       showStatus(profileStatus, 'Unable to load your account information. Please refresh the page.', true);
     }
   }
+
+  async function loadPaymentQr(user) {
+    const { data, error } = await supabase
+      .from('payment_qr_codes')
+      .select('id, storage_path, public_url, is_active, created_at, deactivated_at')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      if (error.code === '42P01') {
+        showStatus(paymentStatus, 'Payment QR storage is not set up yet. Run the payment QR SQL migration first.', true);
+      } else {
+        console.error('Unable to load payment QR:', error);
+        showStatus(paymentStatus, 'Unable to load the payment QR. Please refresh the page.', true);
+      }
+      return;
+    }
+
+    const rows = data || [];
+    const active = rows.find(row => row.is_active);
+
+    if (active?.public_url) {
+      paymentQrPreview.src = active.public_url;
+      paymentQrPreview.hidden = false;
+      paymentQrEmpty.hidden = true;
+      paymentActiveBadge.hidden = false;
+    } else {
+      paymentQrPreview.removeAttribute('src');
+      paymentQrPreview.hidden = true;
+      paymentQrEmpty.hidden = false;
+      paymentActiveBadge.hidden = true;
+    }
+
+    paymentQrHistoryList.innerHTML = rows.map(row => {
+      const date = new Date(row.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+      return `<div class="payment-history-item">
+        ${row.public_url ? `<img class="payment-history-thumb" src="${escapeHtml(row.public_url)}" alt="GCash QR">` : ''}
+        <div class="payment-history-meta"><strong>GCash QR</strong><span>Uploaded ${escapeHtml(date)}</span></div>
+        <span class="payment-history-status ${row.is_active ? 'active' : 'inactive'}">${row.is_active ? 'ACTIVE' : 'INACTIVE'}</span>
+      </div>`;
+    }).join('');
+    paymentQrHistory.hidden = rows.length === 0;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+  }
+
+  paymentQrFile?.addEventListener('change', () => {
+    selectedQrFile = paymentQrFile.files?.[0] || null;
+    savePaymentQr.disabled = !selectedQrFile;
+    if (selectedQrFile) {
+      paymentQrFileName.textContent = `${selectedQrFile.name} · ${(selectedQrFile.size / 1024 / 1024).toFixed(2)} MB`;
+      const previewUrl = URL.createObjectURL(selectedQrFile);
+      paymentQrPreview.src = previewUrl;
+      paymentQrPreview.hidden = false;
+      paymentQrEmpty.hidden = true;
+      paymentActiveBadge.hidden = true;
+    } else {
+      paymentQrFileName.textContent = 'PNG, JPG, or WEBP · recommended square image';
+    }
+  });
+
+  savePaymentQr?.addEventListener('click', async () => {
+    if (!selectedQrFile || !currentUser) return;
+
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(selectedQrFile.type)) {
+      showStatus(paymentStatus, 'Please choose a PNG, JPG, or WEBP image.', true);
+      return;
+    }
+    if (selectedQrFile.size > 5 * 1024 * 1024) {
+      showStatus(paymentStatus, 'The QR image must be 5 MB or smaller.', true);
+      return;
+    }
+
+    savePaymentQr.disabled = true;
+    savePaymentQr.textContent = 'Uploading…';
+    showStatus(paymentStatus, 'Uploading your new GCash QR…');
+
+    try {
+      const extension = selectedQrFile.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const path = `${currentUser.id}/gcash-${Date.now()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('payment-qr')
+        .upload(path, selectedQrFile, { contentType: selectedQrFile.type, upsert: false });
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = supabase.storage.from('payment-qr').getPublicUrl(path);
+      const publicUrl = publicData?.publicUrl;
+      if (!publicUrl) throw new Error('Unable to create the public QR image URL.');
+
+      const { error: insertError } = await supabase
+        .from('payment_qr_codes')
+        .insert({ owner_id: currentUser.id, storage_path: path, public_url: publicUrl, is_active: true });
+      if (insertError) {
+        await supabase.storage.from('payment-qr').remove([path]);
+        throw insertError;
+      }
+
+      selectedQrFile = null;
+      paymentQrFile.value = '';
+      paymentQrFileName.textContent = 'PNG, JPG, or WEBP · recommended square image';
+      showStatus(paymentStatus, 'GCash QR uploaded and activated successfully.');
+      await loadPaymentQr(currentUser);
+    } catch (error) {
+      console.error('Unable to save payment QR:', error);
+      showStatus(paymentStatus, error.message || 'Unable to save the GCash QR. Please try again.', true);
+    } finally {
+      savePaymentQr.disabled = !selectedQrFile;
+      savePaymentQr.textContent = 'Save & Activate';
+    }
+  });
 
   document.getElementById('save-profile')?.addEventListener('click', async () => {
     const button = document.getElementById('save-profile');
