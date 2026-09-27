@@ -2,11 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.__datihanGlobalInitialized) return;
   window.__datihanGlobalInitialized = true;
 
-  const faviconHref = new URL("../assets/datihan-logo.svg", document.currentScript?.src || `${window.location.origin}/datihan.ph/js/global.js`).href;
+  // DATIHAN browser-tab icon. The repository logo is datihanlogo1.jpg at the project root.
+  const faviconHref = new URL(`${assetPrefix || ""}datihanlogo1.jpg`, window.location.href).href;
   if (!document.querySelector('link[rel="icon"][data-datihan-favicon]')) {
     const favicon = document.createElement("link");
     favicon.rel = "icon";
-    favicon.type = "image/svg+xml";
     favicon.href = faviconHref;
     favicon.dataset.datihanFavicon = "true";
     document.head.appendChild(favicon);
