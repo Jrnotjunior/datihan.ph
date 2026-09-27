@@ -130,18 +130,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       confirmButton.textContent = 'Cancelling…';
 
       try {
-        const { data: updatedOrders, error: cancelError } = await supabase
-          .from('orders')
-          .update({ status: 'cancelled' })
-          .eq('id', activeOrder.id)
-          .eq('user_id', currentUserId)
-          .eq('status', 'pending')
-          .select('id, status');
+        const { data: result, error: cancelError } = await supabase.rpc(
+          'cancel_order_and_restore_stock',
+          {
+            p_order_id: activeOrder.id,
+            p_user_id: currentUserId
+          }
+        );
 
         if (cancelError) throw cancelError;
 
-        if (!updatedOrders?.length) {
-          throw new Error('This order can no longer be cancelled because its status has changed.');
+        if (!result?.success) {
+          throw new Error(result?.message || 'This order could not be cancelled.');
         }
 
         activeOrder.status = 'cancelled';
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const cancelledOrderNumber = activeOrder.order_number;
         closeCancelModal();
-        if (note) note.textContent = `Order #${cancelledOrderNumber} has been cancelled.`;
+        if (note) note.textContent = `Order #${cancelledOrderNumber} has been cancelled. The purchased quantity has been returned to stock.`;
       } catch (error) {
         console.error('Order cancellation error:', error);
         if (note) note.textContent = `Unable to cancel the order: ${error.message || error}`;
