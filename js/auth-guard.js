@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    const faviconHref = new URL('../assets/datihan-logo.svg', document.currentScript?.src || `${window.location.origin}/datihan.ph/js/auth-guard.js`).href;
+    if (!document.querySelector('link[rel="icon"][data-datihan-favicon]')) {
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.type = 'image/svg+xml';
+      favicon.href = faviconHref;
+      favicon.dataset.datihanFavicon = 'true';
+      document.head.appendChild(favicon);
+    }
+
     const { data, error } = await window.datihanSupabase.auth.getSession();
     if (error || !data.session) {
       window.location.replace('../auth/login.html');
