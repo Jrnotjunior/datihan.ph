@@ -51,8 +51,8 @@ p { margin: 0; }
 }
 
 .brand {
-  width: 132px;
-  height: 60px;
+  width: 160px;
+  height: 64px;
   display: inline-flex;
   align-items: center;
   justify-self: start;
