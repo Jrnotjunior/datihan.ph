@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmApprove = document.getElementById('status-confirm-approve');
 
   const state = { orders: [] };
-  const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned_refunded'];
+  const statuses = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered', 'cancelled', 'returned_refunded'];
   const money = value => `₱${Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   let pendingConfirmation = null;
 
@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const labels = {
       pending: 'Pending — Payment to verify',
       confirmed: 'Confirmed — Payment verified',
+      preparing: 'Preparing',
       shipped: 'Shipped',
       delivered: 'Delivered',
       cancelled: 'Cancelled',
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function paymentState(order) {
     const status = String(order.status || 'pending');
     if (status === 'pending') return { label: 'Awaiting payment verification', className: 'payment-pending', help: 'Customer says the GCash payment was sent. Verify your GCash account before accepting the order.' };
-    if (['confirmed', 'shipped', 'delivered'].includes(status)) return { label: 'Payment verified', className: 'payment-confirmed', help: 'Payment was manually verified before fulfillment.' };
+    if (['confirmed', 'preparing', 'shipped', 'delivered'].includes(status)) return { label: 'Payment verified', className: 'payment-confirmed', help: 'Payment was manually verified before fulfillment.' };
     if (status === 'cancelled') return { label: 'Payment not accepted', className: 'payment-cancelled', help: 'This order is cancelled and will not be fulfilled.' };
     return { label: 'Payment status follows order', className: 'payment-pending', help: 'Review the order before continuing.' };
   }
@@ -184,7 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentStatus === nextStatus) return true;
     const allowed = {
       pending: ['confirmed', 'cancelled'],
-      confirmed: ['shipped', 'cancelled'],
+      confirmed: ['preparing', 'cancelled'],
+      preparing: ['shipped'],
       shipped: ['delivered', 'returned_refunded'],
       delivered: ['returned_refunded'],
       cancelled: [],
