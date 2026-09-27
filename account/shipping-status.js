@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   summary.innerHTML = `<div class="orders-progress-heading"><div><p class="eyebrow">ORDER PROGRESS</p><p class="orders-progress-subtitle">Select a status to view those orders.</p></div><label class="orders-progress-all"><input type="checkbox" id="orders-progress-all-checkbox"><span>View all orders</span></label></div><div class="orders-progress-track" role="list"></div>`;
   main.querySelector('.orders-header')?.after(summary);
 
+  let selectedStatus = null;
   const filterOrders = status => {
+    selectedStatus = status;
     const cards = list.querySelectorAll('.order-card');
     let visible = 0;
     cards.forEach(card => {
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const checkbox = summary.querySelector('#orders-progress-all-checkbox');
     if (checkbox) checkbox.checked = !status;
     let empty = list.querySelector('.orders-filter-empty');
-    if (status && !visible) {
+    if (status && cards.length && !visible) {
       if (!empty) { empty = document.createElement('p'); empty.className = 'orders-filter-empty'; list.appendChild(empty); }
       empty.textContent = `No ${labels[status].toLowerCase()} orders right now.`;
       empty.hidden = false;
@@ -73,10 +75,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     summary.querySelectorAll('.orders-progress-step').forEach(btn => btn.addEventListener('click', () => filterOrders(btn.dataset.status)));
     summary.querySelector('#orders-progress-all-checkbox')?.addEventListener('change', event => filterOrders(event.target.checked ? null : (steps.find(s => counts[s] > 0) || null)));
 
-    const observer = new MutationObserver(() => addShippingDetails(orders || []));
+    const firstActive = steps.find(s => counts[s] > 0) || null;
+    selectedStatus = firstActive;
+    const observer = new MutationObserver(() => {
+      addShippingDetails(orders || []);
+      if (selectedStatus) filterOrders(selectedStatus);
+    });
     observer.observe(list,{childList:true,subtree:true});
     addShippingDetails(orders || []);
-    filterOrders(steps.find(s => counts[s] > 0) || null);
+    filterOrders(firstActive);
   } catch (error) {
     console.error('Order progress summary error:',error);
   }
