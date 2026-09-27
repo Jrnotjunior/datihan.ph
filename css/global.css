@@ -75,7 +75,7 @@ p { margin: 0; }
   justify-self: center;
   grid-column: 2;
   grid-row: 1;
-  gap: clamp(1rem, 2.2vw, 2rem);
+  gap: 6rem;
 }
 .main-nav a {
   font-size: 14px;
