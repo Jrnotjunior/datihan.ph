@@ -297,40 +297,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!Number.isFinite(shippingFee) || shippingFee < 0) throw new Error('The calculated shipping fee is invalid.');
 
       const orderNumber = createOrderNumber();
-      const orderTotal = subtotal + shippingFee;
+      const orderItems = cart.map(item => ({
+        product_id: String(item.id),
+        quantity: Math.max(1, Number(item.quantity || 1))
+      }));
 
-      // The RPC is the authoritative source for the fee. Do not require the optional
-      // shipping_rate_id column when creating the order; this keeps checkout working
-      // even when PostgREST has not refreshed its schema cache after the column change.
-      const { data: order, error: orderError } = await supabase.from('orders').insert({
-        order_number: orderNumber,
-        user_id: currentUser.id,
-        shipping_address: shippingAddress,
-        subtotal,
-        shipping_fee: shippingFee,
-        total: orderTotal,
-        status: 'pending'
-      }).select('id, order_number').single();
-      if (orderError) throw orderError;
-
-      const orderItems = cart.map(item => {
-        const quantity = Math.max(1, Number(item.quantity || 1));
-        const price = Number(item.price || 0);
-        return {
-          order_id: order.id,
-          product_id: String(item.id),
-          product_name: item.name || 'Product',
-          price,
-          quantity,
-          subtotal: price * quantity
-        };
+      // Create the order, verify/lock stock, insert order items, and decrement stock
+      // inside one database transaction. This prevents two buyers from purchasing
+      // the same last unit at the same time.
+      const { data: order, error: orderError } = await supabase.rpc('place_order_atomic', {
+        p_order_number: orderNumber,
+        p_user_id: currentUser.id,
+        p_owner_id: rate.owner_id,
+        p_shipping_address: shippingAddress,
+        p_shipping_fee: shippingFee,
+        p_items: orderItems
       });
-
-      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-      if (itemsError) {
-        await supabase.from('orders').delete().eq('id', order.id);
-        throw itemsError;
-      }
+      if (orderError) throw orderError;
+      if (!order?.order_number) throw new Error('The order was created but no order number was returned.');
 
       // Keep the account-scoped cart store in sync. Previously checkout only
       // updated the legacy localStorage keys, so cart-store could restore the
@@ -348,7 +332,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       showStatus('');
 
       const message = String(error?.message || error || 'Unknown error');
-      if (message.toLowerCase().includes('row-level security') || message.toLowerCase().includes('rls')) {
+      const lowerMessage = message.toLowerCase();
+      if (lowerMessage.includes('insufficient_stock:')) {
+        showToast('One or more items are no longer available in the requested quantity. Please return to your cart and adjust your order.', 'Item no longer available', 'error');
+      } else if (lowerMessage.includes('row-level security') || lowerMessage.includes('rls')) {
         showToast('Your order could not be saved because of a database permission setting. Please check the order policies.', 'Order not placed', 'error');
       } else {
         showToast(message, 'Order not placed', 'error');
