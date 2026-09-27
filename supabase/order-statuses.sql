@@ -11,6 +11,7 @@ CHECK (
     ARRAY[
       'pending'::text,
       'confirmed'::text,
+      'preparing'::text,
       'shipped'::text,
       'delivered'::text,
       'cancelled'::text,
